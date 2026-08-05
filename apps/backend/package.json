@@ -1,0 +1,30 @@
+{
+  "name": "dengueradar-backend",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "src/server.js",
+  "scripts": {
+    "dev": "node --watch src/devServer.js",
+    "start": "node src/server.js",
+    "seed:zones": "node src/seeds/seedMohZones.js",
+    "seed:risk": "node src/seeds/seedRiskData.js",
+    "seed:all": "node src/seeds/seedMohZones.js && node src/seeds/seedRiskData.js",
+    "seed:dev": "node src/seeds/devSeed.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "express-rate-limit": "^7.1.5",
+    "express-validator": "^7.0.1",
+    "helmet": "^7.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.0.3",
+    "nodemailer": "^6.9.7"
+  },
+  "devDependencies": {
+    "mongodb-memory-server": "^11.2.0"
+  }
+}

@@ -1,0 +1,60 @@
+import axios from 'axios';
+
+const api = axios.create({
+  baseURL: '/api',
+  withCredentials: true,
+  headers: { 'Content-Type': 'application/json' },
+});
+
+// Attach token from localStorage
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('accessToken');
+  if (token) config.headers.Authorization = `Bearer ${token}`;
+  return config;
+});
+
+// Handle 401 — clear auth and redirect
+api.interceptors.response.use(
+  (res) => res,
+  (err) => {
+    if (err.response?.status === 401) {
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('user');
+      window.location.href = '/login';
+    }
+    return Promise.reject(err);
+  }
+);
+
+export default api;
+
+// Typed API helpers
+export const authAPI = {
+  signupGeneral: (data) => api.post('/auth/signup/general', data),
+  signupMohOfficer: (data) => api.post('/auth/signup/moh-officer', data),
+  login: (data) => api.post('/auth/login', data),
+  logout: () => api.post('/auth/logout'),
+  verifyEmail: (token) => api.post('/auth/verify-email', { token }),
+};
+
+export const referenceAPI = {
+  getDistricts: () => api.get('/districts'),
+  getMohZones: (district) => api.get(`/moh-zones?district=${encodeURIComponent(district)}`),
+};
+
+export const publicAPI = {
+  getLiveStats: () => api.get('/stats/live'),
+  getNationalRisk: () => api.get('/risk/national'),
+  getNationalTrends: () => api.get('/trends/national'),
+};
+
+export const userAPI = {
+  getDashboard: () => api.get('/user/dashboard'),
+  updateProfile: (data) => api.patch('/user/profile', data),
+};
+
+export const mohAPI = {
+  getDashboard: () => api.get('/moh/dashboard'),
+  getZoneReport: (mohZone) => api.get(`/moh/reports/${encodeURIComponent(mohZone)}`),
+  exportZoneReport: (mohZone) => api.get(`/moh/reports/${encodeURIComponent(mohZone)}/export`),
+};
