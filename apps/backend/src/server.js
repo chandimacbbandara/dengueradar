@@ -1,5 +1,11 @@
 import 'dotenv/config';
+import dns from 'dns';
 import express from 'express';
+
+// Force Google DNS — fixes SRV resolution failures with some local routers/VPNs
+dns.setServers(['8.8.8.8', '8.8.4.4', '1.1.1.1']);
+
+
 import helmet from 'helmet';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
