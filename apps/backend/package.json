@@ -5,6 +5,7 @@
   "main": "src/server.js",
   "scripts": {
     "dev": "node --watch src/devServer.js",
+    "dev:db": "node --watch src/server.js",
     "start": "node src/server.js",
     "seed:zones": "node src/seeds/seedMohZones.js",
     "seed:risk": "node src/seeds/seedRiskData.js",

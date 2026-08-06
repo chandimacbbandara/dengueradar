@@ -15,8 +15,9 @@ export const signupGeneral = async (req, res) => {
     }
 
     const passwordHash = await bcrypt.hash(password, 12);
-    const emailVerificationToken = crypto.randomBytes(32).toString('hex');
-    const emailVerificationExpires = Date.now() + 24 * 60 * 60 * 1000;
+    const isDev = process.env.NODE_ENV === 'development';
+    const emailVerificationToken = isDev ? undefined : crypto.randomBytes(32).toString('hex');
+    const emailVerificationExpires = isDev ? undefined : Date.now() + 24 * 60 * 60 * 1000;
 
     const user = await User.create({
       role: 'general',
@@ -26,13 +27,19 @@ export const signupGeneral = async (req, res) => {
       district,
       mohZone,
       passwordHash,
+      // Auto-verify in development so email verification is not required
+      isVerified: isDev ? true : false,
       emailVerificationToken,
       emailVerificationExpires
     });
 
-    await sendVerificationEmail(user.email, emailVerificationToken);
+    if (!isDev) {
+      await sendVerificationEmail(user.email, emailVerificationToken);
+    }
 
-    res.status(201).json({ success: true, message: 'Registration successful. Please check your email to verify your account.' });
+    res.status(201).json({ success: true, message: isDev
+      ? 'Registration successful. You can log in immediately.'
+      : 'Registration successful. Please check your email to verify your account.' });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
@@ -48,8 +55,9 @@ export const signupMohOfficer = async (req, res) => {
     }
 
     const passwordHash = await bcrypt.hash(password, 12);
-    const emailVerificationToken = crypto.randomBytes(32).toString('hex');
-    const emailVerificationExpires = Date.now() + 24 * 60 * 60 * 1000;
+    const isDev = process.env.NODE_ENV === 'development';
+    const emailVerificationToken = isDev ? undefined : crypto.randomBytes(32).toString('hex');
+    const emailVerificationExpires = isDev ? undefined : Date.now() + 24 * 60 * 60 * 1000;
 
     const user = await User.create({
       role: 'moh_officer',
@@ -60,11 +68,15 @@ export const signupMohOfficer = async (req, res) => {
       employeeId,
       passwordHash,
       isApproved: false,
+      // Auto-verify in development so email verification is not required
+      isVerified: isDev ? true : false,
       emailVerificationToken,
       emailVerificationExpires
     });
 
-    await sendVerificationEmail(user.email, emailVerificationToken);
+    if (!isDev) {
+      await sendVerificationEmail(user.email, emailVerificationToken);
+    }
 
     res.status(201).json({ success: true, message: 'Registration successful. Your account is pending admin approval.' });
   } catch (err) {
@@ -97,8 +109,8 @@ export const login = async (req, res) => {
     const accessToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN || '15m' });
     const refreshToken = jwt.sign({ id: user._id }, process.env.JWT_REFRESH_SECRET, { expiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d' });
 
-    user.refreshToken = refreshToken;
-    await user.save();
+    // Use updateOne instead of save() to avoid full-document validation on login
+    await User.updateOne({ _id: user._id }, { $set: { refreshToken } });
 
     res.cookie('accessToken', accessToken, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'strict', maxAge: 15 * 60 * 1000 });
     res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'strict', maxAge: 7 * 24 * 60 * 60 * 1000 });
