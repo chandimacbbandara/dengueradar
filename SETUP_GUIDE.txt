@@ -1,0 +1,294 @@
+# DengueRadar — Project Setup Guide
+# Step-by-step instructions to run the project locally from scratch
+# ================================================================
+
+═══════════════════════════════════════════════════════════════════
+  PREREQUISITES  (install these once on your machine)
+═══════════════════════════════════════════════════════════════════
+
+  ✅  Node.js  v18 or later     →  https://nodejs.org
+  ✅  npm      v9  or later     →  comes with Node.js
+  ✅  Git                       →  https://git-scm.com
+
+  Check your versions:
+    node -v
+    npm  -v
+
+  You also need:
+  ✅  MongoDB Atlas account      →  https://cloud.mongodb.com
+      (free M0 tier is enough)
+  ✅  OpenWeatherMap account     →  https://openweathermap.org/api
+      (free plan, "Current Weather Data" API)
+
+
+═══════════════════════════════════════════════════════════════════
+  STEP 1 — Clone the repository
+═══════════════════════════════════════════════════════════════════
+
+  git clone <your-repo-url>
+  cd dengueradar
+
+
+═══════════════════════════════════════════════════════════════════
+  STEP 2 — Backend setup
+═══════════════════════════════════════════════════════════════════
+
+  2-A.  Go to the backend folder
+        ──────────────────────────
+        cd apps/backend
+
+  2-B.  Install dependencies
+        ──────────────────────────
+        npm install
+
+  2-C.  Create your environment file
+        ──────────────────────────────
+        Copy the example and fill in your real values:
+
+        cp .env.example .env
+
+        Then open  apps/backend/.env  and set:
+
+        ┌─────────────────────────────────────────────────────────┐
+        │  PORT=5000                                              │
+        │  MONGO_URI=<your MongoDB Atlas connection string>       │
+        │  JWT_SECRET=<any long random string>                    │
+        │  JWT_REFRESH_SECRET=<another long random string>        │
+        │  JWT_EXPIRES_IN=15m                                     │
+        │  JWT_REFRESH_EXPIRES_IN=7d                              │
+        │  FRONTEND_URL=http://localhost:5173                     │
+        │  EMAIL_HOST=smtp.gmail.com                              │
+        │  EMAIL_PORT=587                                         │
+        │  EMAIL_USER=<your Gmail address>                        │
+        │  EMAIL_PASS=<your Gmail app password>                   │
+        │  EMAIL_FROM=DengueRadar <noreply@dengueradar.lk>        │
+        │  NODE_ENV=development                                   │
+        │  OPENWEATHER_API_KEY=<your OpenWeatherMap API key>      │
+        └─────────────────────────────────────────────────────────┘
+
+        ⚠  OPENWEATHER_API_KEY — newly created keys take up to
+           2 hours to activate. The weather widget silently hides
+           itself until the key is live — no crash will occur.
+
+  2-D.  Seed the database
+        ──────────────────────────
+        Run these three commands in order:
+
+        # 1. Seed MOH zone reference data
+        npm run seed:zones
+
+        # 2. Seed real dengue case data from the EPID Unit CSV
+        #    (takes ~3 minutes — imports 145,985 weekly records)
+        npm run seed:cases
+
+        # 3. Seed risk prediction data
+        npm run seed:risk
+
+        After step 2 you will see:
+          ✅ Done — 145,985 records imported (0 skipped)
+
+  2-E.  Start the backend server
+        ──────────────────────────
+        npm run dev
+
+        You should see:
+          MongoDB connected: <cluster>.mongodb.net
+          [WeatherJob] ⏱  Scheduling weather fetch job (every 4 hours).
+          [WeatherFetcher] 🚀 Starting weather fetch for 25 districts...
+          [WeatherFetcher] ✅ Done — 25/25 districts updated
+          DengueRadar API running on port 5000
+
+        Keep this terminal open.
+
+
+═══════════════════════════════════════════════════════════════════
+  STEP 3 — Frontend setup
+═══════════════════════════════════════════════════════════════════
+
+  3-A.  Open a NEW terminal, go to the frontend folder
+        ──────────────────────────────────────────────────
+        cd apps/frontend
+
+  3-B.  Install dependencies
+        ──────────────────────────
+        npm install
+
+  3-C.  Start the frontend dev server
+        ──────────────────────────────
+        npm run dev
+
+        You should see:
+          VITE ready in ...ms
+          ➜  Local:   http://localhost:5173
+
+        Open  http://localhost:5173  in your browser.
+
+
+═══════════════════════════════════════════════════════════════════
+  STEP 4 — Create your first user account
+═══════════════════════════════════════════════════════════════════
+
+  4-A.  Go to  http://localhost:5173
+  4-B.  Click "Sign up as Citizen"
+  4-C.  Fill in your name, email, district, and MOH zone
+  4-D.  Check your email for the verification link and click it
+  4-E.  Log in — your dashboard will now show:
+          • Real weather data for your district
+          • Real dengue case trend for your MOH zone
+            (Daily / Weekly / Monthly tabs)
+
+  For an MOH Officer account:
+  4-B.  Click "Sign up as MOH Officer"
+  4-C.  Fill in officer details including Employee ID
+  4-D.  Verify email → officer accounts require admin approval
+        before the MOH Dashboard becomes accessible.
+
+
+═══════════════════════════════════════════════════════════════════
+  AVAILABLE npm SCRIPTS — Backend  (apps/backend)
+═══════════════════════════════════════════════════════════════════
+
+  npm run dev          Start backend with hot-reload (no DB mock)
+  npm run dev:db       Start backend with hot-reload (with DB)
+  npm start            Start backend in production mode
+
+  npm run seed:zones   Seed MOH zone reference data
+  npm run seed:cases   Import real EPID Unit dengue case CSV
+  npm run seed:risk    Seed risk prediction data
+  npm run seed:all     Run zones + risk seeds together
+  npm run seed:dev     Run dev seed (test data)
+
+
+═══════════════════════════════════════════════════════════════════
+  AVAILABLE npm SCRIPTS — Frontend  (apps/frontend)
+═══════════════════════════════════════════════════════════════════
+
+  npm run dev          Start Vite dev server on port 5173
+  npm run build        Build production bundle
+  npm run preview      Preview the production build locally
+
+
+═══════════════════════════════════════════════════════════════════
+  API ENDPOINTS (all prefixed with /api)
+═══════════════════════════════════════════════════════════════════
+
+  PUBLIC
+    GET  /health                       Server health check
+    GET  /stats/live                   Live platform statistics
+    GET  /risk/national                National risk map data
+    GET  /trends/national              National 12-month trends
+
+  AUTH
+    POST /auth/signup/general          Register as citizen
+    POST /auth/signup/moh-officer      Register as MOH officer
+    POST /auth/login                   Login
+    POST /auth/logout                  Logout
+    POST /auth/verify-email            Verify email token
+
+  REFERENCE
+    GET  /districts                    List of all 25 districts
+    GET  /moh-zones?district=X         MOH zones for a district
+
+  USER  (requires login)
+    GET  /user/dashboard               Citizen dashboard data
+    GET  /user/zone-trend?period=X     Dengue trend graph data
+                                       period = daily | weekly | monthly
+    PATCH /user/profile                Update profile
+
+  MOH OFFICER  (requires login + moh_officer role)
+    GET  /moh/dashboard                MOH officer dashboard
+    GET  /moh/reports/:mohZone         Zone report
+    GET  /moh/reports/:mohZone/export  Export zone report
+
+  WEATHER  (requires login)
+    GET  /weather/all                  Live weather all 25 districts
+    GET  /weather/district/:district   Live weather for one district
+
+
+═══════════════════════════════════════════════════════════════════
+  PROJECT FOLDER STRUCTURE
+═══════════════════════════════════════════════════════════════════
+
+  dengueradar/
+  ├── apps/
+  │   ├── backend/                 Node.js + Express API
+  │   │   └── src/
+  │   │       ├── config/          Database connection
+  │   │       ├── controllers/     Route handlers
+  │   │       ├── data/            District coordinates
+  │   │       ├── jobs/            Scheduled weather fetch (cron)
+  │   │       ├── middleware/      Auth, role checks
+  │   │       ├── models/          MongoDB schemas
+  │   │       ├── routes/          API routes
+  │   │       ├── seeds/           Database seed scripts
+  │   │       └── services/        Weather fetcher, email
+  │   │
+  │   ├── frontend/                React + Vite SPA
+  │   │   └── src/
+  │   │       ├── components/      Reusable UI components
+  │   │       ├── context/         Auth state (Zustand)
+  │   │       ├── hooks/           Custom React hooks
+  │   │       ├── pages/           Full page components
+  │   │       └── services/        API call helpers
+  │   │
+  │   └── ml-service/              (ML inference service — coming soon)
+  │
+  ├── ml-pipeline/
+  │   └── data/raw/                Raw EPID Unit CSV dataset
+  │
+  ├── docs/                        Additional documentation
+  └── infra/                       Deployment configuration
+
+
+═══════════════════════════════════════════════════════════════════
+  COMMON ISSUES & FIXES
+═══════════════════════════════════════════════════════════════════
+
+  ❌ "OPENWEATHER_API_KEY is not set"
+     → Add OPENWEATHER_API_KEY to apps/backend/.env
+
+  ❌ HTTP 401 from OpenWeather
+     → New API keys take up to 2 hours to activate.
+       Wait and restart the backend.
+
+  ❌ MongoDB connection error
+     → Check MONGO_URI in .env. Make sure your IP address
+       is whitelisted in MongoDB Atlas Network Access.
+
+  ❌ Weather widget not showing
+     → Either the API key isn't active yet, or the
+       live_weather collection is empty. Restart the backend
+       once the key is active — it fetches immediately on startup.
+
+  ❌ Graph shows all zeros
+     → Run  npm run seed:cases  from apps/backend.
+       This imports 145,985 real EPID Unit records.
+
+  ❌ Port 5000 already in use
+     → Change PORT= in apps/backend/.env to any free port
+       and update the proxy target in apps/frontend/vite.config.js
+
+  ❌ Email verification not arriving
+     → Check EMAIL_USER and EMAIL_PASS in .env.
+       For Gmail you need an App Password (not your normal password):
+       Google Account → Security → 2FA → App Passwords
+
+
+═══════════════════════════════════════════════════════════════════
+  NOTES
+═══════════════════════════════════════════════════════════════════
+
+  • The weather job runs immediately on server startup and then
+    every 4 hours automatically. No manual trigger needed.
+
+  • Real dengue data covers all 25 districts and real MOH zones
+    from 2013-12-28 to 2026-05-11 (EPID Unit records).
+
+  • AI risk prediction is not yet connected. The risk score shown
+    on dashboards is currently seeded placeholder data.
+    This will be replaced when the ML model is integrated.
+
+  • The seed:cases script is safe to re-run — it uses upsert
+    so it will update existing records rather than duplicate them.
+
+═══════════════════════════════════════════════════════════════════
