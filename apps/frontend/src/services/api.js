@@ -49,7 +49,8 @@ export const publicAPI = {
 };
 
 export const userAPI = {
-  getDashboard: () => api.get('/user/dashboard'),
+  getDashboard:  () => api.get('/user/dashboard'),
+  getZoneTrend:  (period = 'monthly') => api.get(`/user/zone-trend?period=${period}`),
   updateProfile: (data) => api.patch('/user/profile', data),
 };
 
@@ -57,4 +58,9 @@ export const mohAPI = {
   getDashboard: () => api.get('/moh/dashboard'),
   getZoneReport: (mohZone) => api.get(`/moh/reports/${encodeURIComponent(mohZone)}`),
   exportZoneReport: (mohZone) => api.get(`/moh/reports/${encodeURIComponent(mohZone)}/export`),
+};
+
+export const weatherAPI = {
+  getDistrict: (district) => api.get(`/weather/district/${encodeURIComponent(district)}`),
+  getAll: () => api.get('/weather/all'),
 };

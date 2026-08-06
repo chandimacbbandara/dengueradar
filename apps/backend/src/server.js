@@ -16,6 +16,8 @@ import referenceRoutes from './routes/reference.js';
 import publicRoutes from './routes/public.js';
 import userRoutes from './routes/user.js';
 import mohRoutes from './routes/moh.js';
+import weatherRoutes from './routes/weather.js';
+import { startWeatherJob } from './jobs/weatherJob.js';
 
 const app = express();
 
@@ -44,6 +46,7 @@ app.use('/api', referenceRoutes);
 app.use('/api', publicRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/moh', mohRoutes);
+app.use('/api/weather', weatherRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => res.json({ success: true, message: 'DengueRadar API running' }));
@@ -65,6 +68,8 @@ const PORT = process.env.PORT || 5000;
 
 connectDB().then(() => {
   app.listen(PORT, () => console.log(`DengueRadar API running on port ${PORT}`));
+  // Start the scheduled weather fetch job (runs immediately + every 4 h)
+  startWeatherJob();
 });
 
 export default app;

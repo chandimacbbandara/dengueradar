@@ -2,11 +2,12 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar.jsx';
 import RiskBadge from '../components/RiskBadge.jsx';
-import TrendChart from '../components/TrendChart.jsx';
+import ZoneTrendChart from '../components/ZoneTrendChart.jsx';
+import WeatherWidget from '../components/WeatherWidget.jsx';
 import { useAuthStore } from '../context/AuthContext.jsx';
 import { mohAPI } from '../services/api.js';
 import toast from 'react-hot-toast';
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend } from 'recharts';
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts';
 
 export default function MohDashboard() {
   const { user } = useAuthStore();
@@ -52,6 +53,9 @@ export default function MohDashboard() {
       </div>
 
       <div className="dashboard-content flex flex-col gap-6">
+        {/* Current weather for this officer's district */}
+        <WeatherWidget district={user?.district} />
+
         {/* Stats Row */}
         <div className="grid-4">
           <div className="card p-6">
@@ -89,13 +93,9 @@ export default function MohDashboard() {
               </ResponsiveContainer>
             </div>
           </div>
-          
-          <div className="card p-6">
-            <h3 className="font-bold mb-6">Case Trend (Last 30 Days)</h3>
-            <div style={{ height: '300px' }}>
-              <TrendChart data={data?.trends} />
-            </div>
-          </div>
+
+          {/* Zone trend — scoped to this officer's own district + zone */}
+          <ZoneTrendChart />
         </div>
 
         {/* Zones Table */}
