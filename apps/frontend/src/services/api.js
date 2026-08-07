@@ -30,11 +30,13 @@ export default api;
 
 // Typed API helpers
 export const authAPI = {
-  signupGeneral: (data) => api.post('/auth/signup/general', data),
+  sendOtp:          (data) => api.post('/auth/send-otp', data),
+  verifyOtp:        (data) => api.post('/auth/verify-otp', data),
+  signupGeneral:    (data) => api.post('/auth/signup/general', data),
   signupMohOfficer: (data) => api.post('/auth/signup/moh-officer', data),
-  login: (data) => api.post('/auth/login', data),
-  logout: () => api.post('/auth/logout'),
-  verifyEmail: (token) => api.post('/auth/verify-email', { token }),
+  login:            (data) => api.post('/auth/login', data),
+  logout:           ()     => api.post('/auth/logout'),
+  verifyEmail:      (token) => api.post('/auth/verify-email', { token }),
 };
 
 export const referenceAPI = {
@@ -63,4 +65,13 @@ export const mohAPI = {
 export const weatherAPI = {
   getDistrict: (district) => api.get(`/weather/district/${encodeURIComponent(district)}`),
   getAll: () => api.get('/weather/all'),
+};
+
+export const adminAPI = {
+  getDashboard:   ()         => api.get('/admin/dashboard'),
+  getOfficers:    (status)   => api.get(`/admin/officers?status=${status}`),
+  approveOfficer: (id)       => api.post(`/admin/officers/${id}/approve`),
+  rejectOfficer:  (id, reason) => api.post(`/admin/officers/${id}/reject`, { reason }),
+  deleteOfficer:  (id)       => api.delete(`/admin/officers/${id}`),
+  getCitizens:    ()         => api.get('/admin/citizens'),
 };

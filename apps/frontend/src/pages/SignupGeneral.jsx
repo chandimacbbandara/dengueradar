@@ -1,102 +1,294 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { authAPI } from '../services/api.js';
 import toast from 'react-hot-toast';
 import DistrictZoneSelect from '../components/DistrictZoneSelect.jsx';
 import PasswordStrength from '../components/PasswordStrength.jsx';
 
+/* ─── 6-box OTP input ───────────────────────────────────────────── */
+function OtpInput({ value, onChange }) {
+  const inputs = useRef([]);
+  const digits  = (value + '      ').slice(0, 6).split('');
+
+  const handleKey = (i, e) => {
+    if (e.key === 'Backspace') {
+      const next = [...digits];
+      if (next[i] && next[i] !== ' ') {
+        next[i] = ' ';
+      } else if (i > 0) {
+        next[i - 1] = ' ';
+        inputs.current[i - 1]?.focus();
+      }
+      onChange(next.join('').trimEnd());
+      return;
+    }
+    if (!/^\d$/.test(e.key)) return;
+    const next = [...digits];
+    next[i] = e.key;
+    onChange(next.join('').trimEnd());
+    if (i < 5) inputs.current[i + 1]?.focus();
+  };
+
+  return (
+    <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', margin: '24px 0' }}>
+      {digits.map((d, i) => (
+        <input
+          key={i}
+          ref={el => inputs.current[i] = el}
+          id={`otp-digit-${i}`}
+          type="text"
+          inputMode="numeric"
+          maxLength={1}
+          value={d === ' ' ? '' : d}
+          onKeyDown={e => handleKey(i, e)}
+          onChange={() => {}}
+          onFocus={e => e.target.select()}
+          style={{
+            width: '52px', height: '64px',
+            textAlign: 'center',
+            fontSize: '26px', fontWeight: 800,
+            border: `2px solid ${d && d !== ' ' ? 'var(--color-primary)' : 'var(--color-border)'}`,
+            borderRadius: '12px',
+            background: d && d !== ' ' ? 'var(--color-primary-light)' : 'var(--color-bg)',
+            color: 'var(--color-text-primary)',
+            outline: 'none',
+            transition: 'all 0.15s ease',
+            boxShadow: d && d !== ' ' ? '0 0 0 3px rgba(14,165,165,0.15)' : 'none',
+            caretColor: 'var(--color-primary)',
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
+/* ─── Main component ────────────────────────────────────────────── */
 export default function SignupGeneral() {
+  const [step, setStep]     = useState('form');   // 'form' | 'otp'
   const [formData, setFormData] = useState({
     firstName: '', lastName: '', email: '', whatsappNumber: '', password: '', confirmPassword: ''
   });
   const [district, setDistrict] = useState('');
-  const [mohZone, setMohZone] = useState('');
-  const [errors, setErrors] = useState({});
-  const [loading, setLoading] = useState(false);
+  const [mohZone,  setMohZone]  = useState('');
+  const [otp,      setOtp]      = useState('');
+  const [errors,   setErrors]   = useState({});
+  const [loading,  setLoading]  = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
   const navigate = useNavigate();
 
   const validate = () => {
-    const newErrors = {};
-    if (!formData.firstName) newErrors.firstName = 'Required';
-    if (!formData.email.includes('@')) newErrors.email = 'Invalid email';
-    if (!formData.whatsappNumber) newErrors.whatsappNumber = 'Required';
-    if (formData.password.length < 8) newErrors.password = 'Must be at least 8 characters';
-    if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = 'Passwords do not match';
-    if (!district) newErrors.district = 'Required';
-    if (!mohZone) newErrors.mohZone = 'Required';
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    const e = {};
+    if (!formData.firstName)                        e.firstName        = 'Required';
+    if (!formData.email.includes('@'))              e.email            = 'Invalid email';
+    if (!formData.whatsappNumber)                   e.whatsappNumber   = 'Required';
+    if (formData.password.length < 8)               e.password         = 'At least 8 characters';
+    if (formData.password !== formData.confirmPassword) e.confirmPassword = 'Passwords do not match';
+    if (!district)                                  e.district         = 'Required';
+    if (!mohZone)                                   e.mohZone          = 'Required';
+    setErrors(e);
+    return Object.keys(e).length === 0;
   };
 
-  const handleSubmit = async (e) => {
+  /* Step 1: send OTP */
+  const handleSendOtp = async (e) => {
     e.preventDefault();
     if (!validate()) return;
     setLoading(true);
-
     try {
-      await authAPI.signupGeneral({
-        ...formData,
-        whatsappNumber: '+94' + formData.whatsappNumber.replace(/^0+/, ''),
-        district,
-        mohZone
-      });
-      toast.success('Account created! Please check your email to verify, then log in.', { duration: 6000 });
-      navigate('/login');
+      await authAPI.sendOtp({ email: formData.email, name: formData.firstName });
+      setStep('otp');
+      toast.success(`Verification code sent to ${formData.email}`);
+      startCooldown();
     } catch (err) {
-      if (err.response?.data?.errors) {
-        setErrors(err.response.data.errors);
-      } else {
-        toast.error(err.response?.data?.message || 'Signup failed');
-      }
+      toast.error(err.response?.data?.message || 'Failed to send OTP');
     } finally {
       setLoading(false);
     }
   };
 
+  /* Resend cooldown (60 s) */
+  const startCooldown = () => {
+    setResendCooldown(60);
+    const id = setInterval(() => {
+      setResendCooldown(prev => {
+        if (prev <= 1) { clearInterval(id); return 0; }
+        return prev - 1;
+      });
+    }, 1000);
+  };
+
+  const handleResend = async () => {
+    if (resendCooldown > 0) return;
+    setLoading(true);
+    try {
+      await authAPI.sendOtp({ email: formData.email, name: formData.firstName });
+      toast.success('New code sent!');
+      setOtp('');
+      startCooldown();
+    } catch (err) {
+      toast.error('Failed to resend');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  /* Step 2: verify OTP then register */
+  const handleVerifyAndRegister = async (e) => {
+    e.preventDefault();
+    const trimmedOtp = otp.replace(/\s/g, '');
+    if (trimmedOtp.length !== 6) {
+      toast.error('Please enter all 6 digits');
+      return;
+    }
+    setLoading(true);
+    try {
+      // Verify OTP
+      await authAPI.verifyOtp({ email: formData.email, otp: trimmedOtp });
+
+      // Complete registration
+      await authAPI.signupGeneral({
+        ...formData,
+        whatsappNumber: '+94' + formData.whatsappNumber.replace(/^0+/, ''),
+        district,
+        mohZone,
+      });
+
+      toast.success('🎉 Account created! You can now log in.', { duration: 5000 });
+      navigate('/login');
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Verification failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  /* ── OTP step UI ── */
+  if (step === 'otp') {
+    return (
+      <div className="auth-layout">
+        <div className="auth-panel-left">
+          <Link to="/" className="text-2xl font-extrabold text-white mb-12 flex items-center gap-2">
+            🦟 Dengue<span style={{color:'#e0f7f7'}}>Radar</span>
+          </Link>
+          <h1 className="text-4xl font-extrabold mb-4">Check your inbox</h1>
+          <p className="text-lg opacity-90 mb-8 max-w-md">
+            We sent a 6-digit verification code to protect your account.
+            It expires in 10 minutes.
+          </p>
+          <ul className="flex flex-col gap-4">
+            <li className="flex items-center gap-3"><span className="text-xl">📧</span> Check spam/junk if you don't see it</li>
+            <li className="flex items-center gap-3"><span className="text-xl">⏰</span> Code is valid for 10 minutes</li>
+            <li className="flex items-center gap-3"><span className="text-xl">🔒</span> Never share your code with anyone</li>
+          </ul>
+        </div>
+
+        <div className="auth-panel-right">
+          <div style={{maxWidth:'440px', width:'100%', margin:'0 auto'}}>
+
+            {/* Animated envelope */}
+            <div style={{textAlign:'center', marginBottom:'8px'}}>
+              <div style={{
+                width:'80px', height:'80px', borderRadius:'50%',
+                background:'linear-gradient(135deg,#0EA5A5,#2F80ED)',
+                display:'flex', alignItems:'center', justifyContent:'center',
+                margin:'0 auto 16px', fontSize:'36px',
+                boxShadow:'0 8px 24px rgba(14,165,165,0.3)',
+              }}>📧</div>
+              <h2 className="auth-form-title" style={{marginBottom:'4px'}}>Enter your code</h2>
+              <p className="auth-form-subtitle" style={{marginBottom:0}}>
+                Sent to <strong>{formData.email}</strong>
+              </p>
+            </div>
+
+            <form onSubmit={handleVerifyAndRegister}>
+              <OtpInput value={otp} onChange={setOtp} />
+
+              <button
+                id="verify-otp-btn"
+                type="submit"
+                className="btn btn-primary w-full justify-center"
+                disabled={loading || otp.replace(/\s/g,'').length < 6}
+              >
+                {loading ? 'Verifying...' : 'Verify & Create Account'}
+              </button>
+            </form>
+
+            <div style={{textAlign:'center', marginTop:'24px'}}>
+              <p className="text-sm text-muted">Didn't receive it?</p>
+              <button
+                id="resend-otp-btn"
+                onClick={handleResend}
+                disabled={resendCooldown > 0 || loading}
+                style={{
+                  marginTop:'8px', background:'none', border:'none',
+                  color: resendCooldown > 0 ? 'var(--color-text-muted)' : 'var(--color-primary)',
+                  fontWeight: 600, fontSize:'14px', cursor: resendCooldown > 0 ? 'default' : 'pointer',
+                }}
+              >
+                {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : 'Resend code'}
+              </button>
+            </div>
+
+            <div style={{textAlign:'center', marginTop:'16px'}}>
+              <button
+                onClick={() => setStep('form')}
+                style={{background:'none', border:'none', color:'var(--color-text-secondary)', fontSize:'13px', cursor:'pointer'}}
+              >
+                ← Back to sign up form
+              </button>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  /* ── Registration form step ── */
   return (
     <div className="auth-layout">
       <div className="auth-panel-left">
         <Link to="/" className="text-2xl font-extrabold text-white mb-12 flex items-center gap-2">
-          🦟 Dengue<span style={{color: '#e0f7f7'}}>Radar</span>
+          🦟 Dengue<span style={{color:'#e0f7f7'}}>Radar</span>
         </Link>
         <h1 className="text-4xl font-extrabold mb-4">Join DengueRadar</h1>
-        <p className="text-lg opacity-90 mb-8 max-w-md">Stay ahead of dengue outbreaks and protect your family with our AI early warning system.</p>
+        <p className="text-lg opacity-90 mb-8 max-w-md">Stay ahead of dengue outbreaks and protect your family with real-time risk alerts.</p>
         <ul className="flex flex-col gap-4">
           <li className="flex items-center gap-3"><span className="text-xl">📍</span> Localized risk updates</li>
           <li className="flex items-center gap-3"><span className="text-xl">📱</span> WhatsApp push alerts</li>
-          <li className="flex items-center gap-3"><span className="text-xl">🛡️</span> Community prevention tips</li>
+          <li className="flex items-center gap-3"><span className="text-xl">🛡️</span> Community protection tools</li>
         </ul>
       </div>
-      
+
       <div className="auth-panel-right">
-        <div style={{maxWidth: '480px', width: '100%', margin: '0 auto'}}>
+        <div style={{maxWidth:'480px', width:'100%', margin:'0 auto'}}>
           <h2 className="auth-form-title">Create Account</h2>
           <p className="auth-form-subtitle">Register to receive dengue risk alerts for your area.</p>
 
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <form onSubmit={handleSendOtp} className="flex flex-col gap-4">
             <div className="grid-2 gap-4">
               <div className="form-group" style={{marginBottom:0}}>
                 <label className="form-label">First Name</label>
-                <input type="text" className={`form-input ${errors.firstName ? 'error' : ''}`} value={formData.firstName} onChange={e => setFormData({...formData, firstName: e.target.value})} />
+                <input type="text" className={`form-input ${errors.firstName?'error':''}`} value={formData.firstName} onChange={e=>setFormData({...formData,firstName:e.target.value})} />
                 {errors.firstName && <span className="form-error">{errors.firstName}</span>}
               </div>
               <div className="form-group" style={{marginBottom:0}}>
                 <label className="form-label">Last Name</label>
-                <input type="text" className="form-input" value={formData.lastName} onChange={e => setFormData({...formData, lastName: e.target.value})} />
+                <input type="text" className="form-input" value={formData.lastName} onChange={e=>setFormData({...formData,lastName:e.target.value})} />
               </div>
             </div>
 
             <div className="form-group" style={{marginBottom:0}}>
               <label className="form-label">Email Address</label>
-              <input type="email" className={`form-input ${errors.email ? 'error' : ''}`} value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} />
+              <input type="email" className={`form-input ${errors.email?'error':''}`} value={formData.email} onChange={e=>setFormData({...formData,email:e.target.value})} />
               {errors.email && <span className="form-error">{errors.email}</span>}
             </div>
 
             <div className="form-group" style={{marginBottom:0}}>
               <label className="form-label">WhatsApp Number</label>
               <div style={{display:'flex'}}>
-                <span style={{padding:'12px', background:'var(--color-bg-subtle)', border:'1.5px solid var(--color-border)', borderRight:'none', borderRadius:'var(--radius-md) 0 0 var(--radius-md)'}}>+94</span>
-                <input type="text" className={`form-input ${errors.whatsappNumber ? 'error' : ''}`} style={{borderRadius:'0 var(--radius-md) var(--radius-md) 0'}} placeholder="771234567" value={formData.whatsappNumber} onChange={e => setFormData({...formData, whatsappNumber: e.target.value})} />
+                <span style={{padding:'12px',background:'var(--color-bg-subtle)',border:'1.5px solid var(--color-border)',borderRight:'none',borderRadius:'var(--radius-md) 0 0 var(--radius-md)'}}>+94</span>
+                <input type="text" className={`form-input ${errors.whatsappNumber?'error':''}`} style={{borderRadius:'0 var(--radius-md) var(--radius-md) 0'}} placeholder="771234567" value={formData.whatsappNumber} onChange={e=>setFormData({...formData,whatsappNumber:e.target.value})} />
               </div>
               {errors.whatsappNumber && <span className="form-error">{errors.whatsappNumber}</span>}
             </div>
@@ -106,13 +298,13 @@ export default function SignupGeneral() {
             <div className="grid-2 gap-4">
               <div className="form-group" style={{marginBottom:0}}>
                 <label className="form-label">Password</label>
-                <input type="password" className={`form-input ${errors.password ? 'error' : ''}`} value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} />
+                <input type="password" className={`form-input ${errors.password?'error':''}`} value={formData.password} onChange={e=>setFormData({...formData,password:e.target.value})} />
                 <PasswordStrength password={formData.password} />
                 {errors.password && <span className="form-error">{errors.password}</span>}
               </div>
               <div className="form-group" style={{marginBottom:0}}>
                 <label className="form-label">Confirm Password</label>
-                <input type="password" className={`form-input ${errors.confirmPassword ? 'error' : ''}`} value={formData.confirmPassword} onChange={e => setFormData({...formData, confirmPassword: e.target.value})} />
+                <input type="password" className={`form-input ${errors.confirmPassword?'error':''}`} value={formData.confirmPassword} onChange={e=>setFormData({...formData,confirmPassword:e.target.value})} />
                 {errors.confirmPassword && <span className="form-error">{errors.confirmPassword}</span>}
               </div>
             </div>
@@ -121,8 +313,8 @@ export default function SignupGeneral() {
               <input type="checkbox" required /> I agree to the Terms of Service and Privacy Policy
             </label>
 
-            <button type="submit" className="btn btn-primary w-full justify-center mt-4" disabled={loading}>
-              {loading ? 'Creating Account...' : 'Sign Up'}
+            <button id="signup-submit-btn" type="submit" className="btn btn-primary w-full justify-center mt-4" disabled={loading}>
+              {loading ? 'Sending Code...' : 'Continue — Verify Email →'}
             </button>
           </form>
 

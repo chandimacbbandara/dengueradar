@@ -7,6 +7,7 @@ import SignupGeneral from './pages/SignupGeneral.jsx';
 import SignupMohOfficer from './pages/SignupMohOfficer.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import MohDashboard from './pages/MohDashboard.jsx';
+import AdminDashboard from './pages/AdminDashboard.jsx';
 import Profile from './pages/Profile.jsx';
 
 export default function App() {
@@ -25,6 +26,10 @@ export default function App() {
         <Route
           path="/moh-dashboard"
           element={<ProtectedRoute role="moh_officer"><MohDashboard /></ProtectedRoute>}
+        />
+        <Route
+          path="/admin-dashboard"
+          element={<ProtectedRoute role="admin"><AdminDashboard /></ProtectedRoute>}
         />
         <Route
           path="/profile"

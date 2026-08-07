@@ -10,6 +10,7 @@ export default function ProtectedRoute({ children, role }) {
   }
 
   if (role && user?.role !== role) {
+    if (user?.role === 'admin') return <Navigate to="/admin-dashboard" replace />;
     return <Navigate to={user?.role === 'moh_officer' ? '/moh-dashboard' : '/dashboard'} replace />;
   }
 

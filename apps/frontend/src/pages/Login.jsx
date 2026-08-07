@@ -17,7 +17,8 @@ export default function Login() {
 
   useEffect(() => {
     if (isAuthenticated) {
-      navigate(user?.role === 'moh_officer' ? '/moh-dashboard' : '/dashboard');
+      if (user?.role === 'admin') navigate('/admin-dashboard');
+      else navigate(user?.role === 'moh_officer' ? '/moh-dashboard' : '/dashboard');
     }
   }, [isAuthenticated, navigate, user]);
 
@@ -33,7 +34,10 @@ export default function Login() {
       login(userData, token);
       toast.success('Welcome back!');
       
-      const from = location.state?.from?.pathname || (userData.role === 'moh_officer' ? '/moh-dashboard' : '/dashboard');
+      const from = location.state?.from?.pathname || (
+        userData.role === 'admin' ? '/admin-dashboard' :
+        userData.role === 'moh_officer' ? '/moh-dashboard' : '/dashboard'
+      );
       navigate(from, { replace: true });
     } catch (err) {
       setError(err.response?.data?.message || 'Invalid email or password');

@@ -3,7 +3,9 @@ import bcrypt from 'bcryptjs';
 
 const userSchema = new mongoose.Schema(
   {
-    role: { type: String, enum: ['general', 'moh_officer'], required: true },
+    role: { type: String, enum: ['general', 'moh_officer', 'admin'], required: true },
+    isActive: { type: Boolean, default: true },
+    rejectionReason: { type: String },
     firstName: { type: String },
     lastName:  { type: String },
     officerName: { type: String },
