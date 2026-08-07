@@ -71,53 +71,7 @@ if (caseCount === 0) {
   console.log(`[DevSeed] ⏭  DengueCase already has ${caseCount} docs — skipping seed`);
 }
 
-// ── 5. Always refresh RiskPredictions with current dates ──────────────────────
-// Risk predictions have future dates that go stale — always regenerate them.
-await RiskPrediction.deleteMany({});
-const now2 = new Date();
-const riskDocs = [];
-for (let week = 0; week <= 4; week++) {
-  const predictedFor = new Date(now2.getTime() + week * 7 * 24 * 60 * 60 * 1000);
-  DISTRICTS.forEach(district => {
-    let riskScore = ['Colombo', 'Gampaha'].includes(district)
-      ? Math.floor(Math.random() * 34) + 67
-      : ['Kandy', 'Kalutara', 'Galle', 'Kurunegala'].includes(district)
-      ? Math.floor(Math.random() * 33) + 34
-      : Math.floor(Math.random() * 33);
-    const riskLevel = riskScore >= 67 ? 'high' : riskScore >= 33 ? 'moderate' : 'low';
-    const firstZone = MOH_ZONES_DATA.find(d => d.district === district)?.zones[0] || '';
-    riskDocs.push({ district, mohZone: firstZone, riskScore, riskLevel, predictedFor });
-  });
-}
-await RiskPrediction.insertMany(riskDocs);
-console.log(`[DevSeed] ✅ Refreshed ${riskDocs.length} risk predictions (current + 4 weeks)`);
-
-// ── 6. Refresh DengueCase if the most recent record is more than 1 month old ──
-const latestCase = await DengueCase.findOne().sort({ date: -1 });
-const oneMonthAgo = new Date();
-oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
-if (!latestCase || latestCase.date < oneMonthAgo) {
-  await DengueCase.deleteMany({});
-  const now3 = new Date();
-  const caseDocs2 = [];
-  for (let i = 0; i < 12; i++) {
-    const monthDate = new Date(now3.getFullYear(), now3.getMonth() - i, 1);
-    DISTRICTS.forEach(district => {
-      const count = ['Colombo', 'Gampaha'].includes(district)
-        ? Math.floor(Math.random() * 151) + 50
-        : ['Kandy', 'Kalutara', 'Galle', 'Kurunegala', 'Ratnapura'].includes(district)
-        ? Math.floor(Math.random() * 61) + 20
-        : Math.floor(Math.random() * 26) + 5;
-      caseDocs2.push({ district, date: monthDate, caseCount: count });
-    });
-  }
-  await DengueCase.insertMany(caseDocs2);
-  console.log(`[DevSeed] ✅ Refreshed ${caseDocs2.length} dengue case records (data was stale)`);
-} else {
-  console.log(`[DevSeed] ⏭  DengueCase is current — skipping refresh`);
-}
-
-// ── 6. Disconnect & hand off to Express ───────────────────────────────────────
+// ── 5. Disconnect & hand off to Express ───────────────────────────────────────
 await mongoose.disconnect();
 console.log('[DevSeed] Seed check complete — starting Express server\n');
 

@@ -755,3 +755,111 @@ select.form-input { appearance: none; background-image: url("data:image/svg+xml,
 .p-6 { padding: var(--space-6); }
 .p-8 { padding: var(--space-8); }
 .w-full { width: 100%; }
+
+/* ─── Premium Radar Aesthetic (Home Page Only) ─── */
+.home-radar-theme {
+  background: radial-gradient(circle at 50% -20%, #061b2e 0%, #030a13 100%);
+  color: #F8FAFC;
+  min-height: 100vh;
+}
+.home-radar-theme .hero {
+  background: transparent;
+}
+.home-radar-theme .map-section,
+.home-radar-theme .how-section,
+.home-radar-theme .trend-section {
+  background: transparent;
+}
+.home-radar-theme .section-label {
+  color: #0EA5A5;
+}
+.home-radar-theme .navbar {
+  background: rgba(3, 10, 19, 0.6);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+.home-radar-theme .navbar-logo {
+  color: #fff;
+}
+.home-radar-theme .nav-link {
+  color: #94A3B8;
+}
+.home-radar-theme .nav-link:hover {
+  color: #fff;
+}
+.home-radar-theme .hero-title {
+  color: #fff;
+  text-shadow: 0 0 40px rgba(14, 165, 165, 0.3);
+}
+.home-radar-theme .hero-subtitle {
+  color: #94A3B8;
+}
+.home-radar-theme .section-title {
+  color: #fff;
+}
+.home-radar-theme .section-subtitle {
+  color: #64748B;
+}
+
+/* Glassmorphic Live Cards */
+.radar-glass-card {
+  background: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(14, 165, 165, 0.2);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+}
+.radar-glass-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(14, 165, 165, 0.2);
+  border-color: rgba(14, 165, 165, 0.5);
+}
+
+/* Live Ticker Animation */
+.live-ticker-wrap {
+  width: 100%;
+  overflow: hidden;
+  background: rgba(15, 23, 42, 0.9);
+  border-bottom: 1px solid rgba(14, 165, 165, 0.2);
+  padding: 8px 0;
+  display: flex;
+  align-items: center;
+}
+.live-ticker-track {
+  display: flex;
+  white-space: nowrap;
+  animation: tickerScroll 30s linear infinite;
+}
+.live-ticker-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 32px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #cbd5e1;
+  position: relative;
+}
+.live-ticker-item::after {
+  content: "•";
+  color: #475569;
+  position: absolute;
+  right: -4px;
+}
+@keyframes tickerScroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* Dynamic Hero Typing */
+.typing-text {
+  border-right: 2px solid var(--color-primary);
+  padding-right: 4px;
+  animation: blinkCursor 0.8s step-end infinite;
+}
+@keyframes blinkCursor {
+  0%, 100% { border-color: transparent; }
+  50% { border-color: var(--color-primary); }
+}
+

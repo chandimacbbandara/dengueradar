@@ -62,7 +62,8 @@ function isoWeekLabel(date) {
  */
 export const getZoneTrend = async (req, res) => {
   try {
-    const { district, mohZone } = req.user;
+    const district = req.query.district || req.user.district;
+    const mohZone = req.query.mohZone || req.user.mohZone;
     const period = ['daily', 'weekly', 'monthly'].includes(req.query.period)
       ? req.query.period
       : 'monthly';
@@ -198,9 +199,63 @@ export const getZoneTrend = async (req, res) => {
       .select('riskScore riskLevel predictedFor -_id')
       .lean();
 
+    /* ── Fetch future AI Predictions ── */
+    const futurePredictions = await RiskPrediction.find({
+      district,
+      mohZone,
+      predictedFor: { $gt: now }
+    }).sort({ predictedFor: 1 }).lean();
+
+    const predictedTrendMap = {};
+    if (futurePredictions.length > 0) {
+      const lastPoint = filledData.length > 0 ? filledData[filledData.length - 1] : null;
+      if (lastPoint) {
+        predictedTrendMap[lastPoint.key] = {
+          key: lastPoint.key,
+          label: lastPoint.label,
+          cases: null,
+          predictedCases: lastPoint.cases,
+          count: 1
+        };
+      }
+
+      for (const pred of futurePredictions) {
+        let key, label;
+        if (period === 'weekly') {
+          key = isoWeekKey(pred.predictedFor);
+          label = isoWeekLabel(pred.predictedFor);
+        } else if (period === 'monthly') {
+          key = `${pred.predictedFor.getFullYear()}-${String(pred.predictedFor.getMonth() + 1).padStart(2, '0')}`;
+          label = pred.predictedFor.toLocaleString('en-US', { month: 'short', year: 'numeric' });
+        } else {
+          key = pred.predictedFor.toISOString().slice(0, 10);
+          label = pred.predictedFor.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        }
+        
+        if (!predictedTrendMap[key]) {
+          predictedTrendMap[key] = { key, label, cases: null, predictedCases: 0, count: 0, riskLevel: pred.riskLevel };
+        }
+        predictedTrendMap[key].predictedCases += (pred.predictedCases || 0);
+        predictedTrendMap[key].count += 1;
+        // update to the highest risk level
+        if (pred.riskLevel === 'high' || (pred.riskLevel === 'moderate' && predictedTrendMap[key].riskLevel !== 'high')) {
+          predictedTrendMap[key].riskLevel = pred.riskLevel;
+        }
+      }
+    }
+    
+    // For weekly/daily we didn't do sums usually, but this generic approach works.
+    const predictedTrend = Object.values(predictedTrendMap).map(pt => ({
+      key: pt.key,
+      label: pt.label,
+      cases: pt.cases,
+      predictedCases: pt.predictedCases,
+      riskLevel: pt.riskLevel
+    }));
+
     res.json({
       success: true,
-      data: { zone: mohZone, district, period, riskInfo, trend: filledData },
+      data: { zone: mohZone, district, period, riskInfo, trend: filledData, predictedTrend },
     });
   } catch (err) {
     console.error('[getZoneTrend]', err.message);

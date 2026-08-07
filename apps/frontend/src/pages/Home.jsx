@@ -4,7 +4,50 @@ import Navbar from '../components/Navbar.jsx';
 import LiveStatsStrip from '../components/LiveStatsStrip.jsx';
 import SriLankaMap from '../components/SriLankaMap.jsx';
 import TrendChart from '../components/TrendChart.jsx';
+import LiveTicker from '../components/LiveTicker.jsx';
 import { publicAPI } from '../services/api.js';
+
+function TopRiskCards({ riskData }) {
+  if (!riskData || riskData.length === 0) return null;
+  // Get top 3 highest risk scores
+  const top3 = [...riskData]
+    .sort((a, b) => b.riskScore - a.riskScore)
+    .slice(0, 3);
+
+  return (
+    <section className="section" style={{ paddingTop: '20px', paddingBottom: '40px' }}>
+      <div className="container">
+        <h3 style={{ color: '#fff', fontSize: '20px', fontWeight: 600, marginBottom: '24px' }}>
+          🚨 Top High-Risk Zones Right Now
+        </h3>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px' }}>
+          {top3.map((zone, idx) => (
+            <div key={idx} className="radar-glass-card" style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: '18px', fontWeight: 700, color: '#fff' }}>{zone.mohZone}</span>
+                <span style={{ padding: '4px 8px', borderRadius: '4px', background: 'rgba(239, 68, 68, 0.2)', color: '#EF4444', fontSize: '12px', fontWeight: 700 }}>
+                  HIGH RISK
+                </span>
+              </div>
+              <div style={{ fontSize: '14px', color: '#94A3B8' }}>{zone.district} District</div>
+              
+              <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid rgba(255,255,255,0.1)', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                <div>
+                  <div style={{ fontSize: '11px', color: '#64748B', textTransform: 'uppercase', letterSpacing: '1px' }}>AI Risk Score</div>
+                  <div style={{ fontSize: '24px', fontWeight: 700, color: '#F8FAFC' }}>{Math.round(zone.riskScore)}<span style={{fontSize:'14px', color:'#64748B'}}>/100</span></div>
+                </div>
+                <div>
+                  <div style={{ fontSize: '11px', color: '#64748B', textTransform: 'uppercase', letterSpacing: '1px' }}>Forecast</div>
+                  <div style={{ fontSize: '14px', fontWeight: 600, color: '#0EA5A5' }}>Escalating 📈</div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
 
 export default function Home() {
   const [riskData, setRiskData] = useState([]);
@@ -21,29 +64,31 @@ export default function Home() {
   }, []);
 
   return (
-    <div>
+    <div className="home-radar-theme">
       <Navbar />
+      <LiveTicker riskData={riskData} />
       
       {/* Hero Section */}
       <section id="home" className="hero">
         <div className="hero-inner">
           <div className="hero-content">
-            <div className="hero-tag animate-fadeInUp">
-              <span className="dot dot-high"></span> Live AI-Powered Monitoring
+            <div className="hero-tag animate-fadeInUp" style={{ background: 'rgba(14, 165, 165, 0.2)', border: '1px solid rgba(14, 165, 165, 0.4)', color: '#0EA5A5' }}>
+              <span className="dot dot-high" style={{ background: '#0EA5A5', boxShadow: '0 0 8px #0EA5A5' }}></span> Live AI Monitoring Active
             </div>
             <h1 className="hero-title animate-fadeInUp" style={{animationDelay: '0.1s'}}>
-              Know Your Dengue Risk <br/> <span className="gradient-text">Before It Spreads</span>
+              Know Your Dengue Risk <br/> 
+              <span style={{ color: '#0EA5A5' }} className="typing-text">Before It Spreads</span>
             </h1>
             <p className="hero-subtitle animate-fadeInUp" style={{animationDelay: '0.2s'}}>
               DengueRadar provides real-time dengue risk monitoring and alerts for Sri Lanka. Track risk by district, get WhatsApp alerts, and stay safe.
             </p>
             <div className="hero-actions animate-fadeInUp" style={{animationDelay: '0.3s'}}>
               <a href="#map" className="btn btn-primary btn-lg">Check Your Area &rarr;</a>
-              <Link to="/signup/general" className="btn btn-outline btn-lg">Sign Up for Alerts</Link>
+              <Link to="/signup/general" className="btn btn-outline btn-lg" style={{ color: '#fff', borderColor: 'rgba(255,255,255,0.2)' }}>Sign Up for Alerts</Link>
             </div>
           </div>
           <div className="hero-graphic animate-fadeIn">
-            <div className="hero-map-preview">
+            <div className="radar-glass-card" style={{ padding: '16px', height: '480px', width: '100%', maxWidth: '460px' }}>
               <SriLankaMap riskData={riskData} />
             </div>
           </div>
@@ -52,6 +97,9 @@ export default function Home() {
 
       {/* Stats Strip */}
       <LiveStatsStrip />
+
+      {/* Top 3 Live Risk Cards */}
+      <TopRiskCards riskData={riskData} />
 
       {/* Map Section */}
       <section id="map" className="map-section section">

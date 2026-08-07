@@ -13,21 +13,59 @@ export default function MohDashboard() {
   const { user } = useAuthStore();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  
+  // Default to the officer's own district, but allow changing it
+  const [selectedDistrict, setSelectedDistrict] = useState(user?.district || 'Colombo');
+  const [selectedZone, setSelectedZone] = useState(user?.mohZone || '');
 
   useEffect(() => {
-    mohAPI.getDashboard()
-      .then(res => setData(res.data))
+    setLoading(true);
+    mohAPI.getDashboard(selectedDistrict)
+      .then(res => {
+        const dashboardData = res.data?.data;
+        setData(dashboardData);
+        if (dashboardData?.zones?.length > 0) {
+          const hasZone = dashboardData.zones.some(z => z.name === selectedZone);
+          if (!hasZone) {
+            setSelectedZone(dashboardData.zones[0].name);
+          }
+        } else {
+          setSelectedZone('');
+        }
+      })
       .catch(console.error)
       .finally(() => setLoading(false));
-  }, []);
+  }, [selectedDistrict]);
+
+  const handleReset = () => {
+    setSelectedDistrict(user?.district || 'Colombo');
+    setSelectedZone(user?.mohZone || '');
+  };
+
+  const DISTRICTS = [
+    'Ampara', 'Anuradhapura', 'Badulla', 'Batticaloa', 'Colombo', 'Galle', 
+    'Gampaha', 'Hambantota', 'Jaffna', 'Kalutara', 'Kandy', 'Kegalle', 
+    'Kilinochchi', 'Kurunegala', 'Mannar', 'Matale', 'Matara', 'Moneragala', 
+    'Mullaitivu', 'Nuwara Eliya', 'Polonnaruwa', 'Puttalam', 'Ratnapura', 
+    'Trincomalee', 'Vavuniya'
+  ];
 
   const handleExport = async (zoneName) => {
     try {
-      toast.success(`Exporting report for ${zoneName}...`);
-      await mohAPI.exportZoneReport(zoneName);
-      // In reality, this would trigger a file download blob
+      toast.loading(`Exporting report for ${zoneName}...`, { id: 'export' });
+      const response = await mohAPI.exportZoneReport(zoneName);
+      
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `dengue_report_${zoneName.replace(/\\s+/g, '_')}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      
+      toast.success('Export downloaded!', { id: 'export' });
     } catch(e) {
-      toast.error('Export failed');
+      toast.error('Export failed', { id: 'export' });
     }
   };
 
@@ -45,7 +83,7 @@ export default function MohDashboard() {
       <div className="dashboard-header">
         <div className="container flex justify-between items-center">
           <div>
-            <h1 className="text-2xl font-bold">MOH Dashboard — {user?.district}</h1>
+            <h1 className="text-2xl font-bold">MOH Dashboard</h1>
             <p className="text-muted mt-1">Officer: {user?.officerName}</p>
           </div>
           <Link to="/profile" className="btn btn-outline btn-sm">Settings</Link>
@@ -53,8 +91,8 @@ export default function MohDashboard() {
       </div>
 
       <div className="dashboard-content flex flex-col gap-6">
-        {/* Current weather for this officer's district */}
-        <WeatherWidget district={user?.district} />
+        {/* Current weather for this selected district */}
+        <WeatherWidget district={selectedDistrict} />
 
         {/* Stats Row */}
         <div className="grid-4">
@@ -80,22 +118,82 @@ export default function MohDashboard() {
 
         {/* Charts Row */}
         <div className="grid-2 gap-6">
-          <div className="card p-6">
-            <h3 className="font-bold mb-6">Zone Risk Comparison</h3>
-            <div style={{ height: '300px' }}>
-              <ResponsiveContainer>
-                <BarChart data={zoneChartData} margin={{top:0,right:0,left:-20,bottom:0}}>
-                  <XAxis dataKey="name" tick={{fontSize: 12}} />
-                  <YAxis tick={{fontSize: 12}} />
-                  <Tooltip />
-                  <Bar dataKey="score" fill="#0EA5A5" radius={[4,4,0,0]} name="Risk Score" />
-                </BarChart>
-              </ResponsiveContainer>
+          {/* Left Side: Region Filter Card */}
+          <div className="card p-6" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <div>
+                <h3 className="font-bold text-lg mb-2">🎯 Region & MOH Area Filter</h3>
+                <p className="text-sm text-muted">Select a district and MOH area to load predictions.</p>
+              </div>
+              <button 
+                onClick={handleReset}
+                className="btn btn-outline btn-sm"
+                style={{ fontSize: '11px', padding: '6px 12px' }}
+              >
+                🔄 My Area
+              </button>
             </div>
+            
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <label className="text-xs font-bold text-gray-500 uppercase">1. Select District</label>
+                <select 
+                  className="input" 
+                  value={selectedDistrict} 
+                  onChange={e => {
+                    setSelectedDistrict(e.target.value);
+                    setSelectedZone(''); // Reset zone when district changes
+                  }}
+                  style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #ccc', fontSize: '14px' }}
+                >
+                  {DISTRICTS.map(d => (
+                    <option key={d} value={d}>{d}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <label className="text-xs font-bold text-gray-500 uppercase">2. Select MOH Area</label>
+                <select
+                  className="input"
+                  value={selectedZone}
+                  onChange={e => setSelectedZone(e.target.value)}
+                  style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #ccc', fontSize: '14px' }}
+                >
+                  <option value="">-- Choose MOH Zone --</option>
+                  {data?.zones?.map(z => (
+                    <option key={z.name} value={z.name}>{z.name}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {selectedZone && (
+              <div style={{ marginTop: 'auto', paddingTop: '16px', borderTop: '1px solid rgba(0,0,0,0.1)' }}>
+                <button 
+                  onClick={() => handleExport(selectedZone)}
+                  className="btn btn-primary w-full"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                    padding: '12px',
+                    fontSize: '14px',
+                    fontWeight: 700,
+                    textTransform: 'uppercase'
+                  }}
+                >
+                  📥 Download {selectedZone} Report
+                </button>
+              </div>
+            )}
           </div>
 
-          {/* Zone trend — scoped to this officer's own district + zone */}
-          <ZoneTrendChart />
+          {/* Right Side: Zone trend — scoped to the selected district + zone */}
+          <div>
+            <ZoneTrendChart district={selectedDistrict} mohZone={selectedZone} />
+          </div>
         </div>
 
         {/* Zones Table */}
@@ -122,7 +220,9 @@ export default function MohDashboard() {
                     <td>{zone.cases || 0}</td>
                     <td>{zone.users || 0}</td>
                     <td>
-                      <button onClick={() => handleExport(zone.name)} className="btn btn-sm btn-ghost">Export Report</button>
+                      <button onClick={() => handleExport(zone.name)} className="btn btn-sm btn-ghost" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        📥 Download Report
+                      </button>
                     </td>
                   </tr>
                 ))}

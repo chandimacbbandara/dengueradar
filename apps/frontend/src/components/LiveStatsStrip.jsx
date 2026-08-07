@@ -62,27 +62,27 @@ export default function LiveStatsStrip() {
   const updatedAt = stats?.lastUpdated ? new Date(stats.lastUpdated).toLocaleString() : 'Recently';
 
   return (
-    <div className="stats-strip">
-      <div className="stats-strip-inner">
-        <div className="stat-item">
-          <div className="stat-value"><AnimatedCounter value={stats?.totalUsers || 0} /></div>
-          <div className="stat-label">Active Users</div>
+    <div className="container" style={{ position: 'relative', top: '-40px', zIndex: 10 }}>
+      <div className="radar-glass-card" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '24px', padding: '32px' }}>
+        <div className="stat-item" style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: '36px', fontWeight: 800, color: '#0EA5A5' }}><AnimatedCounter value={stats?.totalUsers || 0} /></div>
+          <div style={{ fontSize: '13px', color: '#94A3B8', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px', marginTop: '8px' }}>Active Users</div>
         </div>
-        <div className="stat-item">
-          <div className="stat-value"><AnimatedCounter value={stats?.districtsMonitored || 25} /></div>
-          <div className="stat-label">Districts Monitored</div>
+        <div className="stat-item" style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: '36px', fontWeight: 800, color: '#0EA5A5' }}><AnimatedCounter value={stats?.districtsMonitored || 25} /></div>
+          <div style={{ fontSize: '13px', color: '#94A3B8', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px', marginTop: '8px' }}>Districts Monitored</div>
         </div>
-        <div className="stat-item">
-          <div className="stat-value"><AnimatedCounter value={stats?.highRiskZones || 0} /></div>
-          <div className="stat-label">High-Risk Zones Today</div>
+        <div className="stat-item" style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: '36px', fontWeight: 800, color: '#EF4444' }}><AnimatedCounter value={stats?.highRiskZones || 0} /></div>
+          <div style={{ fontSize: '13px', color: '#94A3B8', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px', marginTop: '8px' }}>High-Risk Zones Today</div>
         </div>
-        <div className="stat-item">
-          <div className="stat-value" style={{fontSize: '24px', display:'flex', alignItems:'center', justifyContent:'center', height:'100%'}}>
+        <div className="stat-item" style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: '24px', fontWeight: 800, color: '#10B981', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '54px' }}>
             Live
-            <span className="dot dot-high" style={{marginLeft:'8px', animation:'pulse 2s infinite'}}></span>
+            <span className="dot dot-high" style={{ marginLeft: '12px', animation: 'pulse 2s infinite', background: '#10B981', boxShadow: '0 0 12px #10B981' }}></span>
           </div>
-          <div className="stat-label">System Status</div>
-          <div className="stat-sublabel">Updated: {updatedAt}</div>
+          <div style={{ fontSize: '13px', color: '#94A3B8', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px', marginTop: '8px' }}>System Status</div>
+          <div style={{ fontSize: '11px', color: '#475569', marginTop: '4px' }}>Updated: {updatedAt}</div>
         </div>
       </div>
     </div>

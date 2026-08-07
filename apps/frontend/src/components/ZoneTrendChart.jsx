@@ -23,22 +23,30 @@ const RISK_LABEL = { high: '🔴 High Risk', moderate: '🟡 Moderate Risk', low
 /* ─── Custom tooltip ────────────────────────────────────────────── */
 function CryptoTooltip({ active, payload, label }) {
   if (!active || !payload?.length) return null;
-  const cases = payload[0]?.value ?? 0;
+  const data = payload[0];
+  const isPredicted = data.dataKey === 'predictedCases';
+  const cases = data.value ?? 0;
+  const riskLevel = data.payload?.riskLevel;
+
   return (
     <div style={{
       background: 'rgba(15,23,42,0.97)',
       backdropFilter: 'blur(16px)',
-      border: '1px solid rgba(14,165,165,0.35)',
+      border: `1px solid ${isPredicted ? 'rgba(245,158,11,0.35)' : 'rgba(14,165,165,0.35)'}`,
       borderRadius: '12px',
       padding: '12px 16px',
       boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
       minWidth: '150px',
     }}>
-      <p style={{ color: '#94A3B8', fontSize: '11px', marginBottom: '6px', fontWeight: 600 }}>{label}</p>
-      <p style={{ color: '#0EA5A5', fontSize: '22px', fontWeight: 800, lineHeight: 1 }}>
+      <p style={{ color: '#94A3B8', fontSize: '11px', marginBottom: '6px', fontWeight: 600 }}>
+        {label} {isPredicted && <span style={{color: '#F59E0B', marginLeft: '4px'}}>(AI Forecast)</span>}
+      </p>
+      <p style={{ color: isPredicted ? '#F59E0B' : '#0EA5A5', fontSize: '22px', fontWeight: 800, lineHeight: 1 }}>
         {cases.toLocaleString()}
       </p>
-      <p style={{ color: '#475569', fontSize: '11px', marginTop: '4px' }}>dengue cases</p>
+      <p style={{ color: '#475569', fontSize: '11px', marginTop: '4px' }}>
+        dengue cases {riskLevel ? `— Risk: ${riskLevel.toUpperCase()}` : ''}
+      </p>
     </div>
   );
 }
@@ -104,22 +112,22 @@ function PeriodTab({ p, active, onClick }) {
 }
 
 /* ─── Main component ────────────────────────────────────────────── */
-export default function ZoneTrendChart() {
+export default function ZoneTrendChart({ district, mohZone }) {
   const [period, setPeriod]       = useState('monthly');
   const [trendData, setTrendData] = useState(null);
   const [loading, setLoading]     = useState(true);
   const [error, setError]         = useState(null);
 
-  const loadData = useCallback((p) => {
+  const loadData = useCallback((p, dist, zone) => {
     setLoading(true);
     setError(null);
-    userAPI.getZoneTrend(p)
+    userAPI.getZoneTrend(p, dist, zone)
       .then(res => setTrendData(res.data.data))
       .catch(err => setError(err.response?.data?.message || 'Could not load trend data'))
       .finally(() => setLoading(false));
   }, []);
 
-  useEffect(() => { loadData(period); }, [period, loadData]);
+  useEffect(() => { loadData(period, district, mohZone); }, [period, district, mohZone, loadData]);
 
   const handlePeriod = (p) => {
     if (p === period) return;
@@ -140,7 +148,8 @@ export default function ZoneTrendChart() {
     );
   }
 
-  const { zone, district, riskInfo, trend = [] } = trendData ?? {};
+  const { zone, district: dataDistrict, riskInfo, trend = [], predictedTrend = [] } = trendData ?? {};
+  const combinedTrend = [...trend, ...predictedTrend];
   const totalCases = trend.reduce((s, d) => s + (d.cases || 0), 0);
   const peakPoint  = trend.reduce((a, b) => (b.cases > a.cases ? b : a), { cases: 0 });
   const last       = trend[trend.length - 1] ?? {};
@@ -155,8 +164,8 @@ export default function ZoneTrendChart() {
   const gradId = `ztc-grad-${(zone ?? 'x').replace(/\W+/g, '')}`;
 
   // X-axis tick thinning for dense periods
-  const tickInterval = period === 'daily'  ? Math.ceil(trend.length / 10) :
-                       period === 'weekly' ? 1 : 'preserveStartEnd';
+  const tickInterval = period === 'daily'  ? Math.ceil(combinedTrend.length / 10) :
+                       period === 'weekly' ? 2 : 'preserveStartEnd';
 
   return (
     <div style={{
@@ -257,13 +266,17 @@ export default function ZoneTrendChart() {
       <div style={{ height: '220px', marginLeft: '-8px' }}>
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart
-            data={trend}
+            data={combinedTrend}
             margin={{ top: 4, right: 4, left: -20, bottom: 0 }}
           >
             <defs>
               <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%"   stopColor="#0EA5A5" stopOpacity={0.55} />
                 <stop offset="100%" stopColor="#0EA5A5" stopOpacity={0.02} />
+              </linearGradient>
+              <linearGradient id={`${gradId}-pred`} x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%"   stopColor="#F59E0B" stopOpacity={0.55} />
+                <stop offset="100%" stopColor="#F59E0B" stopOpacity={0.02} />
               </linearGradient>
             </defs>
 
@@ -301,6 +314,21 @@ export default function ZoneTrendChart() {
               activeDot={{
                 r: 5, fill: '#0EA5A5', stroke: '#0d1f3c', strokeWidth: 2,
                 filter: 'drop-shadow(0 0 6px #0EA5A5)',
+              }}
+              isAnimationActive={!loading}
+            />
+            <Area
+              type="monotoneX"
+              dataKey="predictedCases"
+              name="AI Prediction"
+              stroke="#F59E0B"
+              strokeWidth={2.5}
+              strokeDasharray="5 5"
+              fill={`url(#${gradId}-pred)`}
+              dot={false}
+              activeDot={{
+                r: 5, fill: '#F59E0B', stroke: '#0d1f3c', strokeWidth: 2,
+                filter: 'drop-shadow(0 0 6px #F59E0B)',
               }}
               isAnimationActive={!loading}
             />
