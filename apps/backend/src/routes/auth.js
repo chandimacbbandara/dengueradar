@@ -2,6 +2,8 @@ import { Router } from 'express';
 import { body } from 'express-validator';
 import { validate } from '../middleware/validate.js';
 import {
+  sendOtp,
+  verifyOtp,
   signupGeneral,
   signupMohOfficer,
   login,
@@ -20,6 +22,11 @@ const passwordRules = [
   }),
 ];
 
+/* ── OTP flow ── */
+router.post('/send-otp',   body('email').isEmail().withMessage('Valid email required'), validate, sendOtp);
+router.post('/verify-otp', body('email').isEmail(), body('otp').isLength({ min: 6, max: 6 }), validate, verifyOtp);
+
+/* ── Registration (requires OTP verified first) ── */
 router.post(
   '/signup/general',
   [
@@ -47,6 +54,7 @@ router.post(
   signupMohOfficer
 );
 
+/* ── Auth ── */
 router.post(
   '/login',
   [
@@ -57,8 +65,8 @@ router.post(
   login
 );
 
-router.post('/verify-email', verifyEmail);
-router.post('/refresh-token', refreshToken);
-router.post('/logout', logout);
+router.post('/verify-email',   verifyEmail);   // legacy compat
+router.post('/refresh-token',  refreshToken);
+router.post('/logout',         logout);
 
 export default router;

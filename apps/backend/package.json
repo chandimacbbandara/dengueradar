@@ -10,7 +10,8 @@
     "seed:zones": "node src/seeds/seedMohZones.js",
     "seed:risk": "node src/seeds/seedRiskData.js",
     "seed:cases": "node src/seeds/seedDengueCases.js",
-    "seed:all": "node src/seeds/seedMohZones.js && node src/seeds/seedRiskData.js",
+    "seed:admin": "node src/seeds/seedAdmin.js",
+    "seed:all": "node src/seeds/seedMohZones.js && node src/seeds/seedRiskData.js && node src/seeds/seedAdmin.js",
     "seed:dev": "node src/seeds/devSeed.js"
   },
   "dependencies": {
