@@ -5,6 +5,7 @@ const riskPredictionSchema = new mongoose.Schema({
   mohZone: { type: String },
   riskScore: { type: Number, required: true },
   riskLevel: { type: String, enum: ['low', 'moderate', 'high'], required: true },
+  predictedCases: { type: Number },
   predictedFor: { type: Date, required: true },
   modelVersion: { type: String, default: 'v1.0' },
   generatedAt: { type: Date, default: Date.now },

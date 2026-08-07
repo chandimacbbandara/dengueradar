@@ -52,14 +52,19 @@ export const publicAPI = {
 
 export const userAPI = {
   getDashboard:  () => api.get('/user/dashboard'),
-  getZoneTrend:  (period = 'monthly') => api.get(`/user/zone-trend?period=${period}`),
+  getZoneTrend:  (period = 'monthly', district, mohZone) => {
+    let url = `/user/zone-trend?period=${period}`;
+    if (district) url += `&district=${encodeURIComponent(district)}`;
+    if (mohZone) url += `&mohZone=${encodeURIComponent(mohZone)}`;
+    return api.get(url);
+  },
   updateProfile: (data) => api.patch('/user/profile', data),
 };
 
 export const mohAPI = {
-  getDashboard: () => api.get('/moh/dashboard'),
+  getDashboard: (district) => api.get(district ? `/moh/dashboard?district=${encodeURIComponent(district)}` : '/moh/dashboard'),
   getZoneReport: (mohZone) => api.get(`/moh/reports/${encodeURIComponent(mohZone)}`),
-  exportZoneReport: (mohZone) => api.get(`/moh/reports/${encodeURIComponent(mohZone)}/export`),
+  exportZoneReport: (mohZone) => api.get(`/moh/reports/${encodeURIComponent(mohZone)}/export`, { responseType: 'blob' }),
 };
 
 export const weatherAPI = {

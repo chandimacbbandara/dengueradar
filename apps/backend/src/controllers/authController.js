@@ -3,6 +3,8 @@ import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import User from '../models/User.js';
 import { sendOtpEmail } from '../services/emailService.js';
+import { fetchAllDistrictWeather } from '../services/weatherFetcher.js';
+import { runMLPredictionsAndAlerts } from '../services/predictionService.js';
 
 /* ─── OTP helpers ───────────────────────────────────────────────── */
 
@@ -134,6 +136,17 @@ export const signupGeneral = async (req, res) => {
     user.isApproved    = true;
     await user.save();
 
+    // Fire off a background update to fetch latest weather and generate predictions for the new area
+    setTimeout(async () => {
+      try {
+        console.log(`[signupGeneral] Lively update triggered for new user in ${district} / ${mohZone}`);
+        await fetchAllDistrictWeather();
+        await runMLPredictionsAndAlerts();
+      } catch (e) {
+        console.error('[signupGeneral] Lively update failed:', e.message);
+      }
+    }, 0);
+
     res.status(201).json({
       success: true,
       message: 'Registration successful! You can now log in.',
@@ -167,6 +180,17 @@ export const signupMohOfficer = async (req, res) => {
     user.passwordHash = passwordHash;
     user.isApproved   = false; // Needs admin approval
     await user.save();
+
+    // Fire off a background update to fetch latest weather and generate predictions for the new area
+    setTimeout(async () => {
+      try {
+        console.log(`[signupMohOfficer] Lively update triggered for new MOH officer in ${district} / ${mohZone}`);
+        await fetchAllDistrictWeather();
+        await runMLPredictionsAndAlerts();
+      } catch (e) {
+        console.error('[signupMohOfficer] Lively update failed:', e.message);
+      }
+    }, 0);
 
     res.status(201).json({
       success: true,

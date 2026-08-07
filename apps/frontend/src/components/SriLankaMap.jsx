@@ -24,7 +24,7 @@ export default function SriLankaMap({ riskData }) {
   const [error, setError] = useState(false);
 
   useEffect(() => {
-    fetch('https://raw.githubusercontent.com/arunoday-c/srilanka-map-data/master/src/%C5%9Brilanka-districts.json')
+    fetch('/srilanka-districts.json')
       .then(res => res.json())
       .then(data => {
         setGeoData(data);
@@ -41,7 +41,7 @@ export default function SriLankaMap({ riskData }) {
   if (error) return <div className="alert alert-error">Failed to load map data. Please try again later.</div>;
 
   const styleFeature = (feature) => {
-    const districtName = feature.properties.name || feature.properties.NAME_1;
+    const districtName = feature.properties.name || feature.properties.NAME_1 || feature.properties.ADM2_EN;
     const districtData = riskData?.find(d => d.district?.toLowerCase() === districtName?.toLowerCase());
     return {
       fillColor: getRiskColor(districtData?.riskLevel),
@@ -53,7 +53,7 @@ export default function SriLankaMap({ riskData }) {
   };
 
   const onEachFeature = (feature, layer) => {
-    const districtName = feature.properties.name || feature.properties.NAME_1;
+    const districtName = feature.properties.name || feature.properties.NAME_1 || feature.properties.ADM2_EN;
     const districtData = riskData?.find(d => d.district?.toLowerCase() === districtName?.toLowerCase());
     
     let popupContent = `<strong>${districtName}</strong><br/>`;
@@ -99,7 +99,9 @@ export default function SriLankaMap({ riskData }) {
       </MapContainer>
       <div style={{
         position: 'absolute', bottom: '20px', right: '20px', zIndex: 1000,
-        background: 'white', padding: '12px', borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+        background: 'rgba(15, 23, 42, 0.9)', backdropFilter: 'blur(8px)',
+        border: '1px solid rgba(14, 165, 165, 0.3)',
+        color: '#f8fafc', padding: '12px', borderRadius: '8px', boxShadow: '0 4px 16px rgba(0,0,0,0.4)'
       }}>
         <div style={{fontSize:'12px', fontWeight:700, marginBottom:'8px'}}>RISK LEVEL</div>
         <div style={{display:'flex', alignItems:'center', gap:'8px', marginBottom:'4px'}}>
