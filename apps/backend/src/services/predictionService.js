@@ -22,7 +22,7 @@ try {
   console.error('[PredictionService] Failed to load mohStaticData.json:', e.message);
 }
 
-const ML_SERVICE_URL = 'http://localhost:8000/api/predict';
+const ML_SERVICE_URL = 'http://127.0.0.1:8000/api/predict';
 
 /**
  * Normalises spelling differences between OpenWeather centroids and target CSVs
@@ -172,10 +172,11 @@ export async function runMLPredictionsAndAlerts() {
         const pred = predictions[i];
         const payloadContext = predictionPayloads[i];
 
-        const riskLevel = pred.risk_level.toLowerCase(); // 'low', 'moderate', 'high'
-        const normalisedRiskLevel = ['low', 'moderate', 'high'].includes(riskLevel)
-          ? riskLevel
-          : 'high';
+        const rawRisk = pred.risk_level.toLowerCase(); // 'low', 'watch', 'warning', 'alert'
+        let normalisedRiskLevel = 'high';
+        if (rawRisk === 'low') normalisedRiskLevel = 'low';
+        else if (rawRisk === 'watch') normalisedRiskLevel = 'moderate';
+        else if (rawRisk === 'warning' || rawRisk === 'alert') normalisedRiskLevel = 'high';
 
         // Check for escalation ONLY for week 1 to avoid spamming alerts for future predictions
         if (weekOffset === 1) {
