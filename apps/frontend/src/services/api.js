@@ -20,6 +20,7 @@ api.interceptors.response.use(
     if (err.response?.status === 401) {
       localStorage.removeItem('accessToken');
       localStorage.removeItem('user');
+      localStorage.removeItem('dengueradar-auth');
       window.location.href = '/login';
     }
     return Promise.reject(err);
