@@ -93,8 +93,8 @@ export async function runMLPredictionsAndAlerts() {
       }
     }
 
-    // 4. Iteratively predict for 8 weeks
-    for (let weekOffset = 1; weekOffset <= 8; weekOffset++) {
+    // 4. Iteratively predict for 2 weeks
+    for (let weekOffset = 1; weekOffset <= 2; weekOffset++) {
       const targetPredictionDate = new Date(now.getTime() + weekOffset * weekDur);
       // Normalize to Monday of that week
       const day = targetPredictionDate.getDay() || 7;
@@ -217,7 +217,7 @@ export async function runMLPredictionsAndAlerts() {
       }
     }
 
-    console.log('[PredictionService] ✅ 8-Week Predictions pipeline completed successfully');
+    console.log('[PredictionService] ✅ 2-Week Predictions pipeline completed successfully');
   } catch (err) {
     console.error('[PredictionService] ❌ Failed to run predictions pipeline:', err.message);
   }

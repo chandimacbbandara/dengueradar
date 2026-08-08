@@ -34,7 +34,7 @@ export default function LiveStatsStrip() {
     const fetchStats = async () => {
       try {
         const res = await publicAPI.getLiveStats();
-        setStats(res.data);
+        setStats(res.data.data);
       } catch (err) {
         console.error('Error fetching stats:', err);
       } finally {
@@ -73,7 +73,7 @@ export default function LiveStatsStrip() {
           <div style={{ fontSize: '13px', color: '#94A3B8', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px', marginTop: '8px' }}>Districts Monitored</div>
         </div>
         <div className="stat-item" style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: '36px', fontWeight: 800, color: '#EF4444' }}><AnimatedCounter value={stats?.highRiskZones || 0} /></div>
+          <div style={{ fontSize: '36px', fontWeight: 800, color: '#EF4444' }}><AnimatedCounter value={stats?.activeHighRiskZones || 0} /></div>
           <div style={{ fontSize: '13px', color: '#94A3B8', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px', marginTop: '8px' }}>High-Risk Zones Today</div>
         </div>
         <div className="stat-item" style={{ textAlign: 'center' }}>

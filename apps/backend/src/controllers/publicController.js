@@ -30,8 +30,12 @@ export const getLiveStats = async (req, res) => {
 
 export const getNationalRisk = async (req, res) => {
   try {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
     const nationalRisk = await RiskPrediction.aggregate([
-      { $sort: { predictedFor: -1 } },
+      { $match: { predictedFor: { $gte: today } } },
+      { $sort: { predictedFor: 1 } },
       { $group: {
           _id: '$district',
           riskScore: { $first: '$riskScore' },

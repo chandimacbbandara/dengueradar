@@ -3,6 +3,8 @@ import mongoose from 'mongoose';
 import DengueCase from '../models/DengueCase.js';
 import RiskPrediction from '../models/RiskPrediction.js';
 
+import MOH_ZONES_DATA from '../data/mohZonesData.js';
+
 const DISTRICTS = [
   'Colombo', 'Gampaha', 'Kalutara', 'Kandy', 'Matale', 'Nuwara Eliya',
   'Galle', 'Matara', 'Hambantota', 'Jaffna', 'Kilinochchi', 'Mannar',
@@ -22,24 +24,29 @@ const seedRiskData = async () => {
 
     const casesDocs = [];
     const now = new Date();
+    const weekDur = 7 * 24 * 60 * 60 * 1000;
     
-    for (let i = 0; i < 12; i++) {
-      const monthDate = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    for (let w = 0; w < 16; w++) {
+      const weekDate = new Date(now.getTime() - w * weekDur);
+      const day = weekDate.getDay() || 7;
+      weekDate.setDate(weekDate.getDate() - day + 1);
+      weekDate.setHours(0, 0, 0, 0);
       
-      DISTRICTS.forEach(district => {
-        let count = 0;
-        if (['Colombo', 'Gampaha'].includes(district)) {
-          count = Math.floor(Math.random() * 151) + 50; // 50-200
-        } else if (['Kandy', 'Kalutara', 'Galle', 'Kurunegala', 'Ratnapura'].includes(district)) {
-          count = Math.floor(Math.random() * 61) + 20; // 20-80
-        } else {
-          count = Math.floor(Math.random() * 26) + 5; // 5-30
-        }
+      MOH_ZONES_DATA.forEach(d => {
+        d.zones.forEach(zoneName => {
+          const count = ['Colombo', 'Gampaha'].includes(d.district)
+            ? Math.floor(Math.random() * 15) + 5
+            : ['Kandy', 'Kalutara', 'Galle', 'Kurunegala', 'Ratnapura'].includes(d.district)
+            ? Math.floor(Math.random() * 6) + 2
+            : Math.floor(Math.random() * 3) + 1;
 
-        casesDocs.push({
-          district,
-          date: monthDate,
-          caseCount: count
+          casesDocs.push({
+            district: d.district,
+            mohZone: zoneName,
+            date: new Date(weekDate),
+            caseCount: count,
+            source: 'epid_unit'
+          });
         });
       });
     }

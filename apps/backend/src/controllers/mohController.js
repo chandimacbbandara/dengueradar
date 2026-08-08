@@ -17,10 +17,13 @@ export const getMohDashboard = async (req, res) => {
     // Count citizens registered in this district
     const registeredCitizens = await User.countDocuments({ district, role: 'general' });
 
-    // Find the latest risk predictions for all zones in this district
+    // Find the current risk predictions (week 1) for all zones in this district
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
     const riskPredictions = await RiskPrediction.aggregate([
-      { $match: { district } },
-      { $sort: { predictedFor: -1 } },
+      { $match: { district, predictedFor: { $gte: today } } },
+      { $sort: { predictedFor: 1 } },
       { $group: {
           _id: '$mohZone',
           riskScore: { $first: '$riskScore' },

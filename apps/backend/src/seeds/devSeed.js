@@ -29,23 +29,39 @@ const run = async () => {
   await MohZone.insertMany(zoneDocs);
   console.log(`✅ Inserted ${zoneDocs.length} MOH zones across ${MOH_ZONES_DATA.length} districts`);
 
-  // ── Seed DengueCase (12 months) ─────────────────────────────────────────────
+  // ── Seed DengueCase (16 weeks) ─────────────────────────────────────────────
   await DengueCase.deleteMany({});
   const now = new Date();
   const caseDocs = [];
-  for (let i = 0; i < 12; i++) {
-    const monthDate = new Date(now.getFullYear(), now.getMonth() - i, 1);
-    DISTRICTS.forEach(district => {
-      let count = ['Colombo', 'Gampaha'].includes(district)
-        ? Math.floor(Math.random() * 151) + 50
-        : ['Kandy', 'Kalutara', 'Galle', 'Kurunegala', 'Ratnapura'].includes(district)
-        ? Math.floor(Math.random() * 61) + 20
-        : Math.floor(Math.random() * 26) + 5;
-      caseDocs.push({ district, date: monthDate, caseCount: count });
+  const weekDur = 7 * 24 * 60 * 60 * 1000;
+
+  for (let w = 0; w < 16; w++) {
+    const weekDate = new Date(now.getTime() - w * weekDur);
+    const day = weekDate.getDay() || 7;
+    weekDate.setDate(weekDate.getDate() - day + 1);
+    weekDate.setHours(0, 0, 0, 0);
+
+    MOH_ZONES_DATA.forEach(d => {
+      d.zones.forEach(zoneName => {
+        const count = ['Colombo', 'Gampaha'].includes(d.district)
+          ? Math.floor(Math.random() * 15) + 5
+          : ['Kandy', 'Kalutara', 'Galle', 'Kurunegala', 'Ratnapura'].includes(d.district)
+          ? Math.floor(Math.random() * 6) + 2
+          : Math.floor(Math.random() * 3) + 1;
+
+        caseDocs.push({
+          district: d.district,
+          mohZone: zoneName,
+          date: new Date(weekDate),
+          caseCount: count,
+          source: 'epid_unit'
+        });
+      });
     });
   }
+
   await DengueCase.insertMany(caseDocs);
-  console.log(`✅ Inserted ${caseDocs.length} dengue case records`);
+  console.log(`✅ Inserted ${caseDocs.length} weekly dengue case records for all MOH zones`);
 
   // ── Seed RiskPrediction ─────────────────────────────────────────────────────
   await RiskPrediction.deleteMany({});
