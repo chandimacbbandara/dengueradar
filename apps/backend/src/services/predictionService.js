@@ -40,6 +40,10 @@ export async function runMLPredictionsAndAlerts() {
   try {
     console.log('[PredictionService] 🤖 Triggering ML predictions pipeline...');
 
+    const now = new Date();
+    // Clear any future predictions first to prevent duplicate accumulation
+    await RiskPrediction.deleteMany({ predictedFor: { $gt: now } });
+
     // 1. Fetch current weather from the database
     const currentLiveWeather = await LiveWeather.find({}).lean();
     const weatherMap = Object.fromEntries(
@@ -57,7 +61,6 @@ export async function runMLPredictionsAndAlerts() {
     }
 
     // Date calculations for lags
-    const now = new Date();
     const weekDur = 7 * 24 * 60 * 60 * 1000;
     
     // 3. Prepare histories for iterative prediction
@@ -90,9 +93,12 @@ export async function runMLPredictionsAndAlerts() {
       }
     }
 
-    // 4. Iteratively predict for 2 weeks
-    for (let weekOffset = 1; weekOffset <= 2; weekOffset++) {
+    // 4. Iteratively predict for 8 weeks
+    for (let weekOffset = 1; weekOffset <= 8; weekOffset++) {
       const targetPredictionDate = new Date(now.getTime() + weekOffset * weekDur);
+      // Normalize to Monday of that week
+      const day = targetPredictionDate.getDay() || 7;
+      targetPredictionDate.setDate(targetPredictionDate.getDate() - day + 1);
       targetPredictionDate.setHours(0, 0, 0, 0);
 
       const predictionPayloads = [];
