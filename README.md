@@ -1,4 +1,4 @@
-# 📡 DengueRadar — Live AI-Powered Dengue Risk & Early Warning System
+# DengueRadar — Live AI-Powered Dengue Risk & Early Warning System
 
 <div align="center">
   <img src="https://img.shields.io/badge/Status-Active-success?style=for-the-badge&logo=statuspage&logoColor=white" />
@@ -9,22 +9,22 @@
 
 ---
 
-## 🌟 Overview
+## Overview
 **DengueRadar** is a state-of-the-art early warning and monitoring platform designed to predict, track, and alert citizens and medical authorities of dengue outbreaks across Sri Lanka. By combining real-time meteorological forecasts, historical case records, and demographic dynamics, DengueRadar uses Machine Learning models (LSTM & XGBoost) to forecast risk levels up to 2 weeks in advance.
 
 ---
 
-## ✨ Features
+## Features
 
-- 🗺️ **Interactive Risk Map**: Fully responsive Leaflet-based GeoJSON map displaying district-by-district risk scores.
-- 🤖 **AI Predictions Engine**: Predicts upcoming case spikes and escalates risk levels ('Low', 'Moderate', 'High').
-- 🚨 **Anti-Spam Early Warnings**: Automatically dispatches email and web alerts to citizens in escalating risk zones with a strict 7-day cooldown to prevent notification fatigue.
-- 🏥 **MOH Officer Portal**: Dedicated officer dashboards featuring dynamic region filters, trend graphs, and instant CSV data export capabilities.
-- 🌦️ **Live Weather Integration**: Automatically fetches real-time humidity, temperature, and rainfall metrics for targeted areas to feed into the prediction models.
+-  **Interactive Risk Map**: Fully responsive Leaflet-based GeoJSON map displaying district-by-district risk scores.
+-  **AI Predictions Engine**: Predicts upcoming case spikes and escalates risk levels ('Low', 'Moderate', 'High').
+-  **Anti-Spam Early Warnings**: Automatically dispatches email and web alerts to citizens in escalating risk zones with a strict 7-day cooldown to prevent notification fatigue.
+-  **MOH Officer Portal**: Dedicated officer dashboards featuring dynamic region filters, trend graphs, and instant CSV data export capabilities.
+-  **Live Weather Integration**: Automatically fetches real-time humidity, temperature, and rainfall metrics for targeted areas to feed into the prediction models.
 
 ---
 
-## 🏗️ Architecture & Stack
+##  Architecture & Stack
 
 ```mermaid
 graph TD
@@ -42,7 +42,7 @@ graph TD
 
 ---
 
-## 🚀 Quick Start Guide
+##  Quick Start Guide
 
 This project utilizes **Git LFS (Large File Storage)** to handle model binaries (`*.keras`, `*.json`).
 
@@ -85,7 +85,7 @@ npm run dev
 
 ---
 
-## 📂 Project Repository Structure
+##  Project Repository Structure
 
 - `apps/frontend/`: React components, custom hooks, and pages (Home, MOH Dashboard).
 - `apps/backend/`: Authentication, weather fetching cron jobs, prediction database controllers.
