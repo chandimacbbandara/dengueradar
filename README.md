@@ -94,7 +94,3 @@ npm run dev
 - `SETUP_GUIDE.md`: Deep technical walkthrough on setup, environment variables, and local testing.
 
 ---
-
-<div align="center">
-  <sub>Developed for public health monitoring and early outbreak intervention in Sri Lanka 🇱🇰</sub>
-</div>
