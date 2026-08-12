@@ -7,12 +7,8 @@ import TrendChart from '../components/TrendChart.jsx';
 import LiveTicker from '../components/LiveTicker.jsx';
 import { publicAPI } from '../services/api.js';
 
-function TopRiskCards({ riskData }) {
-  if (!riskData || riskData.length === 0) return null;
-  // Get top 3 highest risk scores
-  const top3 = [...riskData]
-    .sort((a, b) => b.riskScore - a.riskScore)
-    .slice(0, 3);
+function TopRiskCards({ topZones }) {
+  if (!topZones || topZones.length === 0) return null;
 
   return (
     <section className="section" style={{ paddingTop: '20px', paddingBottom: '40px' }}>
@@ -21,7 +17,7 @@ function TopRiskCards({ riskData }) {
           🚨 Top High-Risk Zones Right Now
         </h3>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px' }}>
-          {top3.map((zone, idx) => (
+          {topZones.map((zone, idx) => (
             <div key={idx} className="radar-glass-card" style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span style={{ fontSize: '18px', fontWeight: 700, color: '#fff' }}>{zone.mohZone}</span>
@@ -52,8 +48,13 @@ function TopRiskCards({ riskData }) {
 export default function Home() {
   const [riskData, setRiskData] = useState([]);
   const [trendData, setTrendData] = useState(null);
+  const [topZones, setTopZones] = useState([]);
 
   useEffect(() => {
+    publicAPI.getTopZones()
+      .then(res => setTopZones(res.data.data || []))
+      .catch(console.error);
+
     publicAPI.getNationalRisk()
       .then(res => setRiskData(res.data.data || []))
       .catch(console.error);
@@ -98,8 +99,8 @@ export default function Home() {
       {/* Stats Strip */}
       <LiveStatsStrip />
 
-      {/* Top 3 Live Risk Cards */}
-      <TopRiskCards riskData={riskData} />
+      {/* Dynamic Top High-Risk Zones */}
+      <TopRiskCards topZones={topZones} />
 
       {/* Map Section */}
       <section id="map" className="map-section section">
