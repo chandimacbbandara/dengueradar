@@ -14,7 +14,7 @@ function TopRiskCards({ topZones }) {
     <section className="section" style={{ paddingTop: '20px', paddingBottom: '40px' }}>
       <div className="container">
         <h3 style={{ color: '#fff', fontSize: '20px', fontWeight: 600, marginBottom: '24px' }}>
-          🚨 Top High-Risk Zones Right Now
+          Top High-Risk Zones Right Now
         </h3>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px' }}>
           {topZones.map((zone, idx) => (
@@ -33,8 +33,8 @@ function TopRiskCards({ topZones }) {
                   <div style={{ fontSize: '24px', fontWeight: 700, color: '#F8FAFC' }}>{Math.round(zone.riskScore)}<span style={{fontSize:'14px', color:'#64748B'}}>/100</span></div>
                 </div>
                 <div>
-                  <div style={{ fontSize: '11px', color: '#64748B', textTransform: 'uppercase', letterSpacing: '1px' }}>Forecast</div>
-                  <div style={{ fontSize: '14px', fontWeight: 600, color: '#0EA5A5' }}>Escalating 📈</div>
+                  <div style={{ fontSize: '11px', color: '#CBD5E1', textTransform: 'uppercase', letterSpacing: '1px' }}>Forecast</div>
+                  <div style={{ fontSize: '14px', fontWeight: 600, color: '#0EA5A5' }}>Escalating</div>
                 </div>
               </div>
             </div>
@@ -144,27 +144,27 @@ export default function Home() {
           <div className="steps-grid">
             <div className="step-card">
               <div className="step-number">1</div>
-              <div className="step-icon">📡</div>
-              <h4 className="step-title">Data Collected</h4>
-              <p className="step-desc">Epidemiology unit reports and live weather data are fed into our system continuously.</p>
+              <div className="step-icon">1</div>
+              <h4 className="step-title">Data Ingestion</h4>
+              <p className="step-desc" style={{color: '#94A3B8'}}>We pull real-time weather and clinical data for all 25 districts.</p>
             </div>
             <div className="step-card">
               <div className="step-number">2</div>
-              <div className="step-icon">🤖</div>
-              <h4 className="step-title">AI Predicts Risk</h4>
-              <p className="step-desc">Advanced ML models analyze the data to forecast high-risk areas before outbreaks happen.</p>
+              <div className="step-icon">2</div>
+              <h4 className="step-title">AI Analysis</h4>
+              <p className="step-desc" style={{color: '#94A3B8'}}>Our XGBoost models process the data to detect hidden risk patterns.</p>
             </div>
             <div className="step-card">
               <div className="step-number">3</div>
-              <div className="step-icon">🔔</div>
-              <h4 className="step-title">Alerts Sent</h4>
-              <p className="step-desc">Registered users receive instant WhatsApp and web alerts when their area risk level changes.</p>
+              <div className="step-icon">3</div>
+              <h4 className="step-title">Early Warning</h4>
+              <p className="step-desc" style={{color: '#94A3B8'}}>If risk escalates, instant push alerts are triggered for MOH officers.</p>
             </div>
             <div className="step-card">
               <div className="step-number">4</div>
-              <div className="step-icon">🛡️</div>
-              <h4 className="step-title">Community Acts</h4>
-              <p className="step-desc">The public takes precautions and MOH officers deploy targeted prevention strategies.</p>
+              <div className="step-icon">4</div>
+              <h4 className="step-title">Prevention</h4>
+              <p className="step-desc" style={{color: '#94A3B8'}}>Communities mobilize to destroy breeding sites before cases spike.</p>
             </div>
           </div>
         </div>
@@ -175,15 +175,15 @@ export default function Home() {
         <div className="container">
           <div className="who-cards">
             <div className="who-card who-card-public card">
-              <div className="who-card-icon">👨‍👩‍👧‍👦</div>
-              <h3>For the General Public</h3>
-              <p>Protect your family. Get real-time alerts when dengue risk increases in your area and learn how to eliminate breeding sites.</p>
+              <div className="who-card-icon">CITIZENS</div>
+              <h3>For Citizens</h3>
+              <p style={{color: '#94A3B8'}}>Check your local risk daily and eliminate mosquito breeding sites if your zone enters the Watch or Alert phases.</p>
               <Link to="/signup/general" className="btn">Sign Up Free</Link>
             </div>
             <div className="who-card who-card-moh card">
-              <div className="who-card-icon">🩺</div>
-              <h3>For MOH Officers</h3>
-              <p>Access advanced predictive analytics, manage your zone's risk profile, and export detailed reports to coordinate field responses.</p>
+              <div className="who-card-icon">OFFICERS</div>
+              <h3>For Health Officers</h3>
+              <p style={{color: '#94A3B8'}}>Deploy limited resources with surgical precision. Let the AI tell you exactly which wards need fogging next week.</p>
               <Link to="/signup/moh-officer" className="btn">Register as Officer</Link>
             </div>
           </div>
@@ -195,8 +195,11 @@ export default function Home() {
         <div className="footer-inner">
           <div className="footer-top">
             <div>
-              <div className="footer-logo">🦟 Dengue<span>Radar</span></div>
-              <p className="footer-tagline">Advanced AI-powered dengue risk monitoring and early warning system for Sri Lanka.</p>
+              <div className="footer-logo" style={{ display: 'flex', alignItems: 'center' }}>
+                <img src="/logo.png" alt="Logo" style={{ height: '32px', marginRight: '8px' }} />
+                Dengue<span>Radar</span>
+              </div>
+              <p className="footer-tagline" style={{color: '#94A3B8'}}>Empowering Sri Lanka to stay one step ahead of Dengue through AI and real-time monitoring.</p>
             </div>
             <div className="footer-col">
               <h4>Platform</h4>

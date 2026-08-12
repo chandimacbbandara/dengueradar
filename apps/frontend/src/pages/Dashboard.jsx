@@ -16,7 +16,7 @@ export default function Dashboard() {
         <div className="container flex justify-between items-center">
           <div>
             <h1 className="text-2xl font-bold">Welcome back, {user?.firstName}!</h1>
-            <p className="text-muted mt-1">📍 {user?.mohZone}, {user?.district} District</p>
+            <p className="text-muted mt-1"> {user?.mohZone}, {user?.district} District</p>
           </div>
           <Link to="/profile" className="btn btn-outline btn-sm">Edit Profile</Link>
         </div>

@@ -33,9 +33,18 @@ export default function Navbar() {
   return (
     <nav className={`navbar ${scrolled ? 'scrolled' : ''}`}>
       <div className="navbar-inner">
-        <Link to="/" className="nav-logo">
-          🦟 Dengue<span>Radar</span>
+        <Link to="/" className="nav-logo" style={{ display: 'flex', alignItems: 'center' }}>
+          <img src="/logo.png" alt="Logo" style={{ height: '32px', marginRight: '8px' }} />
+          Dengue<span>Radar</span>
         </Link>
+
+        <button className="mobile-toggle" onClick={() => setMobileOpen(!mobileOpen)} aria-label="Toggle menu">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
 
         <ul className={`nav-links ${mobileOpen ? 'open' : ''}`}>
           <li><a href="/#home">Home</a></li>

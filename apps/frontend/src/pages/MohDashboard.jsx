@@ -122,7 +122,7 @@ export default function MohDashboard() {
           <div className="card p-6" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
               <div>
-                <h3 className="font-bold text-lg mb-2">🎯 Region & MOH Area Filter</h3>
+                <h3 className="font-bold text-lg mb-2"> Region & MOH Area Filter</h3>
                 <p className="text-sm text-muted">Select a district and MOH area to load predictions.</p>
               </div>
               <button 
@@ -130,7 +130,7 @@ export default function MohDashboard() {
                 className="btn btn-outline btn-sm"
                 style={{ fontSize: '11px', padding: '6px 12px' }}
               >
-                🔄 My Area
+                 My Area
               </button>
             </div>
             
@@ -184,7 +184,7 @@ export default function MohDashboard() {
                     textTransform: 'uppercase'
                   }}
                 >
-                  📥 Download {selectedZone} Report
+                   Download {selectedZone} Report
                 </button>
               </div>
             )}
@@ -221,7 +221,7 @@ export default function MohDashboard() {
                     <td>{zone.users || 0}</td>
                     <td>
                       <button onClick={() => handleExport(zone.name)} className="btn btn-sm btn-ghost" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                        📥 Download Report
+                         Download Report
                       </button>
                     </td>
                   </tr>
