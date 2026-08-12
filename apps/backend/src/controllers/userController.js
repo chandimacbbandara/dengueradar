@@ -7,10 +7,11 @@ export const getDashboard = async (req, res) => {
   try {
     const { district, mohZone, _id } = req.user;
     
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    sevenDaysAgo.setHours(0, 0, 0, 0);
 
-    const riskInfo = await RiskPrediction.findOne({ district, mohZone, predictedFor: { $gte: today } })
+    const riskInfo = await RiskPrediction.findOne({ district, mohZone, predictedFor: { $gte: sevenDaysAgo } })
       .sort({ predictedFor: 1 })
       .select('district mohZone riskScore riskLevel predictedFor -_id');
 
@@ -197,10 +198,11 @@ export const getZoneTrend = async (req, res) => {
     }
 
     /* ── Current risk snapshot ── */
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    sevenDaysAgo.setHours(0, 0, 0, 0);
 
-    const riskInfo = await RiskPrediction.findOne({ district, mohZone, predictedFor: { $gte: today } })
+    const riskInfo = await RiskPrediction.findOne({ district, mohZone, predictedFor: { $gte: sevenDaysAgo } })
       .sort({ predictedFor: 1 })
       .select('riskScore riskLevel predictedFor -_id')
       .lean();

@@ -18,12 +18,13 @@ export const getMohDashboard = async (req, res) => {
     const registeredCitizens = await User.countDocuments({ district, role: 'general' });
 
     // Find the current risk predictions (week 1) for all zones in this district
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    sevenDaysAgo.setHours(0, 0, 0, 0);
 
     const riskPredictions = await RiskPrediction.aggregate([
-      { $match: { district, predictedFor: { $gte: today } } },
-      { $sort: { predictedFor: 1 } },
+      { $match: { district, predictedFor: { $gte: sevenDaysAgo } } },
+      { $sort: { predictedFor: 1, riskScore: -1 } },
       { $group: {
           _id: '$mohZone',
           riskScore: { $first: '$riskScore' },
