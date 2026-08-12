@@ -116,26 +116,19 @@ def predict(payload: PredictRequest):
             # 6. Predict Classifier (Risk Tier)
             # objective: multi:softprob -> outputs probability array
             probs = xgb_clf.predict_proba(x)[0]
-            
-            # Risk score calculation matching 0-100 range scale based on probability weight
-            # low:0, watch:1, warning:2, alert:3
-            risk_score = float(np.sum(probs * np.array([10.0, 40.0, 75.0, 100.0])))
-            
-            # Force consistency between predicted cases, risk score, and risk level
+            # Force 100% logical consistency: risk score and level are strictly tied to predicted cases.
             if pred_cases < 5:
                 risk_level = "Low"
-                risk_score = min(risk_score, 30.0)
-            elif pred_cases < 20:
+                # 0-4 cases maps linearly to a score between 10 and 33
+                risk_score = 10.0 + (pred_cases / 4.0) * 23.0
+            elif pred_cases < 10:
                 risk_level = "Watch"
-                risk_score = max(34.0, min(risk_score, 65.0))
+                # 5-9 cases maps linearly to a score between 34 and 66
+                risk_score = 34.0 + ((pred_cases - 5) / 4.0) * 32.0
             else:
-                if risk_score >= 67:
-                    risk_level = "Alert"
-                elif risk_score >= 34:
-                    risk_level = "Watch"
-                else:
-                    risk_level = "Low"
-                    risk_score = max(67.0, risk_score) if pred_cases >= 50 else risk_score
+                risk_level = "Alert"
+                # 10+ cases maps linearly to a score between 67 and 100
+                risk_score = min(100.0, 67.0 + ((pred_cases - 10) / 20.0) * 33.0)
 
             results.append(DistrictPrediction(
                 district=dist_data.district,
