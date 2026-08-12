@@ -4,13 +4,14 @@ import DengueCase from '../models/DengueCase.js';
 
 export const getLiveStats = async (req, res) => {
   try {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    sevenDaysAgo.setHours(0, 0, 0, 0);
 
     const [totalUsersReal, distinctDistricts, activeHighRiskZones, latestPrediction] = await Promise.all([
       User.countDocuments(),
       RiskPrediction.distinct('district'),
-      RiskPrediction.countDocuments({ riskLevel: 'high', predictedFor: { $gte: today } }),
+      RiskPrediction.countDocuments({ riskLevel: 'high', predictedFor: { $gte: sevenDaysAgo } }),
       RiskPrediction.findOne().sort({ generatedAt: -1 }).select('generatedAt')
     ]);
 
@@ -32,11 +33,12 @@ export const getLiveStats = async (req, res) => {
 
 export const getNationalRisk = async (req, res) => {
   try {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    sevenDaysAgo.setHours(0, 0, 0, 0);
 
     const nationalRisk = await RiskPrediction.aggregate([
-      { $match: { predictedFor: { $gte: today } } },
+      { $match: { predictedFor: { $gte: sevenDaysAgo } } },
       { $sort: { predictedFor: 1, riskScore: -1 } },
       { $group: {
           _id: '$district',
@@ -93,10 +95,11 @@ export const getNationalTrends = async (req, res) => {
 
 export const getTopZones = async (req, res) => {
   try {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    sevenDaysAgo.setHours(0, 0, 0, 0);
 
-    const topZones = await RiskPrediction.find({ predictedFor: { $gte: today } })
+    const topZones = await RiskPrediction.find({ predictedFor: { $gte: sevenDaysAgo } })
       .sort({ riskScore: -1 })
       .limit(3)
       .select('mohZone district riskScore riskLevel predictedFor -_id')
