@@ -37,7 +37,7 @@ export const getNationalRisk = async (req, res) => {
 
     const nationalRisk = await RiskPrediction.aggregate([
       { $match: { predictedFor: { $gte: today } } },
-      { $sort: { predictedFor: 1 } },
+      { $sort: { predictedFor: 1, riskScore: -1 } },
       { $group: {
           _id: '$district',
           riskScore: { $first: '$riskScore' },
