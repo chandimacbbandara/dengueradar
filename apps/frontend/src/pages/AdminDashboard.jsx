@@ -75,7 +75,7 @@ function OfficerRow({ officer, onApprove, onReject, onDelete, actionLoading }) {
                   fontWeight: 700, cursor: 'pointer', opacity: busy ? 0.6 : 1,
                 }}
               >
-                {busy ? '…' : '✅ Approve'}
+                {busy ? '…' : ' Approve'}
               </button>
             )}
             {officer.isApproved && (
@@ -234,7 +234,7 @@ export default function AdminDashboard() {
         boxShadow: '0 2px 16px rgba(0,0,0,0.2)',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <span style={{ fontSize: '22px' }}>🦟</span>
+          <span style={{ fontSize: '22px' }}></span>
           <span style={{ color: '#fff', fontWeight: 800, fontSize: '18px' }}>
             Dengue<span style={{ color: '#0EA5A5' }}>Radar</span>
           </span>
@@ -272,10 +272,10 @@ export default function AdminDashboard() {
 
         {/* ── Stats row ── */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '32px' }}>
-          <StatCard icon="⏳" label="Pending Approvals" value={stats?.pendingOfficers}  color="#F59E0B" loading={loading} />
-          <StatCard icon="✅" label="Approved Officers" value={stats?.approvedOfficers} color="#10B981" loading={loading} />
-          <StatCard icon="👥" label="Registered Citizens" value={stats?.totalUsers}    color="#0EA5A5" loading={loading} />
-          <StatCard icon="📊" label="Total Cases (DB)"  value={stats?.totalCases}      color="#6366F1" loading={loading} />
+          <StatCard icon="" label="Pending Approvals" value={stats?.pendingOfficers}  color="#F59E0B" loading={loading} />
+          <StatCard icon="" label="Approved Officers" value={stats?.approvedOfficers} color="#10B981" loading={loading} />
+          <StatCard icon="" label="Registered Citizens" value={stats?.totalUsers}    color="#0EA5A5" loading={loading} />
+          <StatCard icon="" label="Total Cases (DB)"  value={stats?.totalCases}      color="#6366F1" loading={loading} />
         </div>
 
         {/* ── Tab bar ── */}
@@ -284,9 +284,9 @@ export default function AdminDashboard() {
           background: '#f1f5f9', borderRadius: '12px', padding: '4px', width: 'fit-content',
         }}>
           {[
-            { key: 'pending',  label: `⏳ Pending${stats?.pendingOfficers > 0 ? ` (${stats.pendingOfficers})` : ''}` },
-            { key: 'approved', label: '✅ Approved Officers' },
-            { key: 'citizens', label: '👥 Citizens' },
+            { key: 'pending',  label: ` Pending${stats?.pendingOfficers > 0 ? ` (${stats.pendingOfficers})` : ''}` },
+            { key: 'approved', label: ' Approved Officers' },
+            { key: 'citizens', label: ' Citizens' },
           ].map(t => (
             <button
               key={t.key}
@@ -319,7 +319,7 @@ export default function AdminDashboard() {
             ) : officers.length === 0 ? (
               <div style={{ padding: '48px', textAlign: 'center' }}>
                 <div style={{ fontSize: '40px', marginBottom: '12px' }}>
-                  {tab === 'pending' ? '🎉' : '📋'}
+                  {tab === 'pending' ? '' : ''}
                 </div>
                 <p style={{ color: '#64748B', fontWeight: 600 }}>
                   {tab === 'pending' ? 'No pending applications right now.' : 'No approved officers yet.'}

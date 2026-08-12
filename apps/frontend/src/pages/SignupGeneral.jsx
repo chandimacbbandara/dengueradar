@@ -153,7 +153,7 @@ export default function SignupGeneral() {
         mohZone,
       });
 
-      toast.success('🎉 Account created! You can now log in.', { duration: 5000 });
+      toast.success(' Account created! You can now log in.', { duration: 5000 });
       navigate('/login');
     } catch (err) {
       toast.error(err.response?.data?.message || 'Verification failed');
@@ -168,7 +168,7 @@ export default function SignupGeneral() {
       <div className="auth-layout">
         <div className="auth-panel-left">
           <Link to="/" className="text-2xl font-extrabold text-white mb-12 flex items-center gap-2">
-            🦟 Dengue<span style={{color:'#e0f7f7'}}>Radar</span>
+             Dengue<span style={{color:'#e0f7f7'}}>Radar</span>
           </Link>
           <h1 className="text-4xl font-extrabold mb-4">Check your inbox</h1>
           <p className="text-lg opacity-90 mb-8 max-w-md">
@@ -176,9 +176,9 @@ export default function SignupGeneral() {
             It expires in 10 minutes.
           </p>
           <ul className="flex flex-col gap-4">
-            <li className="flex items-center gap-3"><span className="text-xl">📧</span> Check spam/junk if you don't see it</li>
-            <li className="flex items-center gap-3"><span className="text-xl">⏰</span> Code is valid for 10 minutes</li>
-            <li className="flex items-center gap-3"><span className="text-xl">🔒</span> Never share your code with anyone</li>
+            <li className="flex items-center gap-3"><span className="text-xl"></span> Check spam/junk if you don't see it</li>
+            <li className="flex items-center gap-3"><span className="text-xl"></span> Code is valid for 10 minutes</li>
+            <li className="flex items-center gap-3"><span className="text-xl"></span> Never share your code with anyone</li>
           </ul>
         </div>
 
@@ -193,7 +193,7 @@ export default function SignupGeneral() {
                 display:'flex', alignItems:'center', justifyContent:'center',
                 margin:'0 auto 16px', fontSize:'36px',
                 boxShadow:'0 8px 24px rgba(14,165,165,0.3)',
-              }}>📧</div>
+              }}></div>
               <h2 className="auth-form-title" style={{marginBottom:'4px'}}>Enter your code</h2>
               <p className="auth-form-subtitle" style={{marginBottom:0}}>
                 Sent to <strong>{formData.email}</strong>
@@ -249,14 +249,14 @@ export default function SignupGeneral() {
     <div className="auth-layout">
       <div className="auth-panel-left">
         <Link to="/" className="text-2xl font-extrabold text-white mb-12 flex items-center gap-2">
-          🦟 Dengue<span style={{color:'#e0f7f7'}}>Radar</span>
+           Dengue<span style={{color:'#e0f7f7'}}>Radar</span>
         </Link>
         <h1 className="text-4xl font-extrabold mb-4">Join DengueRadar</h1>
         <p className="text-lg opacity-90 mb-8 max-w-md">Stay ahead of dengue outbreaks and protect your family with real-time risk alerts.</p>
         <ul className="flex flex-col gap-4">
-          <li className="flex items-center gap-3"><span className="text-xl">📍</span> Localized risk updates</li>
-          <li className="flex items-center gap-3"><span className="text-xl">📱</span> WhatsApp push alerts</li>
-          <li className="flex items-center gap-3"><span className="text-xl">🛡️</span> Community protection tools</li>
+          <li className="flex items-center gap-3"><span className="text-xl"></span> Localized risk updates</li>
+          <li className="flex items-center gap-3"><span className="text-xl"></span> WhatsApp push alerts</li>
+          <li className="flex items-center gap-3"><span className="text-xl"></span> Community protection tools</li>
         </ul>
       </div>
 

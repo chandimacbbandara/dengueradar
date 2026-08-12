@@ -155,16 +155,16 @@ export default function SignupMohOfficer() {
       <div className="auth-layout">
         <div className="auth-panel-left" style={{background:'linear-gradient(135deg,#1e3a5f 0%,#2F80ED 100%)'}}>
           <Link to="/" className="text-2xl font-extrabold text-white mb-12 flex items-center gap-2">
-            🦟 Dengue<span style={{color:'#e0f7f7'}}>Radar</span>
+             Dengue<span style={{color:'#e0f7f7'}}>Radar</span>
           </Link>
           <h1 className="text-4xl font-extrabold mb-4">Check your inbox</h1>
           <p className="text-lg opacity-90 mb-8 max-w-md">
             Your official email must be verified before your MOH officer application is submitted.
           </p>
           <ul className="flex flex-col gap-4">
-            <li className="flex items-center gap-3"><span className="text-xl">📧</span> Check spam/junk if you don't see it</li>
-            <li className="flex items-center gap-3"><span className="text-xl">⏰</span> Code valid for 10 minutes</li>
-            <li className="flex items-center gap-3"><span className="text-xl">🔒</span> Never share your code with anyone</li>
+            <li className="flex items-center gap-3"><span className="text-xl"></span> Check spam/junk if you don't see it</li>
+            <li className="flex items-center gap-3"><span className="text-xl"></span> Code valid for 10 minutes</li>
+            <li className="flex items-center gap-3"><span className="text-xl"></span> Never share your code with anyone</li>
           </ul>
         </div>
 
@@ -178,7 +178,7 @@ export default function SignupMohOfficer() {
                 display:'flex', alignItems:'center', justifyContent:'center',
                 margin:'0 auto 16px', fontSize:'36px',
                 boxShadow:'0 8px 24px rgba(47,128,237,0.3)',
-              }}>📧</div>
+              }}></div>
               <h2 className="auth-form-title" style={{marginBottom:'4px'}}>Enter your code</h2>
               <p className="auth-form-subtitle" style={{marginBottom:0}}>
                 Sent to <strong>{formData.email}</strong>
@@ -235,14 +235,14 @@ export default function SignupMohOfficer() {
     <div className="auth-layout">
       <div className="auth-panel-left" style={{background:'linear-gradient(135deg,#1e3a5f 0%,#2F80ED 100%)'}}>
         <Link to="/" className="text-2xl font-extrabold text-white mb-12 flex items-center gap-2">
-          🦟 Dengue<span style={{color:'#e0f7f7'}}>Radar</span>
+           Dengue<span style={{color:'#e0f7f7'}}>Radar</span>
         </Link>
         <h1 className="text-4xl font-extrabold mb-4">For MOH Officers</h1>
         <p className="text-lg opacity-90 mb-8 max-w-md">Access specialized tools to monitor risks, manage resources, and coordinate public health responses.</p>
         <ul className="flex flex-col gap-4">
-          <li className="flex items-center gap-3"><span className="text-xl">📊</span> Detailed risk reports</li>
-          <li className="flex items-center gap-3"><span className="text-xl">📈</span> Zone-level trend analysis</li>
-          <li className="flex items-center gap-3"><span className="text-xl">👥</span> Community outreach tools</li>
+          <li className="flex items-center gap-3"><span className="text-xl"></span> Detailed risk reports</li>
+          <li className="flex items-center gap-3"><span className="text-xl"></span> Zone-level trend analysis</li>
+          <li className="flex items-center gap-3"><span className="text-xl"></span> Community outreach tools</li>
         </ul>
       </div>
 

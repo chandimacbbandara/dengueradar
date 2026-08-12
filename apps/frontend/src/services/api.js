@@ -48,6 +48,7 @@ export const referenceAPI = {
 export const publicAPI = {
   getLiveStats: () => api.get('/stats/live'),
   getNationalRisk: () => api.get('/risk/national'),
+  getTopZones: () => api.get('/risk/top-zones'),
   getNationalTrends: () => api.get('/trends/national'),
 };
 

@@ -11,7 +11,7 @@ export default function LiveTicker({ riskData }) {
   const tickerItems = [...alerts, ...alerts, ...alerts].map((alert, idx) => {
     const isHigh = alert.riskLevel === 'high';
     const color = isHigh ? '#EF4444' : '#F59E0B';
-    const icon = isHigh ? '🚨' : '⚠️';
+    const icon = isHigh ? '' : '';
     
     return (
       <div key={`${alert.district}-${alert.mohZone}-${idx}`} className="live-ticker-item">
