@@ -1,7 +1,12 @@
 import axios from 'axios';
 
+// Determine base URL depending on environment
+const API_URL = import.meta.env.PROD 
+  ? 'http://145.223.22.182:5000/api'
+  : '/api';
+
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: API_URL,
   withCredentials: true,
   headers: { 'Content-Type': 'application/json' },
 });
