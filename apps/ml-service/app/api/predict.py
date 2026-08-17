@@ -294,7 +294,7 @@ def _build_feature_row(moh: MohInput) -> dict:
         "log_pop":                  log_pop,
         "log_density":              log_density,
         "weeks_since_outbreak_lag1": moh.weeks_since_outbreak,
-        "district_cat":             float(district_cat),
+        "district_cat":             int(district_cat),   # CatBoost requires int/str, not float
     }
     return row
 
@@ -307,10 +307,17 @@ def _predict_batch(mohs: list) -> list:
     rows = [_build_feature_row(m) for m in mohs]
     df   = pd.DataFrame(rows, columns=FEATURE_COLS).fillna(0)
 
+    # CatBoost requires categorical features as integer (not float)
+    # district_cat is the only categorical column (last feature, index 62)
+    df["district_cat"] = df["district_cat"].astype(int)
+
+    # Categorical feature column indices for CatBoost
+    cat_feature_indices = [FEATURE_COLS.index(c) for c in PIPELINE_META.get("categorical_cols", ["district_cat"])]
+
     # Base model probabilities
-    lgb_probs = lgb_model.predict(df)                    # shape (N, 4)
-    xgb_probs = xgb_clf.predict_proba(df)               # shape (N, 4)
-    cat_probs = cat_clf.predict_proba(df)                # shape (N, 4)
+    lgb_probs = lgb_model.predict(df)                                           # shape (N, 4)
+    xgb_probs = xgb_clf.predict_proba(df)                                       # shape (N, 4)
+    cat_probs = cat_clf.predict_proba(df, thread_count=-1)                      # shape (N, 4)
 
     # Stack → meta learner
     stacked   = np.hstack([lgb_probs, xgb_probs, cat_probs])  # (N, 12)
