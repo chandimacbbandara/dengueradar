@@ -275,8 +275,8 @@ export default function ZoneTrendChart({ district, mohZone }) {
                 <stop offset="100%" stopColor="#0EA5A5" stopOpacity={0.02} />
               </linearGradient>
               <linearGradient id={`${gradId}-pred`} x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%"   stopColor="#F59E0B" stopOpacity={0.55} />
-                <stop offset="100%" stopColor="#F59E0B" stopOpacity={0.02} />
+                <stop offset="0%"   stopColor={riskColor} stopOpacity={0.55} />
+                <stop offset="100%" stopColor={riskColor} stopOpacity={0.02} />
               </linearGradient>
             </defs>
 
@@ -321,14 +321,14 @@ export default function ZoneTrendChart({ district, mohZone }) {
               type="monotoneX"
               dataKey="predictedCases"
               name="AI Prediction"
-              stroke="#F59E0B"
+              stroke={riskColor}
               strokeWidth={2.5}
               strokeDasharray="5 5"
               fill={`url(#${gradId}-pred)`}
               dot={false}
               activeDot={{
-                r: 5, fill: '#F59E0B', stroke: '#0d1f3c', strokeWidth: 2,
-                filter: 'drop-shadow(0 0 6px #F59E0B)',
+                r: 5, fill: riskColor, stroke: '#0d1f3c', strokeWidth: 2,
+                filter: `drop-shadow(0 0 6px ${riskColor})`,
               }}
               isAnimationActive={!loading}
             />
