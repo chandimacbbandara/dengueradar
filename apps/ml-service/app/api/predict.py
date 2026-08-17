@@ -33,6 +33,10 @@ META_3_PKL_PATH = os.path.join(MODEL_DIR, "meta_3model.pkl")
 LGB_PATH        = os.path.join(MODEL_DIR, "lgb_classifier.txt")
 XGB_PATH        = os.path.join(MODEL_DIR, "xgb_classifier.json")
 CAT_PATH        = os.path.join(MODEL_DIR, "cat_classifier.cbm")
+LGB_REG_PATH    = os.path.join(MODEL_DIR, "lgb_regressor.txt")
+XGB_REG_PATH    = os.path.join(MODEL_DIR, "xgb_regressor.json")
+CAT_REG_PATH    = os.path.join(MODEL_DIR, "cat_regressor.cbm")
+META_REG_PATH   = os.path.join(MODEL_DIR, "meta_reg.pkl")
 
 # ── Load pipeline metadata ───────────────────────────────────────────────────
 try:
@@ -85,11 +89,45 @@ try:
 except Exception as e:
     print(f"❌ Meta learner load error: {e}")
 
+# ── Load regressor models ────────────────────────────────────────────────────
+lgb_reg = None
+xgb_reg = None
+cat_reg = None
+meta_reg = None
+
+try:
+    lgb_reg = lgb.Booster(model_file=LGB_REG_PATH)
+    print("✅ LightGBM regressor loaded")
+except Exception as e:
+    print(f"❌ LightGBM regressor load error: {e}")
+
+try:
+    xgb_reg = xgb.XGBRegressor()
+    xgb_reg.load_model(XGB_REG_PATH)
+    print("✅ XGBoost regressor loaded")
+except Exception as e:
+    print(f"❌ XGBoost regressor load error: {e}")
+
+try:
+    from catboost import CatBoostRegressor
+    cat_reg = CatBoostRegressor()
+    cat_reg.load_model(CAT_REG_PATH)
+    print("✅ CatBoost regressor loaded")
+except Exception as e:
+    print(f"❌ CatBoost regressor load error: {e}")
+
+try:
+    with open(META_REG_PATH, "rb") as f:
+        meta_reg = pickle.load(f)
+    print("✅ Meta regressor loaded")
+except Exception as e:
+    print(f"❌ Meta regressor load error: {e}")
+
 
 # ── Helpers ──────────────────────────────────────────────────────────────────
 
 def _models_ready() -> bool:
-    return all(m is not None for m in [lgb_model, xgb_clf, cat_clf, meta_clf, PIPELINE_META])
+    return all(m is not None for m in [lgb_model, xgb_clf, cat_clf, meta_clf, lgb_reg, xgb_reg, cat_reg, meta_reg, PIPELINE_META])
 
 
 def _tier_to_risk_level(tier: str) -> str:
@@ -110,38 +148,6 @@ def _risk_score_from_probs(probs: np.ndarray) -> float:
     """
     weights = np.array([0.0, 33.0, 66.0, 100.0])
     return float(np.dot(probs, weights))
-
-
-def _predicted_cases_from_tier(tier: str, population: float = 100_000) -> int:
-    """
-    Return a realistic case estimate for the predicted tier.
-    Uses tier midpoints (incidence per 100k) scaled to the actual MOH zone population.
-
-    Tier boundaries from pipeline_meta.json:
-       T1 = ~2.75  (Low/Watch boundary)
-       T2 = ~7.94  (Watch/Warning boundary)
-       T3 = ~23.03 (Warning/Alert boundary)
-    """
-    # Incidence midpoints per band (cases per 100k people)
-    mids = {
-        "Low":     TIER_THRESHOLDS[0] / 2,                              # ~1.4
-        "Watch":   (TIER_THRESHOLDS[0] + TIER_THRESHOLDS[1]) / 2,      # ~5.3
-        "Warning": (TIER_THRESHOLDS[1] + TIER_THRESHOLDS[2]) / 2,      # ~15.5
-        "Alert":   TIER_THRESHOLDS[2] * 2,                              # ~46.0
-    }
-    mid_inc = mids.get(tier, 0.0)  # incidence per 100k
-    pop = max(population, 1_000)   # safety floor
-    approx_cases = int(round(mid_inc / 100_000 * pop))
-    
-    # Enforce strict user-defined boundaries based on the ML Model's predicted Status
-    risk_level = _tier_to_risk_level(tier)
-    if risk_level == "low":
-        return max(1, min(4, approx_cases))
-    elif risk_level == "moderate":
-        return max(5, min(8, approx_cases))
-    else: # high
-        return max(9, approx_cases)
-
 
 def _build_feature_row(moh: MohInput) -> dict:
     """
@@ -322,26 +328,38 @@ def _predict_batch(mohs: list) -> list:
     # Categorical feature column indices for CatBoost
     cat_feature_indices = [FEATURE_COLS.index(c) for c in PIPELINE_META.get("categorical_cols", ["district_cat"])]
 
-    # Base model probabilities
-    lgb_probs = lgb_model.predict(df)                                           # shape (N, 4)
-    xgb_probs = xgb_clf.predict_proba(df)                                       # shape (N, 4)
-    cat_probs = cat_clf.predict_proba(df, thread_count=-1)                      # shape (N, 4)
+    # Classifier inference
+    lgb_probs = lgb_model.predict(df)
+    xgb_probs = xgb_clf.predict_proba(df)
+    cat_probs = cat_clf.predict_proba(df, thread_count=-1)
+    
+    stacked_clf = np.hstack([lgb_probs, xgb_probs, cat_probs])
+    meta_probs  = meta_clf.predict_proba(stacked_clf)
 
-    # Stack → meta learner
-    stacked   = np.hstack([lgb_probs, xgb_probs, cat_probs])  # (N, 12)
-    meta_probs = meta_clf.predict_proba(stacked)               # (N, 4)
+    # Regressor inference
+    lgb_preds = lgb_reg.predict(df)
+    xgb_preds = xgb_reg.predict(df)
+    cat_preds = cat_reg.predict(df, thread_count=-1)
+    
+    stacked_reg = np.column_stack([lgb_preds, xgb_preds, cat_preds])
+    meta_preds  = meta_reg.predict(stacked_reg)
+    
+    # Check if cases need to be exponentiated
+    if PIPELINE_META.get("case_count_log_transform", False):
+        cases_final = np.clip(np.expm1(meta_preds), 0, None)
+    else:
+        cases_final = np.clip(meta_preds, 0, None)
 
     results = []
     for i, moh in enumerate(mohs):
-        probs = meta_probs[i]   # [p_Low, p_Watch, p_Warning, p_Alert]
+        probs = meta_probs[i]
         tier_idx = int(np.argmax(probs))
 
-        # Apply alert threshold: demote Alert → Warning if p_alert < threshold
         if tier_idx == 3 and probs[3] < ALERT_THRESHOLD:
             tier_idx = 2
 
         tier = INT_TO_TIER[tier_idx]
-        predicted_cases = _predicted_cases_from_tier(tier, moh.population)
+        predicted_cases = int(round(cases_final[i]))
 
         results.append(MohPrediction(
             moh_name=moh.moh_name,
