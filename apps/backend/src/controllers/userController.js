@@ -7,11 +7,10 @@ export const getDashboard = async (req, res) => {
   try {
     const { district, mohZone, _id } = req.user;
     
-    const sevenDaysAgo = new Date();
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-    sevenDaysAgo.setHours(0, 0, 0, 0);
+    const latestPrediction = await RiskPrediction.findOne().sort({ generatedAt: -1 }).select('generatedAt');
+    const windowStart = latestPrediction ? new Date(latestPrediction.generatedAt.getTime() - 6 * 60 * 60 * 1000) : new Date();
 
-    const riskInfo = await RiskPrediction.findOne({ district, mohZone, predictedFor: { $gte: sevenDaysAgo } })
+    const riskInfo = await RiskPrediction.findOne({ district, mohZone, generatedAt: { $gte: windowStart } })
       .sort({ predictedFor: 1 })
       .select('district mohZone riskScore riskLevel predictedFor -_id');
 
@@ -198,15 +197,14 @@ export const getZoneTrend = async (req, res) => {
     }
 
     /* ── Current risk snapshot: pick the HIGHEST risk upcoming week ── */
-    const sevenDaysAgo = new Date();
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-    sevenDaysAgo.setHours(0, 0, 0, 0);
+    const latestPrediction = await RiskPrediction.findOne().sort({ generatedAt: -1 }).select('generatedAt');
+    const windowStart = latestPrediction ? new Date(latestPrediction.generatedAt.getTime() - 6 * 60 * 60 * 1000) : new Date();
 
-    // Get ALL upcoming predictions, then surface the worst one for the badge
+    // Get ALL predictions from the latest run, then surface the worst one for the badge
     const allFuturePredictions = await RiskPrediction.find({
       district,
       mohZone,
-      predictedFor: { $gt: now }
+      generatedAt: { $gte: windowStart }
     }).sort({ predictedFor: 1 }).lean();
 
     // Pick the highest-risk prediction for the badge (safety-first)
@@ -215,10 +213,7 @@ export const getZoneTrend = async (req, res) => {
       ? allFuturePredictions.reduce((best, cur) =>
           (RISK_ORDER[cur.riskLevel] ?? 0) >= (RISK_ORDER[best.riskLevel] ?? 0) ? cur : best
         )
-      : await RiskPrediction.findOne({ district, mohZone, predictedFor: { $gte: sevenDaysAgo } })
-          .sort({ riskScore: -1 })
-          .select('riskScore riskLevel predictedFor predictedTier pAlert -_id')
-          .lean();
+      : null;
 
     const futurePredictions = allFuturePredictions;
 

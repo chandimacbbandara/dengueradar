@@ -277,7 +277,7 @@ export async function runMLPredictionsAndAlerts() {
     // We store per-zone state that gets propagated between week 1 and week 2
     const zoneState = {};  // key = `${district}::${zone}`
 
-    for (let weekOffset = 1; weekOffset <= 2; weekOffset++) {
+    for (let weekOffset = 1; weekOffset <= 1; weekOffset++) {
       const targetDate = new Date(now.getTime() + weekOffset * weekDur);
       // Normalize to Monday
       const day = targetDate.getDay() || 7;
@@ -295,8 +295,30 @@ export async function runMLPredictionsAndAlerts() {
 
         for (const zone of zones) {
           const demographicKey = `${mlDistrictName}_${zone}`;
-          const demo           = MOH_DEMOGRAPHICS[demographicKey];
-          if (!demo) continue;
+          let demo = MOH_DEMOGRAPHICS[demographicKey];
+          
+          if (!demo) {
+            // Check specific known aliases
+            if (mlDistrictName === 'Mullaitivu') {
+              if (zone === 'Puthukkudiyiruppu') demo = MOH_DEMOGRAPHICS['Mullaitivu_Puthukudiyiruppu'];
+              if (zone === 'Thunukkai') demo = MOH_DEMOGRAPHICS['Mullaitivu_Thunukkai(mallavi)'];
+            }
+          }
+
+          if (!demo) {
+            // Fallback to district average
+            const districtDemos = Object.entries(MOH_DEMOGRAPHICS)
+              .filter(([k, v]) => k.startsWith(`${mlDistrictName}_`))
+              .map(([k, v]) => v);
+            
+            if (districtDemos.length > 0) {
+              const avgPop = districtDemos.reduce((sum, d) => sum + d[0], 0) / districtDemos.length;
+              const avgDens = districtDemos.reduce((sum, d) => sum + d[1], 0) / districtDemos.length;
+              demo = [avgPop, avgDens];
+            } else {
+              demo = [50000, 500]; // Absolute fallback
+            }
+          }
 
           const [population, pop_density] = demo;
 
@@ -423,17 +445,6 @@ export async function runMLPredictionsAndAlerts() {
           { upsert: true }
         );
 
-        // Propagate state for week 2 using SE-style lag shifting
-        if (weekOffset === 1 && zoneState[stateKey]) {
-          const st = zoneState[stateKey];
-          zoneState[stateKey] = {
-            population:    st.population,
-            caseLags:      propagateLags(st.caseLags, predCases),
-            incLags:       propagateIncLags(st.incLags, predCases, st.population),
-            weeksSince:    propagateWeeksSinceOutbreak(st.weeksSince, predCases),
-            districtStats: propagateDistrictStats(st.districtStats, predCases),
-          };
-        }
       }
     }
 
@@ -487,7 +498,7 @@ async function dispatchEscalationAlerts(district, mohZone, riskLevel) {
 
       if (process.env.NODE_ENV === 'production') {
         try {
-          await sendRiskAlertEmail(email, name, mohZone, riskLevel);
+          await sendRiskAlertEmail(email, name, mohZone, riskLevel, 'escalation');
         } catch (emailErr) {
           console.error(`[PredictionService] Failed to send email to ${email}:`, emailErr.message);
         }
@@ -504,20 +515,34 @@ async function dispatchEscalationAlerts(district, mohZone, riskLevel) {
 }
 
 /**
- * Beautiful HTML email notifying users about risk level escalation.
+ * Beautiful HTML email notifying users about risk level escalation, weekly high risk, or manual MOH alerts.
  */
-async function sendRiskAlertEmail(to, name, mohZone, riskLevel) {
+export async function sendRiskAlertEmail(to, name, mohZone, riskLevel, alertType = 'escalation') {
   const nodemailer = await import('nodemailer');
 
-  const transporter = nodemailer.createTransport({
-    host:   process.env.EMAIL_HOST,
-    port:   parseInt(process.env.EMAIL_PORT) || 587,
-    secure: false,
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS,
-    },
-  });
+  const isGmail = process.env.EMAIL_HOST && process.env.EMAIL_HOST.includes('gmail');
+  
+  let transporter;
+  if (isGmail) {
+    transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
+  } else {
+    const port = parseInt(process.env.EMAIL_PORT) || 587;
+    transporter = nodemailer.createTransport({
+      host:   process.env.EMAIL_HOST,
+      port:   port,
+      secure: port === 465,
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
+  }
 
   const levelColor  = riskLevel === 'high' ? '#EF4444' : '#F59E0B';
   const levelText   = riskLevel.toUpperCase();
@@ -546,7 +571,11 @@ async function sendRiskAlertEmail(to, name, mohZone, riskLevel) {
             <td style="padding: 40px 30px; color: #334155;">
               <p style="font-size: 16px; line-height: 1.6; margin: 0 0 20px 0;">Hello ${name},</p>
               <p style="font-size: 16px; line-height: 1.6; margin: 0 0 25px 0;">
-                Our AI model has detected a risk level escalation in your registered zone:
+                ${alertType === 'manual' 
+                  ? 'Your local Medical Officer of Health (MOH) has issued an official alert for your zone:' 
+                  : alertType === 'weekly' 
+                    ? 'Our AI model indicates that your registered zone is currently at a HIGH risk level:' 
+                    : 'Our AI model has detected a risk level escalation in your registered zone:'}
               </p>
 
               <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; text-align: center; margin-bottom: 30px;">

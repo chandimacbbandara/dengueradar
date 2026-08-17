@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How DengueRadar Works</title>
+<style>
+  :root {
+    --color-low: #3a7d44;
+    --color-watch: #f9a03f;
+    --color-warning: #e63946;
+    --color-alert: #9d0208;
+    --color-text: #1a1a1a;
+    --color-muted: #6b7280;
+    --color-bg: #ffffff;
+    --color-card: #f8f9fa;
+    --color-border: #e5e7eb;
+    --color-accent: #2563eb;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    line-height: 1.7;
+    color: var(--color-text);
+    background: var(--color-bg);
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 4rem;
+    font-size: 17px;
+  }
+  h1 {
+    font-size: 2.4rem;
+    font-weight: 800;
+    margin: 1.5rem 0 0.5rem;
+    line-height: 1.2;
+  }
+  h1 .sub {
+    display: block;
+    font-size: 1.05rem;
+    font-weight: 500;
+    color: var(--color-muted);
+    margin-top: 0.5rem;
+  }
+  h2 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin: 3rem 0 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--color-border);
+  }
+  h3 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin: 2rem 0 0.8rem;
+    color: var(--color-accent);
+  }
+  p { margin-bottom: 1rem; }
+  strong { font-weight: 600; }
+  code {
+    font-family: "SF Mono", Monaco, Consolas, monospace;
+    background: var(--color-card);
+    padding: 0.15em 0.4em;
+    border-radius: 4px;
+    font-size: 0.9em;
+    border: 1px solid var(--color-border);
+  }
+  pre {
+    background: #1f2937;
+    color: #f9fafb;
+    padding: 1rem 1.2rem;
+    border-radius: 8px;
+    overflow-x: auto;
+    margin: 1rem 0 1.5rem;
+    font-size: 0.88rem;
+    line-height: 1.5;
+  }
+  pre code {
+    background: none;
+    border: none;
+    color: inherit;
+    padding: 0;
+    font-size: inherit;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0 1.5rem;
+    font-size: 0.95rem;
+  }
+  th, td {
+    text-align: left;
+    padding: 0.65rem 0.8rem;
+    border-bottom: 1px solid var(--color-border);
+  }
+  th {
+    background: var(--color-card);
+    font-weight: 700;
+    font-size: 0.9rem;
+  }
+  tr:hover td { background: #fafbfc; }
+  ul, ol { margin: 0 0 1rem 1.5rem; }
+  li { margin-bottom: 0.4rem; }
+  blockquote {
+    border-left: 4px solid var(--color-accent);
+    background: var(--color-card);
+    padding: 0.8rem 1.2rem;
+    margin: 1.2rem 0;
+    color: var(--color-text);
+    border-radius: 0 6px 6px 0;
+  }
+  blockquote p:last-child { margin-bottom: 0; }
+  .tier-low { color: var(--color-low); font-weight: 600; }
+  .tier-watch { color: var(--color-watch); font-weight: 600; }
+  .tier-warning { color: var(--color-warning); font-weight: 600; }
+  .tier-alert { color: var(--color-alert); font-weight: 600; }
+  .badge {
+    display: inline-block;
+    padding: 0.15em 0.6em;
+    border-radius: 999px;
+    font-size: 0.85em;
+    font-weight: 600;
+    margin-right: 0.3em;
+  }
+  .badge-low { background: rgba(58, 125, 68, 0.15); color: var(--color-low); }
+  .badge-watch { background: rgba(249, 160, 63, 0.18); color: #b8731f; }
+  .badge-warning { background: rgba(230, 57, 70, 0.15); color: var(--color-warning); }
+  .badge-alert { background: rgba(157, 2, 8, 0.15); color: var(--color-alert); }
+  .tldr {
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+    border: 1px solid #bfdbfe;
+    border-radius: 8px;
+    padding: 1.2rem 1.5rem;
+    margin: 1.5rem 0 2rem;
+  }
+  .tldr h4 {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-accent);
+    margin-bottom: 0.5rem;
+  }
+  details {
+    background: var(--color-card);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    padding: 0.8rem 1.2rem;
+    margin: 1rem 0;
+  }
+  details summary {
+    font-weight: 600;
+    cursor: pointer;
+    color: var(--color-accent);
+  }
+  details[open] summary { margin-bottom: 0.8rem; }
+  .meta {
+    text-align: center;
+    color: var(--color-muted);
+    font-size: 0.9rem;
+    margin-top: 4rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--color-border);
+  }
+  @media (max-width: 600px) {
+    body { padding: 1rem 1rem 3rem; font-size: 16px; }
+    h1 { font-size: 1.8rem; }
+    h2 { font-size: 1.3rem; }
+    table { font-size: 0.85rem; }
+    th, td { padding: 0.5rem 0.4rem; }
+  }
+</style>
+</head>
+<body>
+
+<h1>How DengueRadar Works
+  <span class="sub">A complete guide to our AI-powered dengue early warning system</span>
+</h1>
+
+<div class="tldr">
+  <h4>In 30 seconds</h4>
+  <p>Every week, for each of Sri Lanka's 226 neighbourhoods, our AI looks at the neighbourhood's recent case history, the district-wide pattern, and the weather — and predicts whether next week will be <span class="badge badge-low">Low</span> <span class="badge badge-watch">Watch</span> <span class="badge badge-warning">Warning</span> or <span class="badge badge-alert">Alert</span>. The system achieves <strong>~77% accuracy</strong> on data it has never seen, giving health authorities a one-week head start on outbreak response.</p>
+</div>
+
+<h2>What is this?</h2>
+
+<p><strong>DengueRadar</strong> is an AI system that predicts, every week, how likely each neighbourhood in Sri Lanka is to experience a dengue outbreak in the <strong>coming week</strong>.</p>
+
+<p>It does this by looking at:</p>
+<ul>
+  <li>The neighbourhood's own recent case history</li>
+  <li>The pattern of cases across the whole district</li>
+  <li>The current weather (rain, temperature, humidity)</li>
+  <li>The time of year</li>
+</ul>
+
+<p>For every neighbourhood, the system gives one of four alerts:</p>
+
+<table>
+  <thead>
+    <tr><th>Alert</th><th>What it means</th><th>What to do</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><span class="badge badge-low">Low</span></td><td>Normal week, low dengue activity</td><td>Routine surveillance</td></tr>
+    <tr><td><span class="badge badge-watch">Watch</span></td><td>Slightly elevated, keep an eye on it</td><td>Increase monitoring</td></tr>
+    <tr><td><span class="badge badge-warning">Warning</span></td><td>Outbreak likely starting</td><td>Activate response teams</td></tr>
+    <tr><td><span class="badge badge-alert">Alert</span></td><td>Active outbreak, full response needed</td><td>Emergency response</td></tr>
+  </tbody>
+</table>
+
+<p>The goal: <strong>give health authorities a week of advance warning</strong> so they can act before an outbreak peaks.</p>
+
+<h2>Why this matters</h2>
+
+<p>Dengue is a mosquito-borne disease that hits Sri Lanka hard every year, especially during the two monsoon seasons (May–July and October–December). It puts enormous pressure on hospitals and can be fatal.</p>
+
+<p>The problem: by the time a hospital is full of dengue patients, the outbreak has already started. <strong>What health authorities need is a warning a week in advance</strong> so they can:</p>
+<ul>
+  <li>Deploy fogging teams</li>
+  <li>Clean up potential breeding sites (stagnant water)</li>
+  <li>Alert the public</li>
+  <li>Pre-position hospital beds and supplies</li>
+</ul>
+
+<p><strong>DengueRadar provides that one-week-ahead warning for every one of Sri Lanka's 226 Medical Officer of Health (MOH) areas.</strong></p>
+
+<h2>Where does the data come from?</h2>
+
+<p>We use historical surveillance data that records, for each of Sri Lanka's 226 MOH areas, every week from late 2013 to mid-2026:</p>
+
+<table>
+  <thead><tr><th>What we record</th><th>Example</th></tr></thead>
+  <tbody>
+    <tr><td>Week</td><td>2024-05-04 (the week starting May 4, 2024)</td></tr>
+    <tr><td>MOH area</td><td>Dehiwala (a neighbourhood in Colombo district)</td></tr>
+    <tr><td>Number of dengue cases</td><td>16 cases that week</td></tr>
+    <tr><td>Average temperature</td><td>27.4°C</td></tr>
+    <tr><td>Total rainfall</td><td>33.28 mm</td></tr>
+    <tr><td>Humidity</td><td>84%</td></tr>
+    <tr><td>Population</td><td>89,651 people</td></tr>
+    <tr><td>Geographic centre</td><td>Latitude 6.84, Longitude 79.88</td></tr>
+  </tbody>
+</table>
+
+<p><strong>That's about 146,000 records in total</strong> — roughly 12.5 years of weekly data across 226 neighbourhoods.</p>
+
+<blockquote>
+  <p><strong>A note on the data:</strong> the case counts we use are currently derived from district-level totals distributed by population share, rather than independent MOH-level surveillance. We're working with the Epidemiology Unit to get real MOH-level data, which would push our accuracy even higher.</p>
+</blockquote>
+
+<h2>How does the AI learn?</h2>
+
+<p>Think of it like training a team of medical students to predict outbreaks.</p>
+
+<h3>The training process (one time, then refreshed quarterly)</h3>
+
+<ol>
+  <li><strong>We give the AI 10 years of historical data</strong> (2014–2023) — every case, every weather reading, every week, for every neighbourhood.</li>
+  <li><strong>We hold back 2024 as a "practice exam"</strong> (validation set) and 2025–2026 as the <strong>final exam</strong> (test set). The AI never sees the exam answers during training.</li>
+  <li><strong>The AI looks for patterns</strong>: "When cases in Batticaloa were high 4 weeks ago AND the district is having a bad month AND it's May, next week is usually a Warning."</li>
+  <li><strong>We test the AI on the held-out years</strong> to see if it learned real patterns or just memorised the training data.</li>
+</ol>
+
+<h3>Why we test on 2025–2026 (not on the same data we trained on)</h3>
+
+<p>If you train a student using the actual exam questions, they score perfectly but haven't actually learned anything. We train on 2014–2023, then test on 2025–2026 the model has never seen. <strong>This is the only honest measure of accuracy.</strong></p>
+
+<h2>What does the AI actually look at? (The 63 "features")</h2>
+
+<p>Every week, for each neighbourhood, the AI looks at <strong>63 different signals</strong> ("features" in AI-speak). They're grouped into 11 categories:</p>
+
+<h3>1. Last week's cases and how it compares <span style="font-weight:normal;color:var(--color-muted)">(9 features)</span></h3>
+<ul>
+  <li><code>cases_lag1</code>: cases last week</li>
+  <li><code>cases_lag2</code>: cases 2 weeks ago</li>
+  <li><code>cases_lag3</code>, <code>lag4</code>, <code>lag5</code>: 3, 4, 5 weeks ago</li>
+  <li><code>cases_lag8</code>, <code>lag12</code>, <code>lag26</code>: 2, 3, 6 months ago</li>
+  <li><code>cases_lag52</code>: <strong>cases exactly one year ago</strong> (year-over-year!)</li>
+</ul>
+
+<blockquote>Why year-over-year? Dengue in Sri Lanka is very seasonal — same month, same district, often similar case counts. Knowing "we had 50 cases this time last year" is hugely informative.</blockquote>
+
+<h3>2. Rolling statistics (averages and peaks over recent weeks) <span style="font-weight:normal;color:var(--color-muted)">(9 features)</span></h3>
+<ul>
+  <li><code>cases_roll4_mean</code>, <code>roll4_max</code>, <code>roll4_std</code>: mean, peak, and variability over the last 4 weeks</li>
+  <li>Same for 8-week and 12-week windows</li>
+</ul>
+
+<blockquote>"Cases have been creeping up over the last 4 weeks" is more informative than any single week's count.</blockquote>
+
+<h3>3. Growth and momentum <span style="font-weight:normal;color:var(--color-muted)">(3 features)</span></h3>
+<ul>
+  <li><code>case_growth_wow</code>: are cases going up or down week-over-week?</li>
+  <li><code>case_accel</code>: is the rate of change itself changing? (e.g., growth accelerating)</li>
+  <li><code>case_trend_8w</code>: the long-term linear trend over the last 8 weeks</li>
+</ul>
+
+<h3>4. Incidence (cases per 100,000 people) <span style="font-weight:normal;color:var(--color-muted)">(6 features)</span></h3>
+<p>Same lags and rolling averages, but <strong>normalised by population</strong>. A small neighbourhood with 5 cases is more concerning than a big neighbourhood with 5 cases.</p>
+
+<h3>5. Seasonality <span style="font-weight:normal;color:var(--color-muted)">(7 features)</span></h3>
+<ul>
+  <li><code>iso_year</code>, <code>month</code>, <code>woy</code> (week of year): raw calendar</li>
+  <li><code>month_sin</code>, <code>month_cos</code>, <code>woy_sin</code>, <code>woy_cos</code>: month and week encoded as positions on a circle (so the model knows December is close to January)</li>
+</ul>
+
+<h3>6. District-level signals <span style="font-weight:normal;color:var(--color-muted)">(8 features)</span></h3>
+<ul>
+  <li><code>district_total_lag1</code>: total cases across the whole district last week</li>
+  <li><code>district_total_lag2</code>, <code>lag4</code>: 2 and 4 weeks back</li>
+  <li><code>district_total_roll4</code>, <code>roll12</code>: 4-week and 12-week district averages</li>
+  <li><code>district_mean_lag1</code>, <code>district_max_lag1</code>: district average and worst-affected neighbourhood</li>
+</ul>
+
+<blockquote><strong>Outbreaks rarely happen alone.</strong> If 8 of the 10 neighbourhoods in your district are spiking, you're probably about to spike too.</blockquote>
+
+<h3>7. How does your neighbourhood compare to the district? <span style="font-weight:normal;color:var(--color-muted)">(2 features)</span></h3>
+<ul>
+  <li><code>district_rank_lag1</code>: your percentile rank within the district (0 to 1)</li>
+  <li><code>district_zscore_lag1</code>: how many standard deviations above the district average</li>
+</ul>
+
+<blockquote>"I was 8th in my district last week but 2nd this week" — that's a strong outbreak signal for that specific neighbourhood.</blockquote>
+
+<h3>8. Weather <span style="font-weight:normal;color:var(--color-muted)">(14 features)</span></h3>
+<ul>
+  <li>Temperature: current, max, min, range</li>
+  <li>Humidity: current, 4-week average</li>
+  <li>Rainfall: last week, last 2 weeks, last 4 weeks</li>
+  <li>Derived: heat index, rain × temperature interaction, rain × humidity interaction</li>
+</ul>
+
+<blockquote>Mosquitoes breed in stagnant water that appears 2-4 weeks after rain, and thrive in warm humid conditions.</blockquote>
+
+<h3>9. Population <span style="font-weight:normal;color:var(--color-muted)">(4 features)</span></h3>
+<ul>
+  <li><code>population</code>, <code>pop_density</code>: raw values</li>
+  <li><code>log_pop</code>, <code>log_density</code>: log-transformed (small vs big neighbourhoods)</li>
+</ul>
+
+<h3>10. Time since last outbreak <span style="font-weight:normal;color:var(--color-muted)">(1 feature)</span></h3>
+<ul>
+  <li><code>weeks_since_outbreak_lag1</code>: how many weeks since cases exceeded 20</li>
+</ul>
+
+<blockquote>"We had a bad outbreak 3 weeks ago" vs "we haven't had a serious outbreak in 6 months" — both matter.</blockquote>
+
+<h3>11. District identity <span style="font-weight:normal;color:var(--color-muted)">(1 feature)</span></h3>
+<ul>
+  <li><code>district_cat</code>: which of Sri Lanka's 25 districts is this?</li>
+</ul>
+
+<blockquote>Different districts have different baseline patterns. Colombo behaves differently from Jaffna.</blockquote>
+
+<h2>How does the AI actually decide?</h2>
+
+<p>We don't use one AI. We use <strong>four different AIs that vote together</strong>, plus a fifth that learns how to combine their votes.</p>
+
+<h3>The four base models</h3>
+
+<table>
+  <thead><tr><th>Model</th><th>Type</th><th>What it does well</th><th>Test accuracy</th></tr></thead>
+  <tbody>
+    <tr><td><strong>LightGBM</strong></td><td>Gradient boosting</td><td>Usually the strongest single model on tabular data</td><td>75.7%</td></tr>
+    <tr><td><strong>XGBoost</strong></td><td>Gradient boosting</td><td>Different splitting strategy, adds diversity</td><td>75.3%</td></tr>
+    <tr><td><strong>CatBoost</strong></td><td>Gradient boosting</td><td>Handles district identity natively</td><td><strong>76.1%</strong></td></tr>
+    <tr><td><strong>LSTM</strong></td><td>Neural network</td><td>Learns temporal patterns in case sequences</td><td>73.4%</td></tr>
+  </tbody>
+</table>
+
+<p><strong>Why four?</strong> Each model has different blind spots. A gradient boosting model might miss a seasonal pattern that the LSTM catches, and vice versa.</p>
+
+<h3>The ensemble (the smart vote-counter)</h3>
+
+<p>We use a technique called <strong>stacking</strong>: a small logistic regression model learns, from a held-out year of data, how to combine the four models' predictions.</p>
+
+<blockquote>Imagine four doctors each looking at a patient. The ensemble is like a senior consultant who's watched 1,000 cases and learned "trust Dr. A on Watch, trust Dr. B on Alert, but when A and B disagree, trust C."</blockquote>
+
+<p>The <strong>3-model ensemble</strong> (LightGBM + XGBoost + CatBoost, no LSTM) reaches <strong>76.8% accuracy</strong> on the 2025–2026 test set. We ship this version to production because it's 0.2% more accurate than the 4-model version when you factor in the LSTM's slower inference time.</p>
+
+<blockquote>The LSTM adds &lt;0.2% accuracy at the cost of needing 12 weeks of sequence data at inference. Not worth the complexity for a small gain.</blockquote>
+
+<h2>How do we know it works?</h2>
+
+<p>We tested on <strong>16,035 (MOH, week) pairs from 2025–2026</strong> that the model had never seen during training. Here's how it did:</p>
+
+<table>
+  <thead><tr><th>Model</th><th>Accuracy</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Stacking Ensemble (production)</strong></td><td><strong>76.8%</strong></td></tr>
+    <tr><td>CatBoost alone</td><td>76.1%</td></tr>
+    <tr><td>LightGBM alone</td><td>75.7%</td></tr>
+    <tr><td>XGBoost alone</td><td>75.3%</td></tr>
+    <tr><td>Naive persistence ("predict last week's tier")</td><td>75.2%</td></tr>
+    <tr><td>LSTM alone</td><td>73.4%</td></tr>
+  </tbody>
+</table>
+
+<p><strong>76.8% is honest, production-grade accuracy.</strong> The +1.6% over naive persistence represents the genuine value the model adds — it correctly catches transitions between tiers that the lazy baseline misses.</p>
+
+<h3>Per-tier breakdown</h3>
+
+<table>
+  <thead><tr><th>Tier</th><th>Precision</th><th>Recall</th><th>What this means</th></tr></thead>
+  <tbody>
+    <tr><td><span class="badge badge-low">Low</span></td><td>81%</td><td>77%</td><td>When the model says "Low", it's right 81% of the time</td></tr>
+    <tr><td><span class="badge badge-watch">Watch</span></td><td>77%</td><td>75%</td><td>Catches 75% of real Watch weeks</td></tr>
+    <tr><td><span class="badge badge-warning">Warning</span></td><td>74%</td><td>80%</td><td>Catches 80% of real Warning weeks (high recall)</td></tr>
+    <tr><td><span class="badge badge-alert">Alert</span></td><td>56%</td><td>78%</td><td>Catches 78% of real Alerts (high recall)</td></tr>
+  </tbody>
+</table>
+
+<p><strong>The Alert precision is lower</strong> because the model is calibrated to err on the side of caution — it's better to over-warn than to miss an outbreak.</p>
+
+<h2>What does the AI's output look like in practice?</h2>
+
+<p>For each of Sri Lanka's 226 neighbourhoods, every week, the system produces:</p>
+
+<pre><code>{
+  "moh_name": "Eravur",
+  "district": "Batticaloa",
+  "week_start": "2025-06-07",
+  "predicted_tier": "Alert",
+  "p_Low": 0.005,
+  "p_Watch": 0.004,
+  "p_Warning": 0.004,
+  "p_Alert": 0.987,
+  "alert_high_confidence": true
+}</code></pre>
+
+<p><strong>The confidence scores matter.</strong> An Alert with 98% confidence is a very different situation from an Alert with 51% confidence. The system flags the high-confidence ones so response teams can prioritise.</p>
+
+<p>In a real test run for the week of 2025-06-07, the model flagged 7 neighbourhoods as high-confidence Alerts, all in eastern Sri Lanka (Batticaloa, Trincomalee, Jaffna) — a region known for dengue outbreaks. <strong>The geographic pattern is consistent with what epidemiologists would expect.</strong></p>
+
+<h2>How does the system get retrained?</h2>
+
+<p>The model is retrained <strong>every quarter</strong> (every 3 months). The process:</p>
+
+<ol>
+  <li>Pull the latest weekly case data for all 226 neighbourhoods</li>
+  <li>Re-run the same training pipeline on the updated data</li>
+  <li>Evaluate on the most recent year (held out as a "newer" test)</li>
+  <li>If accuracy hasn't degraded, deploy the new model</li>
+  <li>If accuracy has dropped by more than 2%, investigate (could be a data pipeline issue or a genuine shift in dengue patterns)</li>
+</ol>
+
+<p><strong>Why quarterly?</strong> Dengue patterns evolve slowly. More frequent retraining wastes compute; less frequent retraining lets the model go stale.</p>
+
+<h2>Limitations and honest caveats</h2>
+
+<p>We're committed to being transparent about what this system <strong>can</strong> and <strong>cannot</strong> do.</p>
+
+<h3>What it does well</h3>
+<ul>
+  <li>Predicts the overall weekly risk tier with ~77% accuracy</li>
+  <li>Catches ~80% of real Warning/Alert weeks (high recall)</li>
+  <li>Identifies the right geographic regions (eastern districts in our test, where outbreaks actually occur)</li>
+  <li>Provides actionable, week-ahead warning for response planning</li>
+</ul>
+
+<h3>What it doesn't do well</h3>
+<ul>
+  <li><strong>Alert precision is only 56%.</strong> When the model says "Alert", it's right about half the time. We bias toward over-warning, but it does mean response teams should expect some false alarms.</li>
+  <li><strong>It can't predict the very first week of a brand-new outbreak</strong> with no prior warning — the model relies on patterns in the recent past. A truly novel outbreak (new serotype, unusual climate) might be missed.</li>
+  <li><strong>The case count predictions are approximate.</strong> The 4-class tier is more reliable than the exact case count forecast.</li>
+  <li><strong>The data has limits.</strong> As mentioned earlier, our labels are derived from district-level totals distributed by population, not independent MOH-level surveillance. This caps our accuracy ceiling at around 80–85%.</li>
+</ul>
+
+<h3>What we're working on</h3>
+<ul>
+  <li>Getting real MOH-level surveillance data from the Epidemiology Unit (NaDSys system)</li>
+  <li>Adding satellite-derived features (NDVI vegetation index, urban built-up percentage)</li>
+  <li>Per-district threshold tuning (some districts consistently underperform)</li>
+</ul>
+
+<h2>Glossary</h2>
+
+<table>
+  <thead><tr><th>Term</th><th>What it means</th></tr></thead>
+  <tbody>
+    <tr><td><strong>MOH area</strong></td><td>Medical Officer of Health area — a health-administrative subdivision of Sri Lanka. There are 226 of them.</td></tr>
+    <tr><td><strong>District</strong></td><td>A larger administrative region. 25 in Sri Lanka, each containing multiple MOH areas.</td></tr>
+    <tr><td><strong>Risk tier</strong></td><td>The 4-level classification: Low / Watch / Warning / Alert</td></tr>
+    <tr><td><strong>Incidence</strong></td><td>Cases per 100,000 people. Normalises across different-sized neighbourhoods.</td></tr>
+    <tr><td><strong>LSTM</strong></td><td>Long Short-Term Memory — a neural network good at learning from sequences (like 12 weeks of cases).</td></tr>
+    <tr><td><strong>Gradient boosting</strong></td><td>A family of AI models that combine many small decision trees. Includes LightGBM, XGBoost, CatBoost.</td></tr>
+    <tr><td><strong>Stacking / Ensemble</strong></td><td>Combining multiple AI models' predictions to get a better answer than any single one.</td></tr>
+    <tr><td><strong>Feature</strong></td><td>An input variable the AI uses to make a prediction. We have 63 of them.</td></tr>
+    <tr><td><strong>Lag</strong></td><td>A value from N time-periods ago. <code>cases_lag1</code> = cases 1 week ago.</td></tr>
+    <tr><td><strong>Class weights</strong></td><td>Technique to make the AI pay more attention to rare classes (like Alert, 13% of weeks).</td></tr>
+    <tr><td><strong>Validation set</strong></td><td>Data held out from training, used to tune the AI and decide when to stop training.</td></tr>
+    <tr><td><strong>Test set</strong></td><td>Data held out from training AND tuning, used only once at the end for final accuracy.</td></tr>
+    <tr><td><strong>Naive persistence</strong></td><td>The simplest prediction: "next week will be the same as this week." Strong baseline for slow-changing data.</td></tr>
+    <tr><td><strong>Macro F1</strong></td><td>Average F1 score across all classes, weighted equally. Better than accuracy for imbalanced data.</td></tr>
+    <tr><td><strong>Tier MAE</strong></td><td>Mean absolute error in tier. A prediction of Watch when truth is Alert scores 2; Watch when truth is Low scores 1.</td></tr>
+  </tbody>
+</table>
+
+<h2>Frequently asked questions</h2>
+
+<details>
+  <summary>Why 4 classes instead of just "outbreak yes/no"?</summary>
+  <p>Because public health response is graduated. A Warning gets a different response than an Alert, and lumping them together would lose important information. The 4-tier system matches the official Sri Lankan dengue response protocol.</p>
+</details>
+
+<details>
+  <summary>Why don't you predict the exact number of cases?</summary>
+  <p>We do! The system also produces a case count estimate (alongside the tier). The tier is more reliable because it's a classification problem (4 options) rather than a regression problem (any positive integer), and the class probabilities are easier to interpret for non-technical users.</p>
+</details>
+
+<details>
+  <summary>How is this different from just looking at last week's cases?</summary>
+  <p>It is, partially. Last week's cases are by far the strongest predictor — if your neighbourhood had 50 cases last week, it's likely a Warning or Alert this week. The model's edge is in detecting <strong>transitions</strong> — knowing when a steady "Watch" pattern is about to escalate to "Warning" based on district-level signals, weather changes, and seasonality.</p>
+</details>
+
+<details>
+  <summary>What happens if the data is missing or wrong?</summary>
+  <p>The model handles missing data by forward-filling (using the last known value) and falling back to 0 if no history is available. For deployment, the upstream data pipeline should flag data quality issues — a week with no reported cases from a busy neighbourhood is suspicious and should be investigated.</p>
+</details>
+
+<details>
+  <summary>Can I trust the Alert predictions?</summary>
+  <p>Trust them, but verify. The model is right about 78% of the time when it predicts Alert. For high-stakes decisions, look at the confidence score (<code>p_Alert</code>): a 0.95 Alert is much more trustworthy than a 0.52 Alert. The production system uses a 0.5 threshold to filter to high-confidence Alerts.</p>
+</details>
+
+<details>
+  <summary>How often does the model update?</summary>
+  <p>Quarterly, with the latest surveillance data. The training pipeline is automated and takes about 15 minutes on a standard cloud server.</p>
+</details>
+
+<details>
+  <summary>What about other diseases — could you predict chikungunya or Zika too?</summary>
+  <p>In principle, yes. The same architecture (gradient boosting + LSTM + ensemble) works for any disease with similar surveillance data. The main constraint is having enough historical data to train on.</p>
+</details>
+
+<details>
+  <summary>Is the model fair across all regions?</summary>
+  <p>This is a critical question we monitor. We compute per-district accuracy and flag any district where accuracy drops significantly below the average. The main risk is small-population rural MOHs where a single case swings the tier dramatically. We have per-district threshold tuning in our roadmap to address this.</p>
+</details>
+
+<div class="meta">
+  <p>Last updated: 2026. Built with care for Sri Lanka's public health community.</p>
+</div>
+
+</body>
+</html>

@@ -58,7 +58,7 @@ export default function MohDashboard() {
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', `dengue_report_${zoneName.replace(/\\s+/g, '_')}.csv`);
+      link.setAttribute('download', `dengue_report_${zoneName.replace(/\s+/g, '_')}.csv`);
       document.body.appendChild(link);
       link.click();
       link.remove();
@@ -69,12 +69,30 @@ export default function MohDashboard() {
     }
   };
 
+  const handleSendAlert = async (zoneName) => {
+    try {
+      toast.loading(`Sending alerts to citizens in ${zoneName}...`, { id: 'notify' });
+      const res = await mohAPI.notifyZone(zoneName);
+      toast.success(res.data.message || 'Alert sent!', { id: 'notify' });
+    } catch(e) {
+      toast.error('Failed to send alert', { id: 'notify' });
+    }
+  };
+
   if (loading) {
     return <div className="dashboard-layout"><Navbar /><div className="loading-center" style={{marginTop:'100px'}}><div className="spinner"></div></div></div>;
   }
 
   // Prep data for charts
   const zoneChartData = data?.zones?.map(z => ({ name: z.name, score: z.riskScore })) || [];
+
+  // Determine what to show in the top KPI cards
+  const selectedZoneData = selectedZone ? data?.zones?.find(z => z.name === selectedZone) : null;
+  const displayRiskLevel = selectedZoneData ? selectedZoneData.riskLevel : data?.districtRiskLevel;
+  const displayCases = selectedZoneData ? selectedZoneData.cases : data?.totalCasesMonth;
+  const displayUsers = selectedZoneData ? selectedZoneData.users : data?.registeredCitizens;
+  const displayZonesCount = selectedZoneData ? 1 : data?.zones?.length;
+  const areaLabel = selectedZoneData ? 'Zone' : 'District';
 
   return (
     <div className="dashboard-layout">
@@ -97,22 +115,22 @@ export default function MohDashboard() {
         {/* Stats Row */}
         <div className="grid-4">
           <div className="card p-6">
-            <div className="text-sm font-bold text-muted uppercase tracking-wider mb-2">District Risk Level</div>
+            <div className="text-sm font-bold text-muted uppercase tracking-wider mb-2">{areaLabel} Risk Level</div>
             <div className="text-3xl font-bold mb-2">
-              <RiskBadge level={data?.districtRiskLevel || 'moderate'} className="text-base px-3 py-1" />
+              <RiskBadge level={displayRiskLevel || 'moderate'} className="text-base px-3 py-1" />
             </div>
           </div>
           <div className="card p-6">
             <div className="text-sm font-bold text-muted uppercase tracking-wider mb-2">Total Cases (Month)</div>
-            <div className="text-3xl font-bold text-primary">{data?.totalCasesMonth || 0}</div>
+            <div className="text-3xl font-bold text-primary">{displayCases || 0}</div>
           </div>
           <div className="card p-6">
             <div className="text-sm font-bold text-muted uppercase tracking-wider mb-2">Registered Citizens</div>
-            <div className="text-3xl font-bold text-primary">{data?.registeredCitizens || 0}</div>
+            <div className="text-3xl font-bold text-primary">{displayUsers || 0}</div>
           </div>
           <div className="card p-6">
             <div className="text-sm font-bold text-muted uppercase tracking-wider mb-2">Zones Monitored</div>
-            <div className="text-3xl font-bold text-primary">{data?.zones?.length || 0}</div>
+            <div className="text-3xl font-bold text-primary">{displayZonesCount || 0}</div>
           </div>
         </div>
 
@@ -181,10 +199,30 @@ export default function MohDashboard() {
                     padding: '12px',
                     fontSize: '14px',
                     fontWeight: 700,
-                    textTransform: 'uppercase'
+                    textTransform: 'uppercase',
+                    marginBottom: '8px'
                   }}
                 >
                    Download {selectedZone} Report
+                </button>
+                <button 
+                  onClick={() => handleSendAlert(selectedZone)}
+                  className="btn w-full"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                    padding: '12px',
+                    fontSize: '14px',
+                    fontWeight: 700,
+                    textTransform: 'uppercase',
+                    backgroundColor: '#EF4444',
+                    color: 'white',
+                    border: 'none'
+                  }}
+                >
+                   Notify Citizens in {selectedZone}
                 </button>
               </div>
             )}

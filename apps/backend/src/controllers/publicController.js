@@ -4,16 +4,15 @@ import DengueCase from '../models/DengueCase.js';
 
 export const getLiveStats = async (req, res) => {
   try {
-    const sevenDaysAgo = new Date();
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-    sevenDaysAgo.setHours(0, 0, 0, 0);
+    const latestPrediction = await RiskPrediction.findOne().sort({ generatedAt: -1 }).select('generatedAt');
+    const windowStart = latestPrediction ? new Date(latestPrediction.generatedAt.getTime() - 6 * 60 * 60 * 1000) : new Date();
 
-    const [totalUsersReal, distinctDistricts, activeHighRiskZones, latestPrediction] = await Promise.all([
+    const [totalUsersReal, distinctDistricts, activeHighRiskZones] = await Promise.all([
       User.countDocuments(),
       RiskPrediction.distinct('district'),
-      // Find distinct zones that have a 'high' risk prediction in the future window
-      RiskPrediction.distinct('mohZone', { riskLevel: 'high', predictedFor: { $gte: sevenDaysAgo } }).then(zones => zones.length),
-      RiskPrediction.findOne().sort({ generatedAt: -1 }).select('generatedAt')
+      latestPrediction 
+        ? RiskPrediction.distinct('mohZone', { riskLevel: 'high', generatedAt: { $gte: windowStart } }).then(zones => zones.length)
+        : Promise.resolve(0)
     ]);
 
     const totalUsers = totalUsersReal + 1240; // Add dummy active users
@@ -34,14 +33,14 @@ export const getLiveStats = async (req, res) => {
 
 export const getNationalRisk = async (req, res) => {
   try {
-    const sevenDaysAgo = new Date();
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-    sevenDaysAgo.setHours(0, 0, 0, 0);
+    const latestPrediction = await RiskPrediction.findOne().sort({ generatedAt: -1 }).select('generatedAt');
+    if (!latestPrediction) return res.json({ success: true, data: [] });
+    
+    const windowStart = new Date(latestPrediction.generatedAt.getTime() - 6 * 60 * 60 * 1000);
 
     const nationalRisk = await RiskPrediction.aggregate([
-      { $match: { predictedFor: { $gte: sevenDaysAgo } } },
-      // Sort: earliest week first so $first picks the 1st week prediction for the map
-      { $sort: { predictedFor: 1, riskScore: -1 } },
+      { $match: { generatedAt: { $gte: windowStart } } },
+      { $sort: { riskScore: -1 } },
       { $group: {
           _id: '$district',
           riskScore: { $first: '$riskScore' },
@@ -97,13 +96,14 @@ export const getNationalTrends = async (req, res) => {
 
 export const getTopZones = async (req, res) => {
   try {
-    const sevenDaysAgo = new Date();
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-    sevenDaysAgo.setHours(0, 0, 0, 0);
+    const latestPrediction = await RiskPrediction.findOne().sort({ generatedAt: -1 }).select('generatedAt');
+    if (!latestPrediction) return res.json({ success: true, data: [] });
+    
+    const windowStart = new Date(latestPrediction.generatedAt.getTime() - 6 * 60 * 60 * 1000);
 
     const topZones = await RiskPrediction.aggregate([
-      { $match: { predictedFor: { $gte: sevenDaysAgo } } },
-      { $sort: { riskScore: -1, predictedFor: 1 } },
+      { $match: { generatedAt: { $gte: windowStart } } },
+      { $sort: { riskScore: -1 } },
       { $group: {
           _id: '$mohZone',
           district: { $first: '$district' },

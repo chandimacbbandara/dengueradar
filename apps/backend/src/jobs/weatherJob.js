@@ -1,14 +1,14 @@
 import cron from 'node-cron';
 import { fetchAllDistrictWeather } from '../services/weatherFetcher.js';
 
-const CRON_SCHEDULE = '0 */4 * * *'; // Every 4 hours (00:00, 04:00, 08:00, …)
+const CRON_SCHEDULE = '*/30 * * * *'; // Every 30 minutes
 
 /**
  * Starts the weather background job.
  *
  * - Fires one immediate run on startup so the collection is populated
  *   before the first scheduled tick.
- * - Then runs on `CRON_SCHEDULE` (every 4 hours).
+ * - Then runs on `CRON_SCHEDULE` (every 30 minutes).
  *
  * Call this once after the DB connection is established.
  */

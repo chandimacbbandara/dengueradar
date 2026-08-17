@@ -1,6 +1,8 @@
 import RiskPrediction from '../models/RiskPrediction.js';
 import DengueCase from '../models/DengueCase.js';
 import User from '../models/User.js';
+import Alert from '../models/Alert.js';
+import { sendRiskAlertEmail } from '../services/predictionService.js';
 
 export const getMohDashboard = async (req, res) => {
   try {
@@ -18,14 +20,13 @@ export const getMohDashboard = async (req, res) => {
     const registeredCitizens = await User.countDocuments({ district, role: 'general' });
 
     // Find the current risk predictions (week 1) for all zones in this district
-    const sevenDaysAgo = new Date();
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-    sevenDaysAgo.setHours(0, 0, 0, 0);
+    const latestPrediction = await RiskPrediction.findOne().sort({ generatedAt: -1 }).select('generatedAt');
+    const windowStart = latestPrediction ? new Date(latestPrediction.generatedAt.getTime() - 6 * 60 * 60 * 1000) : new Date();
 
     const riskPredictions = await RiskPrediction.aggregate([
-      { $match: { district, predictedFor: { $gte: sevenDaysAgo } } },
+      { $match: { district, generatedAt: { $gte: windowStart } } },
       // Sort: highest riskScore first so $first picks the worst prediction for each zone
-      { $sort: { riskScore: -1, predictedFor: 1 } },
+      { $sort: { riskScore: -1 } },
       { $group: {
           _id: '$mohZone',
           riskScore:      { $first: '$riskScore' },
@@ -62,10 +63,14 @@ export const getMohDashboard = async (req, res) => {
       };
     });
 
-    // Derive overall district risk level (highest risk found in any zone)
-    const hasHigh = zones.some(z => z.riskLevel === 'high');
-    const hasMod = zones.some(z => z.riskLevel === 'moderate');
-    const districtRiskLevel = hasHigh ? 'high' : (hasMod ? 'moderate' : 'low');
+    // Derive overall district risk level based on the average risk score
+    const avgScore = zones.length > 0 
+      ? zones.reduce((sum, z) => sum + (z.riskScore || 0), 0) / zones.length 
+      : 0;
+      
+    let districtRiskLevel = 'low';
+    if (avgScore >= 66) districtRiskLevel = 'high';
+    else if (avgScore >= 33) districtRiskLevel = 'moderate';
 
     res.json({ 
       success: true, 
@@ -141,6 +146,51 @@ export const exportZoneReport = async (req, res) => {
     res.setHeader('Content-Disposition', `attachment; filename="dengue_report_${mohZone.replace(/\s+/g, '_')}.csv"`);
     
     res.send(csv);
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+export const notifyZone = async (req, res) => {
+  try {
+    const { mohZone } = req.body;
+    if (!mohZone) return res.status(400).json({ success: false, message: 'MOH Zone is required' });
+
+    const users = await User.find({ mohZone, isVerified: true }).lean();
+    if (users.length === 0) {
+      return res.json({ success: true, message: 'No registered citizens found in this zone.' });
+    }
+
+    const latestPrediction = await RiskPrediction.findOne({ mohZone }).sort({ predictedFor: -1 }).lean();
+    const riskLevel = latestPrediction ? latestPrediction.riskLevel : 'high';
+
+    const alertDocs = [];
+    for (const user of users) {
+      alertDocs.push({
+        userId: user._id,
+        district: user.district,
+        mohZone: user.mohZone,
+        riskLevel: riskLevel,
+        channel: 'web',
+        message: `MOH ALERT: Your local Medical Officer of Health has issued an alert for ${user.mohZone}. Please take immediate precautions.`,
+        sentAt: new Date(),
+        status: 'sent',
+      });
+
+      if (process.env.NODE_ENV === 'production') {
+        try {
+          await sendRiskAlertEmail(user.email, user.firstName || 'Citizen', user.mohZone, riskLevel, 'manual');
+        } catch (err) {
+          console.error(`[MOHController] Failed to send manual alert email to ${user.email}:`, err.message);
+        }
+      }
+    }
+
+    if (alertDocs.length > 0) {
+      await Alert.insertMany(alertDocs);
+    }
+
+    res.json({ success: true, message: `Alert sent successfully to ${users.length} citizens in ${mohZone}.` });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }

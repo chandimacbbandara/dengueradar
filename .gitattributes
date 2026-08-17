@@ -7,3 +7,5 @@
 *.cbm filter=lfs diff=lfs merge=lfs -text
 apps/ml-service/app/models/*.json filter=lfs diff=lfs merge=lfs -text
 ml-pipeline/src/models/*.json filter=lfs diff=lfs merge=lfs -text
+apps/ml-service/app/models/*.txt filter=lfs diff=lfs merge=lfs -text
+ml-pipeline/src/models/*.txt filter=lfs diff=lfs merge=lfs -text
