@@ -8,11 +8,15 @@ export const getLiveStats = async (req, res) => {
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
     sevenDaysAgo.setHours(0, 0, 0, 0);
 
+    const sevenDaysFromNow = new Date();
+    sevenDaysFromNow.setDate(sevenDaysFromNow.getDate() + 7);
+    sevenDaysFromNow.setHours(23, 59, 59, 999);
+
     const [totalUsersReal, distinctDistricts, activeHighRiskZones, latestPrediction] = await Promise.all([
       User.countDocuments(),
       RiskPrediction.distinct('district'),
-      // Find distinct zones that have a 'high' risk prediction in the future window
-      RiskPrediction.distinct('mohZone', { riskLevel: 'high', predictedFor: { $gte: sevenDaysAgo } }).then(zones => zones.length),
+      // Find distinct zones that have a 'high' risk prediction in the Week 1 window
+      RiskPrediction.distinct('mohZone', { riskLevel: 'high', predictedFor: { $gte: sevenDaysAgo, $lte: sevenDaysFromNow } }).then(zones => zones.length),
       RiskPrediction.findOne().sort({ generatedAt: -1 }).select('generatedAt')
     ]);
 
