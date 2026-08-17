@@ -277,7 +277,7 @@ export async function runMLPredictionsAndAlerts() {
     // We store per-zone state that gets propagated between week 1 and week 2
     const zoneState = {};  // key = `${district}::${zone}`
 
-    for (let weekOffset = 1; weekOffset <= 2; weekOffset++) {
+    for (let weekOffset = 1; weekOffset <= 1; weekOffset++) {
       const targetDate = new Date(now.getTime() + weekOffset * weekDur);
       // Normalize to Monday
       const day = targetDate.getDay() || 7;
@@ -423,17 +423,6 @@ export async function runMLPredictionsAndAlerts() {
           { upsert: true }
         );
 
-        // Propagate state for week 2 using SE-style lag shifting
-        if (weekOffset === 1 && zoneState[stateKey]) {
-          const st = zoneState[stateKey];
-          zoneState[stateKey] = {
-            population:    st.population,
-            caseLags:      propagateLags(st.caseLags, predCases),
-            incLags:       propagateIncLags(st.incLags, predCases, st.population),
-            weeksSince:    propagateWeeksSinceOutbreak(st.weeksSince, predCases),
-            districtStats: propagateDistrictStats(st.districtStats, predCases),
-          };
-        }
       }
     }
 
