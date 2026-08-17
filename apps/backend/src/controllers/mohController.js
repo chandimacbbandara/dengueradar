@@ -18,14 +18,13 @@ export const getMohDashboard = async (req, res) => {
     const registeredCitizens = await User.countDocuments({ district, role: 'general' });
 
     // Find the current risk predictions (week 1) for all zones in this district
-    const sevenDaysAgo = new Date();
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-    sevenDaysAgo.setHours(0, 0, 0, 0);
+    const latestPrediction = await RiskPrediction.findOne().sort({ generatedAt: -1 }).select('generatedAt');
+    const windowStart = latestPrediction ? new Date(latestPrediction.generatedAt.getTime() - 6 * 60 * 60 * 1000) : new Date();
 
     const riskPredictions = await RiskPrediction.aggregate([
-      { $match: { district, predictedFor: { $gte: sevenDaysAgo } } },
+      { $match: { district, generatedAt: { $gte: windowStart } } },
       // Sort: highest riskScore first so $first picks the worst prediction for each zone
-      { $sort: { riskScore: -1, predictedFor: 1 } },
+      { $sort: { riskScore: -1 } },
       { $group: {
           _id: '$mohZone',
           riskScore:      { $first: '$riskScore' },
@@ -62,10 +61,14 @@ export const getMohDashboard = async (req, res) => {
       };
     });
 
-    // Derive overall district risk level (highest risk found in any zone)
-    const hasHigh = zones.some(z => z.riskLevel === 'high');
-    const hasMod = zones.some(z => z.riskLevel === 'moderate');
-    const districtRiskLevel = hasHigh ? 'high' : (hasMod ? 'moderate' : 'low');
+    // Derive overall district risk level based on the average risk score
+    const avgScore = zones.length > 0 
+      ? zones.reduce((sum, z) => sum + (z.riskScore || 0), 0) / zones.length 
+      : 0;
+      
+    let districtRiskLevel = 'low';
+    if (avgScore >= 66) districtRiskLevel = 'high';
+    else if (avgScore >= 33) districtRiskLevel = 'moderate';
 
     res.json({ 
       success: true, 

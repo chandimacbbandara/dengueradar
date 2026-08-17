@@ -295,8 +295,30 @@ export async function runMLPredictionsAndAlerts() {
 
         for (const zone of zones) {
           const demographicKey = `${mlDistrictName}_${zone}`;
-          const demo           = MOH_DEMOGRAPHICS[demographicKey];
-          if (!demo) continue;
+          let demo = MOH_DEMOGRAPHICS[demographicKey];
+          
+          if (!demo) {
+            // Check specific known aliases
+            if (mlDistrictName === 'Mullaitivu') {
+              if (zone === 'Puthukkudiyiruppu') demo = MOH_DEMOGRAPHICS['Mullaitivu_Puthukudiyiruppu'];
+              if (zone === 'Thunukkai') demo = MOH_DEMOGRAPHICS['Mullaitivu_Thunukkai(mallavi)'];
+            }
+          }
+
+          if (!demo) {
+            // Fallback to district average
+            const districtDemos = Object.entries(MOH_DEMOGRAPHICS)
+              .filter(([k, v]) => k.startsWith(`${mlDistrictName}_`))
+              .map(([k, v]) => v);
+            
+            if (districtDemos.length > 0) {
+              const avgPop = districtDemos.reduce((sum, d) => sum + d[0], 0) / districtDemos.length;
+              const avgDens = districtDemos.reduce((sum, d) => sum + d[1], 0) / districtDemos.length;
+              demo = [avgPop, avgDens];
+            } else {
+              demo = [50000, 500]; // Absolute fallback
+            }
+          }
 
           const [population, pop_density] = demo;
 
