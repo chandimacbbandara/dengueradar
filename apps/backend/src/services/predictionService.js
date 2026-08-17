@@ -256,17 +256,17 @@ export async function runMLPredictionsAndAlerts() {
         const extracted   = extractLags(rawDistrict, zone, population);
         const districtStats = getDistrictStatsArray(rawDistrict, zone, districtStatsCache);
 
-        // Build weather inputs from current live weather
+        // Build weather inputs from current + accumulated multi-week data
         const weatherInputs = {
           temp_avg:     weather.temperature_mean ?? 27.0,
           temp_max:     weather.temperature_max  ?? 30.0,
           temp_min:     weather.temperature_min  ?? 24.0,
-          temp_avg_4w:  weather.temp_avg_4w  ?? weather.temperature_mean ?? 27.0,
-          humidity:     weather.humidity     ?? 80.0,
-          humidity_4w:  weather.humidity_4w  ?? weather.humidity ?? 80.0,
-          rain_1w:      weather.rainfall     ?? 0.0,
-          rain_2w:      weather.rain_2w      ?? (weather.rainfall ?? 0) * 1.8,
-          rain_4w:      weather.rain_4w      ?? (weather.rainfall ?? 0) * 3.5,
+          temp_avg_4w:  weather.temp_avg_4w      ?? weather.temperature_mean ?? 27.0,
+          humidity:     weather.humidity          ?? 80.0,
+          humidity_4w:  weather.humidity_4w       ?? weather.humidity ?? 80.0,
+          rain_1w:      weather.rain_1w           ?? 0.0,
+          rain_2w:      weather.rain_2w           ?? 0.0,
+          rain_4w:      weather.rain_4w           ?? 0.0,
         };
 
         mohPayloads.push({
