@@ -520,16 +520,29 @@ async function dispatchEscalationAlerts(district, mohZone, riskLevel) {
 export async function sendRiskAlertEmail(to, name, mohZone, riskLevel, alertType = 'escalation') {
   const nodemailer = await import('nodemailer');
 
-  const port = parseInt(process.env.EMAIL_PORT) || 587;
-  const transporter = nodemailer.createTransport({
-    host:   process.env.EMAIL_HOST,
-    port:   port,
-    secure: port === 465,
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS,
-    },
-  });
+  const isGmail = process.env.EMAIL_HOST && process.env.EMAIL_HOST.includes('gmail');
+  
+  let transporter;
+  if (isGmail) {
+    transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
+  } else {
+    const port = parseInt(process.env.EMAIL_PORT) || 587;
+    transporter = nodemailer.createTransport({
+      host:   process.env.EMAIL_HOST,
+      port:   port,
+      secure: port === 465,
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
+  }
 
   const levelColor  = riskLevel === 'high' ? '#EF4444' : '#F59E0B';
   const levelText   = riskLevel.toUpperCase();

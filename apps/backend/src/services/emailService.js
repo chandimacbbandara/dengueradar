@@ -1,6 +1,18 @@
 import nodemailer from 'nodemailer';
 
 const createTransporter = () => {
+  const isGmail = process.env.EMAIL_HOST && process.env.EMAIL_HOST.includes('gmail');
+  
+  if (isGmail) {
+    return nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
+  }
+
   const port = parseInt(process.env.EMAIL_PORT) || 587;
   return nodemailer.createTransport({
     host: process.env.EMAIL_HOST,
