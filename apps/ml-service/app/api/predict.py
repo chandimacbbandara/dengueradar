@@ -6,10 +6,7 @@ Features: 63 (exactly matching pipeline_meta.json feature_cols)
 
 Prediction strategy
 ───────────────────
-• Week 1 — direct inference from the caller's provided lags / stats.
-• Week 2 — the caller re-submits with lag1 = week-1 predicted value (SE-style
-           propagation).  This endpoint always executes a SINGLE inference;
-           iterative propagation lives in the backend prediction service.
+• Single-week inference from the caller's provided lags / stats.
 """
 
 import os
@@ -152,25 +149,6 @@ def _risk_score_from_probs(probs: np.ndarray) -> float:
 def _build_feature_row(moh: MohInput) -> dict:
     """
     Build the 63-column feature dict for a single MohInput.
-
-    Feature order in FEATURE_COLS (from pipeline_meta.json):
-    ['iso_year','cases_lag1','cases_lag2','temp_avg','temp_max','temp_min',
-     'humidity','rain_1w','rain_2w','rain_4w','temp_avg_4w','humidity_4w',
-     'population','pop_density','cases_lag3','cases_lag4','cases_lag5',
-     'cases_lag8','cases_lag12','cases_lag26','cases_lag52',
-     'cases_roll4_mean','cases_roll4_max','cases_roll4_std',
-     'cases_roll8_mean','cases_roll8_max','cases_roll8_std',
-     'cases_roll12_mean','cases_roll12_max','cases_roll12_std',
-     'case_growth_wow','case_accel','case_trend_8w',
-     'inc_lag1','inc_lag2','inc_lag4','inc_lag8',
-     'inc_roll4_mean','inc_roll12_mean',
-     'month','month_sin','month_cos','woy','woy_sin','woy_cos',
-     'district_total_lag1','district_total_lag2','district_total_lag4',
-     'district_mean_lag1','district_max_lag1',
-     'district_total_roll4','district_total_roll12',
-     'district_rank_lag1','district_zscore_lag1',
-     'temp_range','rain_change','heat_index','rain_x_temp','rain_x_humid',
-     'log_pop','log_density','weeks_since_outbreak_lag1','district_cat']
     """
     w = moh.weather
     dt = pd.Timestamp(moh.week_start)
@@ -182,11 +160,10 @@ def _build_feature_row(moh: MohInput) -> dict:
         lags[5], lags[6], lags[7], lags[8]
     )
 
-    # ── Rolling stats (over lags 1-4, 1-8, 1-12) ────────────────────────────
+    # ── Rolling stats ────────────────────────────────────────────────────────
     roll4_vals  = [lag1, lag2, lag3, lag4]
-    roll8_vals  = [lag1, lag2, lag3, lag4, lags[4], lag5, lag8, lags[5]]
-    roll12_vals = [lag1, lag2, lag3, lag4, lags[4], lag5, lag8, lags[5],
-                   lag12, lags[6], lags[7], lag52]
+    roll8_vals  = [lag1, lag2, lag3, lag4, lag5, lag8]
+    roll12_vals = [lag1, lag2, lag3, lag4, lag5, lag8, lag12]
 
     roll4_mean  = float(np.mean(roll4_vals))
     roll4_max   = float(np.max(roll4_vals))
@@ -205,9 +182,9 @@ def _build_feature_row(moh: MohInput) -> dict:
     wow_prev        = float(np.clip((lag2 - lag3) / (lag3 + 1.0), -5, 5))
     case_accel      = float(case_growth_wow - wow_prev)
 
-    # 8-week linear trend (slope of lags 1..8 reversed so index 0 = oldest)
-    trend_series = np.array([lag8, lag5, lag4, lag3, lag2, lag1, lag1, lag1])
-    if np.std(trend_series) > 1e-6 and len(trend_series) >= 2:
+    # 8-week linear trend
+    trend_series = np.array([lag8, lag5, lag4, lag3, lag2, lag1])
+    if np.std(trend_series) > 1e-6:
         case_trend_8w = float(np.polyfit(np.arange(len(trend_series)), trend_series, 1)[0])
     else:
         case_trend_8w = 0.0
@@ -216,7 +193,7 @@ def _build_feature_row(moh: MohInput) -> dict:
     ilags = list(moh.incidence_lags) + [0.0] * 4
     inc_lag1, inc_lag2, inc_lag4, inc_lag8 = ilags[0], ilags[1], ilags[2], ilags[3]
     inc_roll4_mean  = float(np.mean([inc_lag1, inc_lag2, inc_lag4, inc_lag8]))
-    inc_roll12_mean = inc_roll4_mean   # best approximation without 12 points
+    inc_roll12_mean = float(np.mean([inc_lag1, inc_lag2, inc_lag4, inc_lag8]))
 
     # ── Seasonality ─────────────────────────────────────────────────────────
     month   = dt.month
@@ -244,7 +221,7 @@ def _build_feature_row(moh: MohInput) -> dict:
     # ── Categorical ─────────────────────────────────────────────────────────
     district_cat = DISTRICT_TO_IDX.get(moh.district, 0)
 
-    # ── Assemble dict in FEATURE_COLS order ─────────────────────────────────
+    # ── Assemble dict ───────────────────────────────────────────────────────
     row = {
         "iso_year":                 float(iso_year),
         "cases_lag1":               lag1,
@@ -308,25 +285,19 @@ def _build_feature_row(moh: MohInput) -> dict:
         "log_pop":                  log_pop,
         "log_density":              log_density,
         "weeks_since_outbreak_lag1": moh.weeks_since_outbreak,
-        "district_cat":             int(district_cat),   # CatBoost requires int/str, not float
+        "district_cat":             int(district_cat),
     }
     return row
 
 
 def _predict_batch(mohs: list) -> list:
     """
-    Run the 3-model stacking ensemble on a list of MohInput objects.
-    Returns a list of MohPrediction objects (same length, same order).
+    Run the 3-model stacking ensemble.
     """
     rows = [_build_feature_row(m) for m in mohs]
     df   = pd.DataFrame(rows, columns=FEATURE_COLS).fillna(0)
 
-    # CatBoost requires categorical features as integer (not float)
-    # district_cat is the only categorical column (last feature, index 62)
     df["district_cat"] = df["district_cat"].astype(int)
-
-    # Categorical feature column indices for CatBoost
-    cat_feature_indices = [FEATURE_COLS.index(c) for c in PIPELINE_META.get("categorical_cols", ["district_cat"])]
 
     # Classifier inference
     lgb_probs = lgb_model.predict(df)
@@ -344,7 +315,6 @@ def _predict_batch(mohs: list) -> list:
     stacked_reg = np.column_stack([lgb_preds, xgb_preds, cat_preds])
     meta_preds  = meta_reg.predict(stacked_reg)
     
-    # Check if cases need to be exponentiated
     if PIPELINE_META.get("case_count_log_transform", False):
         cases_final = np.clip(np.expm1(meta_preds), 0, None)
     else:
@@ -384,14 +354,6 @@ def _predict_batch(mohs: list) -> list:
 def predict(payload: PredictRequest):
     """
     Single-call inference endpoint.
-
-    Accepts a list of MohInput items (one per MOH zone).
-    Returns tier prediction + probabilities for each.
-
-    The backend prediction service calls this endpoint TWICE:
-      1. With current-week lags → Week-1 prediction.
-      2. With propagated lags (Week-1 predicted cases injected as lag1) → Week-2 prediction.
-    This keeps the ML service stateless while enabling SE-style 2-week forecasting.
     """
     if not _models_ready():
         raise HTTPException(
@@ -403,7 +365,7 @@ def predict(payload: PredictRequest):
         raise HTTPException(status_code=400, detail="mohs list must not be empty.")
 
     predictions = []
-    BATCH = 200  # process in chunks to limit memory usage
+    BATCH = 200
 
     for start in range(0, len(payload.mohs), BATCH):
         chunk = payload.mohs[start: start + BATCH]

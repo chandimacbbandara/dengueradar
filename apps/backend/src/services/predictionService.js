@@ -31,7 +31,6 @@ const DISTRICT_ALIAS = {
 };
 
 // ── Tier thresholds from pipeline_meta (incidence per 100k, from training data)
-// Used to convert predicted tier → approximate case count for SE propagation
 const TIER_MIDPOINTS = { Low: 1.4, Watch: 5.3, Warning: 15.5, Alert: 50.0 };
 
 /**
@@ -46,75 +45,10 @@ function tierToCases(tier, population) {
 }
 
 /**
- * Propagate (SE-style) the case-lag array forward by one week.
- * The model predicts the NEXT week's tier; we inject the predicted case count
- * as the new lag1, shift all others down.
- *
- * @param {number[]} lags       length-9 array [lag1..lag5, lag8, lag12, lag26, lag52]
- * @param {number}   newCases   predicted cases for the next week
- * @returns {number[]}          new length-9 array
- */
-function propagateLags(lags, newCases) {
-  // lags = [l1, l2, l3, l4, l5, l8, l12, l26, l52]
-  // After propagation: new l1 = newCases, l2 = old l1, l3 = old l2 ...
-  // l8, l12, l26, l52 are far enough back that we just shift them by 1 position
-  const [l1, l2, l3, l4, l5, l8, l12, l26, l52] = lags;
-  return [newCases, l1, l2, l3, l4, l5, l8, l12, l26];
-}
-
-/**
- * Propagate the incidence-lag array forward by one week.
- * incidence_lag1 = predicted_cases / population * 100_000
- *
- * @param {number[]} incLags    length-4 array [lag1, lag2, lag4, lag8]
- * @param {number}   newCases
- * @param {number}   population
- * @returns {number[]}
- */
-function propagateIncLags(incLags, newCases, population) {
-  const newInc = population > 0 ? (newCases / population) * 100_000 : 0;
-  const [il1, il2, il4, il8] = incLags;
-  // shift: new lag1 = newInc, new lag2 = old lag1, new lag4 = old lag2, new lag8 = old lag4
-  return [newInc, il1, il2, il4];
-}
-
-/**
- * Propagate district stats forward by one week.
- * We shift totals: new total_lag1 = old total_lag1 + newCases (rough approximation).
- *
- * @param {number[]} dStats  length-9 array
- * @param {number}   newCases
- * @returns {number[]}
- */
-function propagateDistrictStats(dStats, newCases) {
-  // dStats = [total_lag1, total_lag2, total_lag4,
-  //           mean_lag1, max_lag1,
-  //           total_roll4, total_roll12,
-  //           rank_lag1, zscore_lag1]
-  const [t1, t2, t4, m1, mx1, tr4, tr12, rk, zs] = dStats;
-  // Shift: new lag2 = old lag1, new lag4 = old lag2
-  // total_roll4 gets the new week's data blended in (approximate)
-  const newTotal1 = t1 + newCases;
-  return [newTotal1, t1, t2, m1, mx1, (tr4 * 4 + newCases) / 4, (tr12 * 12 + newCases) / 12, rk, zs];
-}
-
-/**
- * Propagate weeks_since_outbreak counter forward.
- * If newCases > 20, reset to 0; otherwise increment by 1 (capped at 52).
- */
-function propagateWeeksSinceOutbreak(current, newCases) {
-  if (newCases > 20) return 0;
-  return Math.min(current + 1, 52);
-}
-
-/**
  * Automatically fetch inputs, call the stacking ensemble ML service,
  * save predictions, and trigger email notifications when risk escalates.
  *
- * Strategy:
- *  Week 1 — direct inference from real observed lags.
- *  Week 2 — SE-style propagation: inject week-1 predicted cases as lag1,
- *            shift all other lags, then infer again.
+ * The model predicts 1 week ahead using real observed lags and current weather.
  */
 export async function runMLPredictionsAndAlerts() {
   try {
@@ -273,182 +207,153 @@ export async function runMLPredictionsAndAlerts() {
       ];
     }
 
-    // ── Iterative 2-week prediction loop ─────────────────────────────────────
-    // We store per-zone state that gets propagated between week 1 and week 2
-    const zoneState = {};  // key = `${district}::${zone}`
+    // ── Single 1-week prediction ──────────────────────────────────────────────
+    const targetDate = new Date(now.getTime() + weekDur);
+    // Normalize to Monday
+    const day = targetDate.getDay() || 7;
+    targetDate.setDate(targetDate.getDate() - day + 1);
+    targetDate.setHours(0, 0, 0, 0);
+    const weekStartStr = targetDate.toISOString().split('T')[0];
 
-    for (let weekOffset = 1; weekOffset <= 1; weekOffset++) {
-      const targetDate = new Date(now.getTime() + weekOffset * weekDur);
-      // Normalize to Monday
-      const day = targetDate.getDay() || 7;
-      targetDate.setDate(targetDate.getDate() - day + 1);
-      targetDate.setHours(0, 0, 0, 0);
-      const weekStartStr = targetDate.toISOString().split('T')[0];
+    const mohPayloads = [];
+    const payloadMeta = [];  // parallel array: { rawDistrict, zone, population }
 
-      const mohPayloads = [];
-      const payloadMeta = [];  // parallel array: { rawDistrict, zone, population }
+    for (const [rawDistrict, zones] of Object.entries(districtZonesMap)) {
+      const mlDistrictName = DISTRICT_ALIAS[rawDistrict] ?? rawDistrict;
+      const weather        = weatherMap[rawDistrict];
+      if (!weather) continue;
 
-      for (const [rawDistrict, zones] of Object.entries(districtZonesMap)) {
-        const mlDistrictName = DISTRICT_ALIAS[rawDistrict] ?? rawDistrict;
-        const weather        = weatherMap[rawDistrict];
-        if (!weather) continue;
+      for (const zone of zones) {
+        const demographicKey = `${mlDistrictName}_${zone}`;
+        let demo = MOH_DEMOGRAPHICS[demographicKey];
+        
+        if (!demo) {
+          // Check specific known aliases
+          if (mlDistrictName === 'Mullaitivu') {
+            if (zone === 'Puthukkudiyiruppu') demo = MOH_DEMOGRAPHICS['Mullaitivu_Puthukudiyiruppu'];
+            if (zone === 'Thunukkai') demo = MOH_DEMOGRAPHICS['Mullaitivu_Thunukkai(mallavi)'];
+          }
+        }
 
-        for (const zone of zones) {
-          const demographicKey = `${mlDistrictName}_${zone}`;
-          let demo = MOH_DEMOGRAPHICS[demographicKey];
+        if (!demo) {
+          // Fallback to district average
+          const districtDemos = Object.entries(MOH_DEMOGRAPHICS)
+            .filter(([k, v]) => k.startsWith(`${mlDistrictName}_`))
+            .map(([k, v]) => v);
           
-          if (!demo) {
-            // Check specific known aliases
-            if (mlDistrictName === 'Mullaitivu') {
-              if (zone === 'Puthukkudiyiruppu') demo = MOH_DEMOGRAPHICS['Mullaitivu_Puthukudiyiruppu'];
-              if (zone === 'Thunukkai') demo = MOH_DEMOGRAPHICS['Mullaitivu_Thunukkai(mallavi)'];
-            }
-          }
-
-          if (!demo) {
-            // Fallback to district average
-            const districtDemos = Object.entries(MOH_DEMOGRAPHICS)
-              .filter(([k, v]) => k.startsWith(`${mlDistrictName}_`))
-              .map(([k, v]) => v);
-            
-            if (districtDemos.length > 0) {
-              const avgPop = districtDemos.reduce((sum, d) => sum + d[0], 0) / districtDemos.length;
-              const avgDens = districtDemos.reduce((sum, d) => sum + d[1], 0) / districtDemos.length;
-              demo = [avgPop, avgDens];
-            } else {
-              demo = [50000, 500]; // Absolute fallback
-            }
-          }
-
-          const [population, pop_density] = demo;
-
-          const stateKey = `${rawDistrict}::${zone}`;
-
-          let caseLags, incLags, weeksSince, districtStats;
-
-          if (weekOffset === 1) {
-            // Week 1: use real observed lags
-            const extracted = extractLags(rawDistrict, zone, population);
-            caseLags         = extracted.caseLags;
-            incLags          = extracted.incLags;
-            weeksSince       = extracted.weeksSince;
-            districtStats    = getDistrictStatsArray(rawDistrict, zone, districtStatsCache);
-
-            // Store initial state for week-2 propagation
-            zoneState[stateKey] = { caseLags, incLags, weeksSince, districtStats, population };
+          if (districtDemos.length > 0) {
+            const avgPop = districtDemos.reduce((sum, d) => sum + d[0], 0) / districtDemos.length;
+            const avgDens = districtDemos.reduce((sum, d) => sum + d[1], 0) / districtDemos.length;
+            demo = [avgPop, avgDens];
           } else {
-            // Week 2: propagate from week-1 prediction (SE-style)
-            if (!zoneState[stateKey]) continue;
-            caseLags      = zoneState[stateKey].caseLags;
-            incLags       = zoneState[stateKey].incLags;
-            weeksSince    = zoneState[stateKey].weeksSince;
-            districtStats = zoneState[stateKey].districtStats;
-          }
-
-          // Build weather inputs (for week 2 we reuse current weather as best estimate)
-          const weatherInputs = {
-            temp_avg:     weather.temperature_mean ?? 27.0,
-            temp_max:     weather.temperature_max  ?? 30.0,
-            temp_min:     weather.temperature_min  ?? 24.0,
-            temp_avg_4w:  weather.temp_avg_4w  ?? weather.temperature_mean ?? 27.0,
-            humidity:     weather.humidity     ?? 80.0,
-            humidity_4w:  weather.humidity_4w  ?? weather.humidity ?? 80.0,
-            rain_1w:      weather.rainfall     ?? 0.0,
-            rain_2w:      weather.rain_2w      ?? (weather.rainfall ?? 0) * 1.8,
-            rain_4w:      weather.rain_4w      ?? (weather.rainfall ?? 0) * 3.5,
-          };
-
-          mohPayloads.push({
-            moh_name:              zone,
-            district:              mlDistrictName,
-            week_start:            weekStartStr,
-            cases_lags:            caseLags,
-            incidence_lags:        incLags,
-            district_stats:        districtStats,
-            weeks_since_outbreak:  weeksSince,
-            weather:               weatherInputs,
-            population,
-            pop_density,
-          });
-
-          payloadMeta.push({ rawDistrict, zone, population });
-        }
-      }
-
-      if (mohPayloads.length === 0) {
-        console.log(`[PredictionService] ⚠️  No MOH zones for week ${weekOffset}. Skipping.`);
-        continue;
-      }
-
-      // 5. Call the ML service
-      let predictions = [];
-      try {
-        const mlResponse = await axios.post(
-          ML_SERVICE_URL,
-          { mohs: mohPayloads },
-          { timeout: 30_000 }
-        );
-        predictions = mlResponse.data?.predictions ?? [];
-        console.log(`[PredictionService] 🤖 ML returned ${predictions.length} predictions for week ${weekOffset}`);
-      } catch (axiosErr) {
-        console.error(`[PredictionService] ❌ ML service call failed (week ${weekOffset}):`, axiosErr.message);
-        continue;
-      }
-
-      // 6. Persist predictions + trigger escalation alerts
-      for (let i = 0; i < predictions.length; i++) {
-        const pred       = predictions[i];
-        const meta       = payloadMeta[i];
-        const stateKey   = `${meta.rawDistrict}::${meta.zone}`;
-
-        const riskLevel  = pred.risk_level;   // "low" | "moderate" | "high"
-        const predCases  = pred.predicted_cases ?? tierToCases(pred.predicted_tier, meta.population);
-
-        // Escalation check only for week 1 to avoid alert spam
-        if (weekOffset === 1) {
-          const prevPred = await RiskPrediction.findOne({
-            district: meta.rawDistrict,
-            mohZone:  meta.zone,
-          }).sort({ predictedFor: -1 }).lean();
-
-          if (isEscalated(prevPred?.riskLevel, riskLevel)) {
-            await dispatchEscalationAlerts(meta.rawDistrict, meta.zone, riskLevel);
+            demo = [50000, 500]; // Absolute fallback
           }
         }
 
-        // Upsert prediction document
-        await RiskPrediction.findOneAndUpdate(
-          {
-            district:     meta.rawDistrict,
-            mohZone:      meta.zone,
-            predictedFor: targetDate,
-          },
-          {
-            $set: {
-              district:       meta.rawDistrict,
-              mohZone:        meta.zone,
-              riskScore:      pred.risk_score,
-              riskLevel,
-              predictedCases: predCases,
-              predictedFor:   targetDate,
-              generatedAt:    new Date(),
-              // Extra fields for the new model
-              predictedTier:  pred.predicted_tier,
-              pLow:           pred.p_low,
-              pWatch:         pred.p_watch,
-              pWarning:       pred.p_warning,
-              pAlert:         pred.p_alert,
-              alertHighConfidence: pred.alert_high_confidence,
-              modelVersion:   'v2-stacking',
-            }
-          },
-          { upsert: true }
-        );
+        const [population, pop_density] = demo;
 
+        // Use real observed lags from the database
+        const extracted   = extractLags(rawDistrict, zone, population);
+        const districtStats = getDistrictStatsArray(rawDistrict, zone, districtStatsCache);
+
+        // Build weather inputs from current + accumulated multi-week data
+        const weatherInputs = {
+          temp_avg:     weather.temperature_mean ?? 27.0,
+          temp_max:     weather.temperature_max  ?? 30.0,
+          temp_min:     weather.temperature_min  ?? 24.0,
+          temp_avg_4w:  weather.temp_avg_4w      ?? weather.temperature_mean ?? 27.0,
+          humidity:     weather.humidity          ?? 80.0,
+          humidity_4w:  weather.humidity_4w       ?? weather.humidity ?? 80.0,
+          rain_1w:      weather.rain_1w           ?? 0.0,
+          rain_2w:      weather.rain_2w           ?? 0.0,
+          rain_4w:      weather.rain_4w           ?? 0.0,
+        };
+
+        mohPayloads.push({
+          moh_name:              zone,
+          district:              mlDistrictName,
+          week_start:            weekStartStr,
+          cases_lags:            extracted.caseLags,
+          incidence_lags:        extracted.incLags,
+          district_stats:        districtStats,
+          weeks_since_outbreak:  extracted.weeksSince,
+          weather:               weatherInputs,
+          population,
+          pop_density,
+        });
+
+        payloadMeta.push({ rawDistrict, zone, population });
       }
     }
 
-    console.log('[PredictionService] ✅ 2-Week predictions pipeline completed successfully');
+    if (mohPayloads.length === 0) {
+      console.log('[PredictionService] ⚠️  No MOH zones found. Skipping prediction.');
+      return;
+    }
+
+    // 5. Call the ML service
+    let predictions = [];
+    try {
+      const mlResponse = await axios.post(
+        ML_SERVICE_URL,
+        { mohs: mohPayloads },
+        { timeout: 30_000 }
+      );
+      predictions = mlResponse.data?.predictions ?? [];
+      console.log(`[PredictionService] 🤖 ML returned ${predictions.length} predictions`);
+    } catch (axiosErr) {
+      console.error('[PredictionService] ❌ ML service call failed:', axiosErr.message);
+      return;
+    }
+
+    // 6. Persist predictions + trigger escalation alerts
+    for (let i = 0; i < predictions.length; i++) {
+      const pred = predictions[i];
+      const meta = payloadMeta[i];
+
+      const riskLevel = pred.risk_level;   // "low" | "moderate" | "high"
+      const predCases = pred.predicted_cases ?? tierToCases(pred.predicted_tier, meta.population);
+
+      // Check if risk has escalated compared to the previous prediction
+      const prevPred = await RiskPrediction.findOne({
+        district: meta.rawDistrict,
+        mohZone:  meta.zone,
+      }).sort({ predictedFor: -1 }).lean();
+
+      if (isEscalated(prevPred?.riskLevel, riskLevel)) {
+        await dispatchEscalationAlerts(meta.rawDistrict, meta.zone, riskLevel);
+      }
+
+      // Upsert prediction document
+      await RiskPrediction.findOneAndUpdate(
+        {
+          district:     meta.rawDistrict,
+          mohZone:      meta.zone,
+          predictedFor: targetDate,
+        },
+        {
+          $set: {
+            district:       meta.rawDistrict,
+            mohZone:        meta.zone,
+            riskScore:      pred.risk_score,
+            riskLevel,
+            predictedCases: predCases,
+            predictedFor:   targetDate,
+            generatedAt:    new Date(),
+            predictedTier:  pred.predicted_tier,
+            pLow:           pred.p_low,
+            pWatch:         pred.p_watch,
+            pWarning:       pred.p_warning,
+            pAlert:         pred.p_alert,
+            alertHighConfidence: pred.alert_high_confidence,
+            modelVersion:   'v2-stacking',
+          }
+        },
+        { upsert: true }
+      );
+    }
+
+    console.log('[PredictionService] ✅ 1-week prediction pipeline completed successfully');
   } catch (err) {
     console.error('[PredictionService] ❌ Pipeline error:', err.message, err.stack);
   }

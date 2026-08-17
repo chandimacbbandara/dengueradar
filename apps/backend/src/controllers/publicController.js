@@ -40,7 +40,19 @@ export const getNationalRisk = async (req, res) => {
 
     const nationalRisk = await RiskPrediction.aggregate([
       { $match: { generatedAt: { $gte: windowStart } } },
-      { $sort: { riskScore: -1 } },
+      { $addFields: {
+          severity: {
+            $switch: {
+              branches: [
+                { case: { $eq: ['$riskLevel', 'high'] }, then: 3 },
+                { case: { $eq: ['$riskLevel', 'moderate'] }, then: 2 },
+                { case: { $eq: ['$riskLevel', 'low'] }, then: 1 }
+              ],
+              default: 0
+            }
+          }
+      }},
+      { $sort: { severity: -1, riskScore: -1 } },
       { $group: {
           _id: '$district',
           riskScore: { $first: '$riskScore' },
