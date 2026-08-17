@@ -5,8 +5,8 @@ from app.api.predict import router as predict_router
 
 app = FastAPI(
     title="DengueRadar ML Inference Service",
-    description="Inference API using XGBoost Classifier & Regressor",
-    version="1.0.0"
+    description="Inference API using LightGBM + XGBoost + CatBoost 3-model stacking ensemble",
+    version="2.0.0"
 )
 
 app.add_middleware(

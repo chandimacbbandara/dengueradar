@@ -52,3 +52,11 @@ env/
 *.h5
 *.model
 mlruns/
+
+# ── Allow deployment model artifacts in models/ dirs (tracked via Git LFS) ────
+!apps/ml-service/app/models/*.pkl
+!apps/ml-service/app/models/*.keras
+!apps/ml-service/app/models/*.cbm
+!ml-pipeline/src/models/*.pkl
+!ml-pipeline/src/models/*.keras
+!ml-pipeline/src/models/*.cbm

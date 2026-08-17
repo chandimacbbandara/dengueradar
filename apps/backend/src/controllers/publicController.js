@@ -11,7 +11,8 @@ export const getLiveStats = async (req, res) => {
     const [totalUsersReal, distinctDistricts, activeHighRiskZones, latestPrediction] = await Promise.all([
       User.countDocuments(),
       RiskPrediction.distinct('district'),
-      RiskPrediction.countDocuments({ riskLevel: 'high', predictedFor: { $gte: sevenDaysAgo } }),
+      // Find distinct zones that have a 'high' risk prediction in the future window
+      RiskPrediction.distinct('mohZone', { riskLevel: 'high', predictedFor: { $gte: sevenDaysAgo } }).then(zones => zones.length),
       RiskPrediction.findOne().sort({ generatedAt: -1 }).select('generatedAt')
     ]);
 
@@ -39,6 +40,7 @@ export const getNationalRisk = async (req, res) => {
 
     const nationalRisk = await RiskPrediction.aggregate([
       { $match: { predictedFor: { $gte: sevenDaysAgo } } },
+      // Sort: earliest week first so $first picks the 1st week prediction for the map
       { $sort: { predictedFor: 1, riskScore: -1 } },
       { $group: {
           _id: '$district',
@@ -99,11 +101,27 @@ export const getTopZones = async (req, res) => {
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
     sevenDaysAgo.setHours(0, 0, 0, 0);
 
-    const topZones = await RiskPrediction.find({ predictedFor: { $gte: sevenDaysAgo } })
-      .sort({ riskScore: -1 })
-      .limit(3)
-      .select('mohZone district riskScore riskLevel predictedFor -_id')
-      .lean();
+    const topZones = await RiskPrediction.aggregate([
+      { $match: { predictedFor: { $gte: sevenDaysAgo } } },
+      { $sort: { riskScore: -1, predictedFor: 1 } },
+      { $group: {
+          _id: '$mohZone',
+          district: { $first: '$district' },
+          riskScore: { $first: '$riskScore' },
+          riskLevel: { $first: '$riskLevel' },
+          predictedFor: { $first: '$predictedFor' }
+      }},
+      { $sort: { riskScore: -1 } },
+      { $limit: 3 },
+      { $project: {
+          mohZone: '$_id',
+          district: 1,
+          riskScore: 1,
+          riskLevel: 1,
+          predictedFor: 1,
+          _id: 0
+      }}
+    ]);
 
     res.json({ success: true, data: topZones });
   } catch (err) {

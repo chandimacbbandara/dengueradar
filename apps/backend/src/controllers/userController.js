@@ -7,10 +7,11 @@ export const getDashboard = async (req, res) => {
   try {
     const { district, mohZone, _id } = req.user;
     
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    sevenDaysAgo.setHours(0, 0, 0, 0);
 
-    const riskInfo = await RiskPrediction.findOne({ district, mohZone, predictedFor: { $gte: today } })
+    const riskInfo = await RiskPrediction.findOne({ district, mohZone, predictedFor: { $gte: sevenDaysAgo } })
       .sort({ predictedFor: 1 })
       .select('district mohZone riskScore riskLevel predictedFor -_id');
 
@@ -196,21 +197,30 @@ export const getZoneTrend = async (req, res) => {
       }
     }
 
-    /* ── Current risk snapshot ── */
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    /* ── Current risk snapshot: pick the HIGHEST risk upcoming week ── */
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    sevenDaysAgo.setHours(0, 0, 0, 0);
 
-    const riskInfo = await RiskPrediction.findOne({ district, mohZone, predictedFor: { $gte: today } })
-      .sort({ predictedFor: 1 })
-      .select('riskScore riskLevel predictedFor -_id')
-      .lean();
-
-    /* ── Fetch future AI Predictions ── */
-    const futurePredictions = await RiskPrediction.find({
+    // Get ALL upcoming predictions, then surface the worst one for the badge
+    const allFuturePredictions = await RiskPrediction.find({
       district,
       mohZone,
       predictedFor: { $gt: now }
     }).sort({ predictedFor: 1 }).lean();
+
+    // Pick the highest-risk prediction for the badge (safety-first)
+    const RISK_ORDER = { high: 2, moderate: 1, low: 0 };
+    const riskInfo = allFuturePredictions.length > 0
+      ? allFuturePredictions.reduce((best, cur) =>
+          (RISK_ORDER[cur.riskLevel] ?? 0) >= (RISK_ORDER[best.riskLevel] ?? 0) ? cur : best
+        )
+      : await RiskPrediction.findOne({ district, mohZone, predictedFor: { $gte: sevenDaysAgo } })
+          .sort({ riskScore: -1 })
+          .select('riskScore riskLevel predictedFor predictedTier pAlert -_id')
+          .lean();
+
+    const futurePredictions = allFuturePredictions;
 
     const predictedTrendMap = {};
     if (futurePredictions.length > 0) {
