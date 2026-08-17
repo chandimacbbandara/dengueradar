@@ -132,7 +132,15 @@ def _predicted_cases_from_tier(tier: str, population: float = 100_000) -> int:
     mid_inc = mids.get(tier, 0.0)  # incidence per 100k
     pop = max(population, 1_000)   # safety floor
     approx_cases = int(round(mid_inc / 100_000 * pop))
-    return max(0, approx_cases)
+    
+    # Enforce strict user-defined boundaries based on the ML Model's predicted Status
+    risk_level = _tier_to_risk_level(tier)
+    if risk_level == "low":
+        return max(1, min(4, approx_cases))
+    elif risk_level == "moderate":
+        return max(5, min(8, approx_cases))
+    else: # high
+        return max(9, approx_cases)
 
 
 def _build_feature_row(moh: MohInput) -> dict:
@@ -334,14 +342,6 @@ def _predict_batch(mohs: list) -> list:
 
         tier = INT_TO_TIER[tier_idx]
         predicted_cases = _predicted_cases_from_tier(tier, moh.population)
-        
-        # Override risk level strictly based on predicted case boundaries
-        if predicted_cases <= 4:
-            risk_level = "low"
-        elif predicted_cases <= 8:
-            risk_level = "moderate"
-        else:
-            risk_level = "high"
 
         results.append(MohPrediction(
             moh_name=moh.moh_name,
@@ -354,7 +354,7 @@ def _predict_batch(mohs: list) -> list:
             p_alert=float(probs[3]),
             alert_high_confidence=bool(probs[3] > ALERT_THRESHOLD),
             predicted_cases=predicted_cases,
-            risk_level=risk_level,
+            risk_level=_tier_to_risk_level(tier),
             risk_score=_risk_score_from_probs(probs),
         ))
     return results
