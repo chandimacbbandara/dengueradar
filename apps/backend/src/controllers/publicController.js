@@ -105,8 +105,12 @@ export const getTopZones = async (req, res) => {
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
     sevenDaysAgo.setHours(0, 0, 0, 0);
 
+    const sevenDaysFromNow = new Date();
+    sevenDaysFromNow.setDate(sevenDaysFromNow.getDate() + 7);
+    sevenDaysFromNow.setHours(23, 59, 59, 999);
+
     const topZones = await RiskPrediction.aggregate([
-      { $match: { predictedFor: { $gte: sevenDaysAgo } } },
+      { $match: { predictedFor: { $gte: sevenDaysAgo, $lte: sevenDaysFromNow } } },
       { $sort: { riskScore: -1, predictedFor: 1 } },
       { $group: {
           _id: '$mohZone',
