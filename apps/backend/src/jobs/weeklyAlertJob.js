@@ -50,7 +50,7 @@ export function startWeeklyAlertJob() {
 
         if (process.env.NODE_ENV === 'production') {
           try {
-            await sendRiskAlertEmail(email, name, user.mohZone, 'high', true);
+            await sendRiskAlertEmail(email, name, user.mohZone, 'high', 'weekly');
           } catch (err) {
             console.error(`[WeeklyAlertJob] Failed to send email to ${email}:`, err.message);
           }
