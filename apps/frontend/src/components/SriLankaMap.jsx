@@ -40,9 +40,16 @@ export default function SriLankaMap({ riskData }) {
   if (loading) return <div className="loading-center"><div className="spinner"></div></div>;
   if (error) return <div className="alert alert-error">Failed to load map data. Please try again later.</div>;
 
+  const normalizeStr = (str) => {
+    if (!str) return '';
+    const s = str.toLowerCase().replace(/[^a-z]/g, '');
+    if (s.includes('mulathiv') || s.includes('mullaitiv') || s.includes('mulativ')) return 'mullaitivu';
+    return s;
+  };
+
   const styleFeature = (feature) => {
-    const districtName = feature.properties.name || feature.properties.NAME_1 || feature.properties.ADM2_EN;
-    const districtData = riskData?.find(d => d.district?.toLowerCase() === districtName?.toLowerCase());
+    const geoName = feature.properties.name || feature.properties.NAME_1 || feature.properties.ADM2_EN;
+    const districtData = riskData?.find(d => normalizeStr(d.district) === normalizeStr(geoName));
     return {
       fillColor: getRiskColor(districtData?.riskLevel),
       weight: 1,
@@ -53,10 +60,10 @@ export default function SriLankaMap({ riskData }) {
   };
 
   const onEachFeature = (feature, layer) => {
-    const districtName = feature.properties.name || feature.properties.NAME_1 || feature.properties.ADM2_EN;
-    const districtData = riskData?.find(d => d.district?.toLowerCase() === districtName?.toLowerCase());
+    const geoName = feature.properties.name || feature.properties.NAME_1 || feature.properties.ADM2_EN;
+    const districtData = riskData?.find(d => normalizeStr(d.district) === normalizeStr(geoName));
     
-    let popupContent = `<strong>${districtName}</strong><br/>`;
+    let popupContent = `<strong>${geoName}</strong><br/>`;
     if (districtData) {
       popupContent += `Risk Score: ${Math.round(districtData.riskScore)}<br/>
       Level: <span class="risk-badge ${districtData.riskLevel}">${districtData.riskLevel.toUpperCase()}</span>`;
