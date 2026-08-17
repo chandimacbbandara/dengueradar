@@ -498,7 +498,7 @@ async function dispatchEscalationAlerts(district, mohZone, riskLevel) {
 
       if (process.env.NODE_ENV === 'production') {
         try {
-          await sendRiskAlertEmail(email, name, mohZone, riskLevel);
+          await sendRiskAlertEmail(email, name, mohZone, riskLevel, 'escalation');
         } catch (emailErr) {
           console.error(`[PredictionService] Failed to send email to ${email}:`, emailErr.message);
         }
@@ -515,9 +515,9 @@ async function dispatchEscalationAlerts(district, mohZone, riskLevel) {
 }
 
 /**
- * Beautiful HTML email notifying users about risk level escalation or weekly high risk.
+ * Beautiful HTML email notifying users about risk level escalation, weekly high risk, or manual MOH alerts.
  */
-export async function sendRiskAlertEmail(to, name, mohZone, riskLevel, isWeekly = false) {
+export async function sendRiskAlertEmail(to, name, mohZone, riskLevel, alertType = 'escalation') {
   const nodemailer = await import('nodemailer');
 
   const transporter = nodemailer.createTransport({
@@ -557,7 +557,11 @@ export async function sendRiskAlertEmail(to, name, mohZone, riskLevel, isWeekly 
             <td style="padding: 40px 30px; color: #334155;">
               <p style="font-size: 16px; line-height: 1.6; margin: 0 0 20px 0;">Hello ${name},</p>
               <p style="font-size: 16px; line-height: 1.6; margin: 0 0 25px 0;">
-                ${isWeekly ? 'Our AI model indicates that your registered zone is currently at a HIGH risk level:' : 'Our AI model has detected a risk level escalation in your registered zone:'}
+                ${alertType === 'manual' 
+                  ? 'Your local Medical Officer of Health (MOH) has issued an official alert for your zone:' 
+                  : alertType === 'weekly' 
+                    ? 'Our AI model indicates that your registered zone is currently at a HIGH risk level:' 
+                    : 'Our AI model has detected a risk level escalation in your registered zone:'}
               </p>
 
               <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; text-align: center; margin-bottom: 30px;">

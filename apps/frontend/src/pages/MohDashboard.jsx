@@ -58,7 +58,7 @@ export default function MohDashboard() {
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', `dengue_report_${zoneName.replace(/\\s+/g, '_')}.csv`);
+      link.setAttribute('download', `dengue_report_${zoneName.replace(/\s+/g, '_')}.csv`);
       document.body.appendChild(link);
       link.click();
       link.remove();
@@ -66,6 +66,16 @@ export default function MohDashboard() {
       toast.success('Export downloaded!', { id: 'export' });
     } catch(e) {
       toast.error('Export failed', { id: 'export' });
+    }
+  };
+
+  const handleSendAlert = async (zoneName) => {
+    try {
+      toast.loading(`Sending alerts to citizens in ${zoneName}...`, { id: 'notify' });
+      const res = await mohAPI.notifyZone(zoneName);
+      toast.success(res.data.message || 'Alert sent!', { id: 'notify' });
+    } catch(e) {
+      toast.error('Failed to send alert', { id: 'notify' });
     }
   };
 
@@ -189,10 +199,30 @@ export default function MohDashboard() {
                     padding: '12px',
                     fontSize: '14px',
                     fontWeight: 700,
-                    textTransform: 'uppercase'
+                    textTransform: 'uppercase',
+                    marginBottom: '8px'
                   }}
                 >
                    Download {selectedZone} Report
+                </button>
+                <button 
+                  onClick={() => handleSendAlert(selectedZone)}
+                  className="btn w-full"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                    padding: '12px',
+                    fontSize: '14px',
+                    fontWeight: 700,
+                    textTransform: 'uppercase',
+                    backgroundColor: '#EF4444',
+                    color: 'white',
+                    border: 'none'
+                  }}
+                >
+                   Notify Citizens in {selectedZone}
                 </button>
               </div>
             )}

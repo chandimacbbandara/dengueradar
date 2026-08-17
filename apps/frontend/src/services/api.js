@@ -72,6 +72,7 @@ export const mohAPI = {
   getDashboard: (district) => api.get(district ? `/moh/dashboard?district=${encodeURIComponent(district)}` : '/moh/dashboard'),
   getZoneReport: (mohZone) => api.get(`/moh/reports/${encodeURIComponent(mohZone)}`),
   exportZoneReport: (mohZone) => api.get(`/moh/reports/${encodeURIComponent(mohZone)}/export`, { responseType: 'blob' }),
+  notifyZone: (mohZone) => api.post('/moh/notify-zone', { mohZone }),
 };
 
 export const weatherAPI = {
