@@ -112,26 +112,26 @@ def _risk_score_from_probs(probs: np.ndarray) -> float:
     return float(np.dot(probs, weights))
 
 
-def _predicted_cases_from_tier(tier: str) -> int:
+def _predicted_cases_from_tier(tier: str, population: float = 100_000) -> int:
     """
-    Return a rough case estimate for the predicted tier.
-    Based on the tier incidence thresholds in pipeline_meta.json:
+    Return a realistic case estimate for the predicted tier.
+    Uses tier midpoints (incidence per 100k) scaled to the actual MOH zone population.
+
+    Tier boundaries from pipeline_meta.json:
        T1 = ~2.75  (Low/Watch boundary)
        T2 = ~7.94  (Watch/Warning boundary)
        T3 = ~23.03 (Warning/Alert boundary)
-    We use the midpoint of each band (incidence per 100k) and back-calculate
-    assuming 100k population as a reference.
     """
-    # midpoints per band
+    # Incidence midpoints per band (cases per 100k people)
     mids = {
-        "Low":     TIER_THRESHOLDS[0] / 2,
-        "Watch":   (TIER_THRESHOLDS[0] + TIER_THRESHOLDS[1]) / 2,
-        "Warning": (TIER_THRESHOLDS[1] + TIER_THRESHOLDS[2]) / 2,
-        "Alert":   TIER_THRESHOLDS[2] * 2,
+        "Low":     TIER_THRESHOLDS[0] / 2,                              # ~1.4
+        "Watch":   (TIER_THRESHOLDS[0] + TIER_THRESHOLDS[1]) / 2,      # ~5.3
+        "Warning": (TIER_THRESHOLDS[1] + TIER_THRESHOLDS[2]) / 2,      # ~15.5
+        "Alert":   TIER_THRESHOLDS[2] * 2,                              # ~46.0
     }
-    # convert incidence (per 100k) to raw cases assuming reference population 100k
-    mid_inc = mids.get(tier, 0.0)
-    approx_cases = int(round(mid_inc / 100_000 * 100_000))  # = mid_inc
+    mid_inc = mids.get(tier, 0.0)  # incidence per 100k
+    pop = max(population, 1_000)   # safety floor
+    approx_cases = int(round(mid_inc / 100_000 * pop))
     return max(0, approx_cases)
 
 
@@ -343,7 +343,7 @@ def _predict_batch(mohs: list) -> list:
             p_warning=float(probs[2]),
             p_alert=float(probs[3]),
             alert_high_confidence=bool(probs[3] > ALERT_THRESHOLD),
-            predicted_cases=_predicted_cases_from_tier(tier),
+            predicted_cases=_predicted_cases_from_tier(tier, moh.population),
             risk_level=_tier_to_risk_level(tier),
             risk_score=_risk_score_from_probs(probs),
         ))

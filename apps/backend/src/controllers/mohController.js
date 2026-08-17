@@ -24,11 +24,15 @@ export const getMohDashboard = async (req, res) => {
 
     const riskPredictions = await RiskPrediction.aggregate([
       { $match: { district, predictedFor: { $gte: sevenDaysAgo } } },
-      { $sort: { predictedFor: 1, riskScore: -1 } },
+      // Sort: highest riskScore first so $first picks the worst prediction for each zone
+      { $sort: { riskScore: -1, predictedFor: 1 } },
       { $group: {
           _id: '$mohZone',
-          riskScore: { $first: '$riskScore' },
-          riskLevel: { $first: '$riskLevel' }
+          riskScore:      { $first: '$riskScore' },
+          riskLevel:      { $first: '$riskLevel' },
+          predictedTier:  { $first: '$predictedTier' },
+          pAlert:         { $first: '$pAlert' },
+          predictedFor:   { $first: '$predictedFor' }
       }}
     ]);
 
