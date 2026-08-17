@@ -19,6 +19,7 @@ import mohRoutes from './routes/moh.js';
 import weatherRoutes from './routes/weather.js';
 import adminRoutes from './routes/admin.js';
 import { startWeatherJob } from './jobs/weatherJob.js';
+import { startWeeklyAlertJob } from './jobs/weeklyAlertJob.js';
 
 const app = express();
 
@@ -70,8 +71,10 @@ const PORT = process.env.PORT || 5000;
 
 connectDB().then(() => {
   app.listen(PORT, () => console.log(`DengueRadar API running on port ${PORT}`));
-  // Start the scheduled weather fetch job (runs immediately + every 4 h)
+  // Start the scheduled weather fetch job (runs immediately + every 30 min)
   startWeatherJob();
+  // Start the weekly high-risk alert job (runs every Sunday at midnight)
+  startWeeklyAlertJob();
 });
 
 export default app;
