@@ -76,6 +76,14 @@ export default function MohDashboard() {
   // Prep data for charts
   const zoneChartData = data?.zones?.map(z => ({ name: z.name, score: z.riskScore })) || [];
 
+  // Determine what to show in the top KPI cards
+  const selectedZoneData = selectedZone ? data?.zones?.find(z => z.name === selectedZone) : null;
+  const displayRiskLevel = selectedZoneData ? selectedZoneData.riskLevel : data?.districtRiskLevel;
+  const displayCases = selectedZoneData ? selectedZoneData.cases : data?.totalCasesMonth;
+  const displayUsers = selectedZoneData ? selectedZoneData.users : data?.registeredCitizens;
+  const displayZonesCount = selectedZoneData ? 1 : data?.zones?.length;
+  const areaLabel = selectedZoneData ? 'Zone' : 'District';
+
   return (
     <div className="dashboard-layout">
       <Navbar />
@@ -97,22 +105,22 @@ export default function MohDashboard() {
         {/* Stats Row */}
         <div className="grid-4">
           <div className="card p-6">
-            <div className="text-sm font-bold text-muted uppercase tracking-wider mb-2">District Risk Level</div>
+            <div className="text-sm font-bold text-muted uppercase tracking-wider mb-2">{areaLabel} Risk Level</div>
             <div className="text-3xl font-bold mb-2">
-              <RiskBadge level={data?.districtRiskLevel || 'moderate'} className="text-base px-3 py-1" />
+              <RiskBadge level={displayRiskLevel || 'moderate'} className="text-base px-3 py-1" />
             </div>
           </div>
           <div className="card p-6">
             <div className="text-sm font-bold text-muted uppercase tracking-wider mb-2">Total Cases (Month)</div>
-            <div className="text-3xl font-bold text-primary">{data?.totalCasesMonth || 0}</div>
+            <div className="text-3xl font-bold text-primary">{displayCases || 0}</div>
           </div>
           <div className="card p-6">
             <div className="text-sm font-bold text-muted uppercase tracking-wider mb-2">Registered Citizens</div>
-            <div className="text-3xl font-bold text-primary">{data?.registeredCitizens || 0}</div>
+            <div className="text-3xl font-bold text-primary">{displayUsers || 0}</div>
           </div>
           <div className="card p-6">
             <div className="text-sm font-bold text-muted uppercase tracking-wider mb-2">Zones Monitored</div>
-            <div className="text-3xl font-bold text-primary">{data?.zones?.length || 0}</div>
+            <div className="text-3xl font-bold text-primary">{displayZonesCount || 0}</div>
           </div>
         </div>
 
