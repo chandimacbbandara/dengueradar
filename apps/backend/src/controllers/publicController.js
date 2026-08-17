@@ -40,8 +40,8 @@ export const getNationalRisk = async (req, res) => {
 
     const nationalRisk = await RiskPrediction.aggregate([
       { $match: { predictedFor: { $gte: sevenDaysAgo } } },
-      // Sort: highest riskScore first, so $first picks the worst prediction for the district
-      { $sort: { riskScore: -1, predictedFor: 1 } },
+      // Sort: earliest week first so $first picks the 1st week prediction for the map
+      { $sort: { predictedFor: 1, riskScore: -1 } },
       { $group: {
           _id: '$district',
           riskScore: { $first: '$riskScore' },

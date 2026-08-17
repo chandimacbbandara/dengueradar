@@ -333,6 +333,16 @@ def _predict_batch(mohs: list) -> list:
             tier_idx = 2
 
         tier = INT_TO_TIER[tier_idx]
+        predicted_cases = _predicted_cases_from_tier(tier, moh.population)
+        
+        # Override risk level strictly based on predicted case boundaries
+        if predicted_cases <= 4:
+            risk_level = "low"
+        elif predicted_cases <= 8:
+            risk_level = "moderate"
+        else:
+            risk_level = "high"
+
         results.append(MohPrediction(
             moh_name=moh.moh_name,
             district=moh.district,
@@ -343,8 +353,8 @@ def _predict_batch(mohs: list) -> list:
             p_warning=float(probs[2]),
             p_alert=float(probs[3]),
             alert_high_confidence=bool(probs[3] > ALERT_THRESHOLD),
-            predicted_cases=_predicted_cases_from_tier(tier, moh.population),
-            risk_level=_tier_to_risk_level(tier),
+            predicted_cases=predicted_cases,
+            risk_level=risk_level,
             risk_score=_risk_score_from_probs(probs),
         ))
     return results
