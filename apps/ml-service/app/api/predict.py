@@ -26,14 +26,14 @@ router = APIRouter()
 # ── Paths ────────────────────────────────────────────────────────────────────
 MODEL_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "models")
 META_JSON_PATH  = os.path.join(MODEL_DIR, "pipeline_meta.json")
-META_3_PKL_PATH = os.path.join(MODEL_DIR, "meta_3model.pkl")
+META_3_PKL_PATH = os.path.join(MODEL_DIR, "meta_classifier.pkl")
 LGB_PATH        = os.path.join(MODEL_DIR, "lgb_classifier.txt")
 XGB_PATH        = os.path.join(MODEL_DIR, "xgb_classifier.json")
 CAT_PATH        = os.path.join(MODEL_DIR, "cat_classifier.cbm")
 LGB_REG_PATH    = os.path.join(MODEL_DIR, "lgb_regressor.txt")
 XGB_REG_PATH    = os.path.join(MODEL_DIR, "xgb_regressor.json")
 CAT_REG_PATH    = os.path.join(MODEL_DIR, "cat_regressor.cbm")
-META_REG_PATH   = os.path.join(MODEL_DIR, "meta_reg.pkl")
+META_REG_PATH   = os.path.join(MODEL_DIR, "meta_regressor.pkl")
 
 # ── Load pipeline metadata ───────────────────────────────────────────────────
 try:
