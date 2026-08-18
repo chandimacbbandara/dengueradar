@@ -4,6 +4,7 @@ import { authAPI } from '../services/api.js';
 import toast from 'react-hot-toast';
 import DistrictZoneSelect from '../components/DistrictZoneSelect.jsx';
 import PasswordStrength from '../components/PasswordStrength.jsx';
+import Icon from '../components/Icon.jsx';
 
 /* ─── 6-box OTP input ───────────────────────────────────────────── */
 function OtpInput({ value, onChange }) {
@@ -49,7 +50,7 @@ function OtpInput({ value, onChange }) {
             fontSize: '26px', fontWeight: 800,
             border: `2px solid ${d && d !== ' ' ? 'var(--color-primary)' : 'var(--color-border)'}`,
             borderRadius: '12px',
-            background: d && d !== ' ' ? 'var(--color-primary-light)' : 'var(--color-bg)',
+            background: d && d !== ' ' ? 'var(--color-bg)' : 'var(--color-bg)',
             color: 'var(--color-text-primary)',
             outline: 'none',
             transition: 'all 0.15s ease',
@@ -167,18 +168,18 @@ export default function SignupGeneral() {
     return (
       <div className="auth-layout">
         <div className="auth-panel-left">
-          <Link to="/" className="text-2xl font-extrabold text-white mb-12 flex items-center gap-2">
-             Dengue<span style={{color:'#e0f7f7'}}>Radar</span>
+          <Link to="/" className="text-2xl font-extrabold mb-12 flex items-center gap-2" style={{ color: 'var(--color-primary)' }}>
+             <Icon name="activity" /> Dengue<span>Radar</span>
           </Link>
           <h1 className="text-4xl font-extrabold mb-4">Check your inbox</h1>
-          <p className="text-lg opacity-90 mb-8 max-w-md">
+          <p className="text-lg mb-8 max-w-md" style={{ color: 'rgba(255,255,255,0.85)' }}>
             We sent a 6-digit verification code to protect your account.
             It expires in 10 minutes.
           </p>
           <ul className="flex flex-col gap-4">
-            <li className="flex items-center gap-3"><span className="text-xl"></span> Check spam/junk if you don't see it</li>
-            <li className="flex items-center gap-3"><span className="text-xl"></span> Code is valid for 10 minutes</li>
-            <li className="flex items-center gap-3"><span className="text-xl"></span> Never share your code with anyone</li>
+            <li className="flex items-center gap-3"><Icon name="shield" size={20} /> Check spam/junk if you don't see it</li>
+            <li className="flex items-center gap-3"><Icon name="alert" size={20} /> Code is valid for 10 minutes</li>
+            <li className="flex items-center gap-3"><Icon name="activity" size={20} /> Never share your code with anyone</li>
           </ul>
         </div>
 
@@ -189,11 +190,11 @@ export default function SignupGeneral() {
             <div style={{textAlign:'center', marginBottom:'8px'}}>
               <div style={{
                 width:'80px', height:'80px', borderRadius:'50%',
-                background:'linear-gradient(135deg,#0EA5A5,#2F80ED)',
+                background:'var(--color-primary-light)',
                 display:'flex', alignItems:'center', justifyContent:'center',
                 margin:'0 auto 16px', fontSize:'36px',
-                boxShadow:'0 8px 24px rgba(14,165,165,0.3)',
-              }}></div>
+                color: 'var(--color-primary)'
+              }}><Icon name="shield" size={40} /></div>
               <h2 className="auth-form-title" style={{marginBottom:'4px'}}>Enter your code</h2>
               <p className="auth-form-subtitle" style={{marginBottom:0}}>
                 Sent to <strong>{formData.email}</strong>
@@ -248,15 +249,15 @@ export default function SignupGeneral() {
   return (
     <div className="auth-layout">
       <div className="auth-panel-left">
-        <Link to="/" className="text-2xl font-extrabold text-white mb-12 flex items-center gap-2">
-           Dengue<span style={{color:'#e0f7f7'}}>Radar</span>
+        <Link to="/" className="text-2xl font-extrabold mb-12 flex items-center gap-2" style={{ color: 'var(--color-primary)' }}>
+           <Icon name="activity" /> Dengue<span>Radar</span>
         </Link>
         <h1 className="text-4xl font-extrabold mb-4">Join DengueRadar</h1>
-        <p className="text-lg opacity-90 mb-8 max-w-md">Stay ahead of dengue outbreaks and protect your family with real-time risk alerts.</p>
+        <p className="text-lg mb-8 max-w-md" style={{ color: 'rgba(255,255,255,0.85)' }}>Stay ahead of dengue outbreaks and protect your family with real-time risk alerts.</p>
         <ul className="flex flex-col gap-4">
-          <li className="flex items-center gap-3"><span className="text-xl"></span> Localized risk updates</li>
-          <li className="flex items-center gap-3"><span className="text-xl"></span> WhatsApp push alerts</li>
-          <li className="flex items-center gap-3"><span className="text-xl"></span> Community protection tools</li>
+          <li className="flex items-center gap-3"><Icon name="shield" size={20} /> Localized risk updates</li>
+          <li className="flex items-center gap-3"><Icon name="alert" size={20} /> WhatsApp push alerts</li>
+          <li className="flex items-center gap-3"><Icon name="activity" size={20} /> Community protection tools</li>
         </ul>
       </div>
 

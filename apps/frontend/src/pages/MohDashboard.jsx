@@ -8,15 +8,28 @@ import { useAuthStore } from '../context/AuthContext.jsx';
 import { mohAPI } from '../services/api.js';
 import toast from 'react-hot-toast';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts';
+import { useTranslation } from 'react-i18next';
+import SharedMapCard from '../components/SharedMapCard.jsx';
+import Icon from '../components/Icon.jsx';
+import { publicAPI } from '../services/api.js';
 
 export default function MohDashboard() {
   const { user } = useAuthStore();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const { t } = useTranslation();
   
   // Default to the officer's own district, but allow changing it
   const [selectedDistrict, setSelectedDistrict] = useState(user?.district || 'Colombo');
   const [selectedZone, setSelectedZone] = useState(user?.mohZone || '');
+  const [nationalRiskData, setNationalRiskData] = useState([]);
+
+  useEffect(() => {
+    // Fetch national risk for the map coloring
+    publicAPI.getNationalRisk()
+      .then(res => setNationalRiskData(res.data.data || []))
+      .catch(console.error);
+  }, []);
 
   useEffect(() => {
     setLoading(true);
@@ -114,29 +127,41 @@ export default function MohDashboard() {
 
         {/* Stats Row */}
         <div className="grid-4">
-          <div className="card p-6">
-            <div className="text-sm font-bold text-muted uppercase tracking-wider mb-2">{areaLabel} Risk Level</div>
-            <div className="text-3xl font-bold mb-2">
+          <div className="card p-6" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <div className="text-sm font-bold text-muted uppercase tracking-wider flex items-center gap-2"><Icon name="alert" size={16}/> {areaLabel} Risk</div>
+            <div className="text-3xl font-bold">
               <RiskBadge level={displayRiskLevel || 'moderate'} className="text-base px-3 py-1" />
             </div>
           </div>
-          <div className="card p-6">
-            <div className="text-sm font-bold text-muted uppercase tracking-wider mb-2">Total Cases (Month)</div>
+          <div className="card p-6" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <div className="text-sm font-bold text-muted uppercase tracking-wider flex items-center gap-2"><Icon name="activity" size={16}/> {t('dashboard.activeCases')}</div>
             <div className="text-3xl font-bold text-primary">{displayCases || 0}</div>
           </div>
-          <div className="card p-6">
-            <div className="text-sm font-bold text-muted uppercase tracking-wider mb-2">Registered Citizens</div>
-            <div className="text-3xl font-bold text-primary">{displayUsers || 0}</div>
-          </div>
-          <div className="card p-6">
-            <div className="text-sm font-bold text-muted uppercase tracking-wider mb-2">Zones Monitored</div>
+          <div className="card p-6" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <div className="text-sm font-bold text-muted uppercase tracking-wider flex items-center gap-2"><Icon name="vector" size={16}/> {t('dashboard.highRiskZones')}</div>
             <div className="text-3xl font-bold text-primary">{displayZonesCount || 0}</div>
+          </div>
+          <div className="card p-6" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <div className="text-sm font-bold text-muted uppercase tracking-wider flex items-center gap-2"><Icon name="shield" size={16}/> Registered Citizens</div>
+            <div className="text-3xl font-bold text-primary">{displayUsers || 0}</div>
           </div>
         </div>
 
-        {/* Charts Row */}
+        {/* Map and Charts Row */}
         <div className="grid-2 gap-6">
-          {/* Left Side: Region Filter Card */}
+          <SharedMapCard riskData={nationalRiskData} title={`${selectedDistrict} Regional Map`} selectedDistrict={selectedDistrict}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <h4 style={{ fontSize: '14px', fontWeight: '700', color: 'var(--color-text-primary)' }}>{selectedDistrict} District Summary</h4>
+              <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', lineHeight: '1.6' }}>
+                Currently monitoring {data?.zones?.length || 0} MOH zones in the {selectedDistrict} district. 
+                {displayCases > 0 ? ` There are ${displayCases} active cases reported recently.` : ' No active cases reported recently.'} 
+                Use the filters to zoom into specific high-risk wards and deploy prevention resources accordingly.
+              </p>
+            </div>
+          </SharedMapCard>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+
+          {/* Region Filter Card */}
           <div className="card p-6" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
               <div>
@@ -228,9 +253,10 @@ export default function MohDashboard() {
             )}
           </div>
 
-          {/* Right Side: Zone trend — scoped to the selected district + zone */}
-          <div>
-            <ZoneTrendChart district={selectedDistrict} mohZone={selectedZone} />
+            {/* Right Side: Zone trend — scoped to the selected district + zone */}
+            <div className="card p-6">
+              <ZoneTrendChart district={selectedDistrict} mohZone={selectedZone} />
+            </div>
           </div>
         </div>
 

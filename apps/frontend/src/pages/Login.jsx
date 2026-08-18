@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { authAPI } from '../services/api.js';
 import { useAuthStore } from '../context/AuthContext.jsx';
 import toast from 'react-hot-toast';
+import Icon from '../components/Icon.jsx';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -49,17 +50,17 @@ export default function Login() {
   return (
     <div className="auth-layout">
       <div className="auth-panel-left">
-        <Link to="/" className="text-2xl font-extrabold text-white mb-12 flex items-center gap-2">
-          🦟 Dengue<span style={{color: '#e0f7f7'}}>Radar</span>
+        <Link to="/" className="text-2xl font-extrabold mb-12 flex items-center gap-2" style={{ color: 'var(--color-primary)' }}>
+          <Icon name="activity" /> Dengue<span>Radar</span>
         </Link>
         <h1 className="text-4xl font-extrabold mb-4">Welcome Back</h1>
-        <p className="text-lg opacity-90 mb-8 max-w-md">
+        <p className="text-lg mb-8 max-w-md" style={{ color: 'rgba(255,255,255,0.85)' }}>
           Access your personalized dashboard to monitor local dengue risks and manage your alert preferences.
         </p>
         <ul className="flex flex-col gap-4">
-          <li className="flex items-center gap-3"><span className="text-xl">✅</span> Real-time risk map</li>
-          <li className="flex items-center gap-3"><span className="text-xl">✅</span> Instant WhatsApp alerts</li>
-          <li className="flex items-center gap-3"><span className="text-xl">✅</span> Accurate AI predictions</li>
+          <li className="flex items-center gap-3"><Icon name="shield" size={20} /> Real-time risk map</li>
+          <li className="flex items-center gap-3"><Icon name="alert" size={20} /> Instant WhatsApp alerts</li>
+          <li className="flex items-center gap-3"><Icon name="activity" size={20} /> Accurate AI predictions</li>
         </ul>
       </div>
       
