@@ -82,9 +82,9 @@ except Exception as e:
 try:
     with open(META_3_PKL_PATH, "rb") as f:
         meta_clf = pickle.load(f)
-    print("✅ Meta learner (3-model) loaded")
+    print("✅ Meta classifier loaded")
 except Exception as e:
-    print(f"❌ Meta learner load error: {e}")
+    print(f"❌ Meta classifier load error: {e}")
 
 # ── Load regressor models ────────────────────────────────────────────────────
 lgb_reg = None
