@@ -5,46 +5,55 @@ import { SRI_LANKA_DISTRICTS } from '../data/sriLankaDistricts.js';
 const OW_BASE = 'https://api.openweathermap.org/data/2.5/weather';
 const OPEN_METEO_BASE = 'https://api.open-meteo.com/v1/forecast';
 
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
 /**
  * Fetches the last 28 days of daily weather from Open-Meteo (free, no API key).
  * Returns { rain_1w, rain_2w, rain_4w, temp_avg_4w, humidity_4w }.
  */
-async function fetchDailyAggregates(lat, lon) {
+async function fetchDailyAggregates(lat, lon, retries = 3) {
   const end = new Date();
   const start = new Date();
   start.setDate(start.getDate() - 28);
 
   const fmt = (d) => d.toISOString().split('T')[0];
 
-  const { data } = await axios.get(OPEN_METEO_BASE, {
-    params: {
-      latitude: lat,
-      longitude: lon,
-      daily: 'precipitation_sum,temperature_2m_mean,relative_humidity_2m_mean',
-      start_date: fmt(start),
-      end_date: fmt(end),
-      timezone: 'Asia/Colombo',
-    },
-    timeout: 15_000,
-  });
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      const { data } = await axios.get(OPEN_METEO_BASE, {
+        params: {
+          latitude: lat,
+          longitude: lon,
+          daily: 'precipitation_sum,temperature_2m_mean,relative_humidity_2m_mean',
+          start_date: fmt(start),
+          end_date: fmt(end),
+          timezone: 'Asia/Colombo',
+        },
+        timeout: 15_000,
+      });
 
-  const daily = data.daily || {};
-  const precip   = daily.precipitation_sum || [];
-  const temps    = daily.temperature_2m_mean || [];
-  const humidity = daily.relative_humidity_2m_mean || [];
+      const daily = data.daily || {};
+      const precip   = daily.precipitation_sum || [];
+      const temps    = daily.temperature_2m_mean || [];
+      const humidity = daily.relative_humidity_2m_mean || [];
 
-  // Last 7 / 14 / 28 days of rainfall
-  const rain_1w = precip.slice(-7).reduce((s, v) => s + (v ?? 0), 0);
-  const rain_2w = precip.slice(-14).reduce((s, v) => s + (v ?? 0), 0);
-  const rain_4w = precip.reduce((s, v) => s + (v ?? 0), 0);
+      // Last 7 / 14 / 28 days of rainfall
+      const rain_1w = precip.slice(-7).reduce((s, v) => s + (v ?? 0), 0);
+      const rain_2w = precip.slice(-14).reduce((s, v) => s + (v ?? 0), 0);
+      const rain_4w = precip.reduce((s, v) => s + (v ?? 0), 0);
 
-  // 28-day average temperature and humidity
-  const validTemps = temps.filter(v => v !== null && v !== undefined);
-  const validHumid = humidity.filter(v => v !== null && v !== undefined);
-  const temp_avg_4w = validTemps.length > 0 ? validTemps.reduce((s, v) => s + v, 0) / validTemps.length : null;
-  const humidity_4w = validHumid.length > 0 ? validHumid.reduce((s, v) => s + v, 0) / validHumid.length : null;
+      // 28-day average temperature and humidity
+      const validTemps = temps.filter(v => v !== null && v !== undefined);
+      const validHumid = humidity.filter(v => v !== null && v !== undefined);
+      const temp_avg_4w = validTemps.length > 0 ? validTemps.reduce((s, v) => s + v, 0) / validTemps.length : null;
+      const humidity_4w = validHumid.length > 0 ? validHumid.reduce((s, v) => s + v, 0) / validHumid.length : null;
 
-  return { rain_1w, rain_2w, rain_4w, temp_avg_4w, humidity_4w };
+      return { rain_1w, rain_2w, rain_4w, temp_avg_4w, humidity_4w };
+    } catch (err) {
+      if (attempt === retries) throw err;
+      await sleep(1000 * attempt); // exponential backoff 1s, 2s
+    }
+  }
 }
 
 /**
@@ -125,6 +134,7 @@ export async function fetchAllDistrictWeather() {
       );
 
       successCount++;
+      await sleep(1000); // 1-second delay between districts to avoid rate limits
     } catch (err) {
       failCount++;
       const reason = err.response
