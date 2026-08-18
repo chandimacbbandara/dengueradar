@@ -1,10 +1,13 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import Navbar from '../components/Navbar.jsx';
+import Footer from '../components/Footer.jsx';
 import LiveStatsStrip from '../components/LiveStatsStrip.jsx';
-import SriLankaMap from '../components/SriLankaMap.jsx';
+import SharedMapCard from '../components/SharedMapCard.jsx';
 import TrendChart from '../components/TrendChart.jsx';
 import LiveTicker from '../components/LiveTicker.jsx';
+import Icon from '../components/Icon.jsx';
 import { publicAPI } from '../services/api.js';
 
 function TopRiskCards({ topZones }) {
@@ -13,28 +16,28 @@ function TopRiskCards({ topZones }) {
   return (
     <section className="section" style={{ paddingTop: '20px', paddingBottom: '40px' }}>
       <div className="container">
-        <h3 style={{ color: '#fff', fontSize: '20px', fontWeight: 600, marginBottom: '24px' }}>
+        <h3 style={{ color: 'var(--color-text-primary)', fontSize: '20px', fontWeight: 600, marginBottom: '24px' }}>
           Top High-Risk Zones Right Now
         </h3>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px' }}>
           {topZones.map((zone, idx) => (
-            <div key={idx} className="radar-glass-card" style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div key={idx} className="card" style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: '18px', fontWeight: 700, color: '#fff' }}>{zone.mohZone}</span>
-                <span style={{ padding: '4px 8px', borderRadius: '4px', background: 'rgba(239, 68, 68, 0.2)', color: '#EF4444', fontSize: '12px', fontWeight: 700 }}>
+                <span style={{ fontSize: '18px', fontWeight: 700, color: 'var(--color-text-primary)' }}>{zone.mohZone}</span>
+                <span style={{ padding: '4px 8px', borderRadius: '4px', background: 'var(--color-risk-high-bg)', color: 'var(--color-risk-high)', fontSize: '12px', fontWeight: 700 }}>
                   HIGH RISK
                 </span>
               </div>
-              <div style={{ fontSize: '14px', color: '#94A3B8' }}>{zone.district} District</div>
+              <div style={{ fontSize: '14px', color: 'var(--color-text-muted)' }}>{zone.district} District</div>
               
-              <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid rgba(255,255,255,0.1)', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+              <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid var(--color-border-light)', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                 <div>
-                  <div style={{ fontSize: '11px', color: '#64748B', textTransform: 'uppercase', letterSpacing: '1px' }}>AI Risk Score</div>
-                  <div style={{ fontSize: '24px', fontWeight: 700, color: '#F8FAFC' }}>{Math.round(zone.riskScore)}<span style={{fontSize:'14px', color:'#64748B'}}>/100</span></div>
+                  <div style={{ fontSize: '11px', color: 'var(--color-text-secondary)', textTransform: 'uppercase', letterSpacing: '1px' }}>AI Risk Score</div>
+                  <div style={{ fontSize: '24px', fontWeight: 700, color: 'var(--color-text-primary)' }}>{Math.round(zone.riskScore)}<span style={{fontSize:'14px', color:'var(--color-text-muted)'}}>/100</span></div>
                 </div>
                 <div>
-                  <div style={{ fontSize: '11px', color: '#CBD5E1', textTransform: 'uppercase', letterSpacing: '1px' }}>Forecast</div>
-                  <div style={{ fontSize: '14px', fontWeight: 600, color: '#0EA5A5' }}>Escalating</div>
+                  <div style={{ fontSize: '11px', color: 'var(--color-text-secondary)', textTransform: 'uppercase', letterSpacing: '1px' }}>Forecast</div>
+                  <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--color-primary)' }}>Escalating</div>
                 </div>
               </div>
             </div>
@@ -49,6 +52,7 @@ export default function Home() {
   const [riskData, setRiskData] = useState([]);
   const [trendData, setTrendData] = useState(null);
   const [topZones, setTopZones] = useState([]);
+  const { t } = useTranslation();
 
   useEffect(() => {
     publicAPI.getTopZones()
@@ -65,39 +69,38 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="home-radar-theme">
+    <div style={{ background: 'var(--color-bg)', color: 'var(--color-text-primary)' }}>
       <Navbar />
       <LiveTicker riskData={riskData} />
       
       {/* Hero Section */}
       <section id="home" className="hero">
-        <div className="hero-inner">
+        <div className="hero-inner" style={{ marginBottom: '40px' }}>
           <div className="hero-content">
-            <div className="hero-tag animate-fadeInUp" style={{ background: 'rgba(14, 165, 165, 0.2)', border: '1px solid rgba(14, 165, 165, 0.4)', color: '#0EA5A5' }}>
-              <span className="dot dot-high" style={{ background: '#0EA5A5', boxShadow: '0 0 8px #0EA5A5' }}></span> Live AI Monitoring Active
+            <div className="hero-tag animate-fadeInUp">
+              <span className="dot dot-high animate-pulse" style={{ marginRight: '8px' }}></span> Live AI Monitoring Active
             </div>
-            <h1 className="hero-title animate-fadeInUp" style={{animationDelay: '0.1s'}}>
-              Know Your Dengue Risk <br/> 
-              <span style={{ color: '#0EA5A5' }} className="typing-text">Before It Spreads</span>
-            </h1>
+            <h1 className="hero-title animate-fadeInUp" style={{animationDelay: '0.1s'}} dangerouslySetInnerHTML={{ __html: t('hero.title') }}></h1>
             <p className="hero-subtitle animate-fadeInUp" style={{animationDelay: '0.2s'}}>
-              DengueRadar provides real-time dengue risk monitoring and alerts for Sri Lanka. Track risk by district, get WhatsApp alerts, and stay safe.
+              {t('hero.subtitle')}
             </p>
             <div className="hero-actions animate-fadeInUp" style={{animationDelay: '0.3s'}}>
-              <a href="#map" className="btn btn-primary btn-lg">Check Your Area &rarr;</a>
-              <Link to="/signup/general" className="btn btn-outline btn-lg" style={{ color: '#fff', borderColor: 'rgba(255,255,255,0.2)' }}>Sign Up for Alerts</Link>
+              <a href="#map" className="btn btn-primary btn-lg">{t('hero.cta')} &rarr;</a>
+              <Link to="/signup/general" className="btn btn-outline btn-lg">{t('hero.ctaSecondary')}</Link>
             </div>
           </div>
           <div className="hero-graphic animate-fadeIn">
-            <div className="radar-glass-card" style={{ padding: '16px', height: '480px', width: '100%', maxWidth: '460px' }}>
-              <SriLankaMap riskData={riskData} />
+            <div style={{ width: '100%', maxWidth: '460px' }}>
+              <SharedMapCard riskData={riskData} title={t('map.title')} />
             </div>
           </div>
         </div>
-      </section>
 
-      {/* Stats Strip */}
-      <LiveStatsStrip />
+        {/* Stats Strip Integrated directly into Hero bottom */}
+        <div className="animate-fadeInUp" style={{animationDelay: '0.4s'}}>
+          <LiveStatsStrip />
+        </div>
+      </section>
 
       {/* Dynamic Top High-Risk Zones */}
       <TopRiskCards topZones={topZones} />
@@ -112,9 +115,7 @@ export default function Home() {
               Our AI models analyze weather data, historical cases, and population density to predict dengue outbreaks across Sri Lanka.
             </p>
           </div>
-          <div className="map-container">
-            <SriLankaMap riskData={riskData} />
-          </div>
+          <SharedMapCard riskData={riskData} title={t('map.title')} />
         </div>
       </section>
 
@@ -144,27 +145,27 @@ export default function Home() {
           <div className="steps-grid">
             <div className="step-card">
               <div className="step-number">1</div>
-              <div className="step-icon">1</div>
+              <div className="step-icon" style={{ color: 'var(--color-primary)' }}><Icon name="cloud-rain" size={32} /></div>
               <h4 className="step-title">Data Ingestion</h4>
-              <p className="step-desc" style={{color: '#94A3B8'}}>We pull real-time weather and clinical data for all 25 districts.</p>
+              <p className="step-desc">We pull real-time weather and clinical data for all 25 districts.</p>
             </div>
             <div className="step-card">
               <div className="step-number">2</div>
-              <div className="step-icon">2</div>
+              <div className="step-icon" style={{ color: 'var(--color-primary)' }}><Icon name="cpu" size={32} /></div>
               <h4 className="step-title">AI Analysis</h4>
-              <p className="step-desc" style={{color: '#94A3B8'}}>Our XGBoost models process the data to detect hidden risk patterns.</p>
+              <p className="step-desc">Our XGBoost models process the data to detect hidden risk patterns.</p>
             </div>
             <div className="step-card">
               <div className="step-number">3</div>
-              <div className="step-icon">3</div>
+              <div className="step-icon" style={{ color: 'var(--color-risk-moderate)' }}><Icon name="alert-triangle" size={32} /></div>
               <h4 className="step-title">Early Warning</h4>
-              <p className="step-desc" style={{color: '#94A3B8'}}>If risk escalates, instant push alerts are triggered for MOH officers.</p>
+              <p className="step-desc">If risk escalates, instant push alerts are triggered for MOH officers.</p>
             </div>
             <div className="step-card">
               <div className="step-number">4</div>
-              <div className="step-icon">4</div>
+              <div className="step-icon" style={{ color: 'var(--color-risk-low)' }}><Icon name="shield" size={32} /></div>
               <h4 className="step-title">Prevention</h4>
-              <p className="step-desc" style={{color: '#94A3B8'}}>Communities mobilize to destroy breeding sites before cases spike.</p>
+              <p className="step-desc">Communities mobilize to destroy breeding sites before cases spike.</p>
             </div>
           </div>
         </div>
@@ -175,66 +176,22 @@ export default function Home() {
         <div className="container">
           <div className="who-cards">
             <div className="who-card who-card-public card">
-              <div className="who-card-icon">CITIZENS</div>
+              <div className="who-card-icon"><Icon name="users" size={48} /></div>
               <h3>For Citizens</h3>
-              <p style={{color: '#94A3B8'}}>Check your local risk daily and eliminate mosquito breeding sites if your zone enters the Watch or Alert phases.</p>
-              <Link to="/signup/general" className="btn">Sign Up Free</Link>
+              <p>Check your local risk daily and eliminate mosquito breeding sites if your zone enters the Watch or Alert phases.</p>
+              <Link to="/signup/general" className="btn btn-primary">Sign Up Free</Link>
             </div>
-            <div className="who-card who-card-moh card">
-              <div className="who-card-icon">OFFICERS</div>
+            <div className="who-card who-card-moh card" style={{ background: 'var(--color-primary)', color: 'white' }}>
+              <div className="who-card-icon"><Icon name="stethoscope" size={48} /></div>
               <h3>For Health Officers</h3>
-              <p style={{color: '#94A3B8'}}>Deploy limited resources with surgical precision. Let the AI tell you exactly which wards need fogging next week.</p>
-              <Link to="/signup/moh-officer" className="btn">Register as Officer</Link>
+              <p style={{ color: 'rgba(255,255,255,0.85)' }}>Deploy limited resources with surgical precision. Let the AI tell you exactly which wards need fogging next week.</p>
+              <Link to="/signup/moh-officer" className="btn" style={{ background: 'white', color: 'var(--color-primary)' }}>Register as Officer</Link>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer id="contact" className="footer">
-        <div className="footer-inner">
-          <div className="footer-top">
-            <div>
-              <div className="footer-logo" style={{ display: 'flex', alignItems: 'center' }}>
-                <img src="/logo.png" alt="Logo" style={{ height: '32px', marginRight: '8px' }} />
-                Dengue<span>Radar</span>
-              </div>
-              <p className="footer-tagline" style={{color: '#94A3B8'}}>Empowering Sri Lanka to stay one step ahead of Dengue through AI and real-time monitoring.</p>
-            </div>
-            <div className="footer-col">
-              <h4>Platform</h4>
-              <ul>
-                <li><a href="#home">Home</a></li>
-                <li><a href="#map">Live Map</a></li>
-                <li><a href="#trends">Trends</a></li>
-                <li><Link to="/login">Login</Link></li>
-              </ul>
-            </div>
-            <div className="footer-col">
-              <h4>Resources</h4>
-              <ul>
-                <li><a href="#">Prevention Guide</a></li>
-                <li><a href="#">MOH Portal</a></li>
-                <li><a href="#">API Documentation</a></li>
-              </ul>
-            </div>
-            <div className="footer-col">
-              <h4>Contact</h4>
-              <ul>
-                <li><a href="mailto:support@dengueradar.lk">support@dengueradar.lk</a></li>
-                <li><a href="#">Emergency: 1999</a></li>
-              </ul>
-            </div>
-          </div>
-          <div className="footer-bottom">
-            <p>&copy; {new Date().getFullYear()} DengueRadar Sri Lanka. All rights reserved.</p>
-            <div className="flex gap-4">
-              <a href="#">Privacy Policy</a>
-              <a href="#">Terms of Service</a>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

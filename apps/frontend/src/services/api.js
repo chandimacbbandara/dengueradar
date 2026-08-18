@@ -18,16 +18,35 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Handle 401 — clear auth and redirect
+// Handle 401 — try to refresh token, else clear auth and redirect
 api.interceptors.response.use(
   (res) => res,
-  (err) => {
-    if (err.response?.status === 401) {
+  async (err) => {
+    const originalRequest = err.config;
+
+    // If it's a 401, not a retry yet, and not the refresh endpoint itself
+    if (err.response?.status === 401 && !originalRequest._retry && originalRequest.url !== '/auth/refresh-token') {
+      originalRequest._retry = true;
+      try {
+        const res = await axios.post(`${API_URL}/auth/refresh-token`, {}, { withCredentials: true });
+        if (res.data?.token) {
+          localStorage.setItem('accessToken', res.data.token);
+          originalRequest.headers.Authorization = `Bearer ${res.data.token}`;
+          return api(originalRequest);
+        }
+      } catch (refreshErr) {
+        // Refresh failed, clear session and redirect
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('dengueradar-auth');
+        window.location.href = '/login';
+        return Promise.reject(refreshErr);
+      }
+    } else if (err.response?.status === 401 && originalRequest.url === '/auth/refresh-token') {
       localStorage.removeItem('accessToken');
-      localStorage.removeItem('user');
       localStorage.removeItem('dengueradar-auth');
       window.location.href = '/login';
     }
+    
     return Promise.reject(err);
   }
 );

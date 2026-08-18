@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import Navbar from '../components/Navbar.jsx';
+import Footer from '../components/Footer.jsx';
 import { useAuthStore } from '../context/AuthContext.jsx';
 import { userAPI } from '../services/api.js';
 import toast from 'react-hot-toast';
@@ -31,13 +32,20 @@ export default function Profile() {
   const isMoh = user?.role === 'moh_officer';
 
   return (
-    <div className="dashboard-layout">
+    <div className={`dashboard-layout ${!isMoh && user?.role !== 'admin' ? 'citizen-dashboard' : ''}`}>
       <Navbar />
-      <div className="dashboard-content" style={{maxWidth: '800px'}}>
-        <h1 className="text-2xl font-bold mb-6">Account Settings</h1>
+      
+      <div className="dashboard-header" style={{ background: 'var(--color-bg-subtle)' }}>
+        <div className="container">
+          <h1 className="text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>Account Settings</h1>
+          <p className="text-muted mt-1" style={{ color: 'var(--color-text-secondary)' }}>Manage your profile and notification preferences</p>
+        </div>
+      </div>
+
+      <div className="dashboard-content" style={{maxWidth: '800px', margin: '0 auto', width: '100%'}}>
         
         <div className="card p-8 mb-6">
-          <h2 className="text-lg font-bold mb-6">Personal Information</h2>
+          <h2 className="text-lg font-bold mb-6" style={{ color: 'var(--color-text-primary)' }}>Personal Information</h2>
           <form onSubmit={handleSubmit} className="flex flex-col gap-5">
             {isMoh ? (
               <div className="form-group">
@@ -65,11 +73,11 @@ export default function Profile() {
             <div className="grid-2">
               <div className="form-group">
                 <label className="form-label">District (Read-only)</label>
-                <input type="text" className="form-input bg-gray-50" value={user?.district || ''} disabled />
+                <input type="text" className="form-input" style={{ background: 'var(--color-bg-subtle)' }} value={user?.district || ''} disabled />
               </div>
               <div className="form-group">
                 <label className="form-label">MOH Zone (Read-only)</label>
-                <input type="text" className="form-input bg-gray-50" value={user?.mohZone || ''} disabled />
+                <input type="text" className="form-input" style={{ background: 'var(--color-bg-subtle)' }} value={user?.mohZone || ''} disabled />
               </div>
             </div>
 
@@ -82,28 +90,29 @@ export default function Profile() {
         </div>
 
         <div className="card p-8">
-          <h2 className="text-lg font-bold mb-6">Account Details</h2>
+          <h2 className="text-lg font-bold mb-6" style={{ color: 'var(--color-text-primary)' }}>Account Details</h2>
           <div className="grid-2 gap-6">
             <div>
-              <p className="text-sm font-bold text-muted uppercase mb-1">Email Address</p>
-              <p>{user?.email}</p>
+              <p className="text-sm font-bold uppercase mb-1" style={{ color: 'var(--color-text-muted)' }}>Email Address</p>
+              <p style={{ color: 'var(--color-text-primary)' }}>{user?.email}</p>
             </div>
             <div>
-              <p className="text-sm font-bold text-muted uppercase mb-1">Account Role</p>
-              <p className="capitalize">{user?.role?.replace('_', ' ')}</p>
+              <p className="text-sm font-bold uppercase mb-1" style={{ color: 'var(--color-text-muted)' }}>Account Role</p>
+              <p className="capitalize" style={{ color: 'var(--color-text-primary)' }}>{user?.role?.replace('_', ' ')}</p>
             </div>
             <div>
-              <p className="text-sm font-bold text-muted uppercase mb-1">Member Since</p>
-              <p>{user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}</p>
+              <p className="text-sm font-bold uppercase mb-1" style={{ color: 'var(--color-text-muted)' }}>Member Since</p>
+              <p style={{ color: 'var(--color-text-primary)' }}>{user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}</p>
             </div>
             <div>
-              <p className="text-sm font-bold text-muted uppercase mb-1">Password</p>
+              <p className="text-sm font-bold uppercase mb-1" style={{ color: 'var(--color-text-muted)' }}>Password</p>
               <button className="btn btn-sm btn-outline mt-1">Change Password</button>
             </div>
           </div>
         </div>
         
       </div>
+      <Footer />
     </div>
   );
 }

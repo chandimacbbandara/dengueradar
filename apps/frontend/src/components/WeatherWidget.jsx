@@ -1,17 +1,18 @@
 import { useState, useEffect } from 'react';
 import { weatherAPI } from '../services/api.js';
+import Icon from './Icon.jsx';
 
 /* OpenWeather weather_code → icon + description */
 function describeWeather(code) {
-  if (!code) return { icon: '🌡️', desc: 'Weather data loading...' };
-  if (code === 800)             return { icon: '☀️',  desc: 'Clear sky' };
-  if (code > 800)               return { icon: '☁️',  desc: 'Cloudy' };
-  if (code >= 700)              return { icon: '🌫️', desc: 'Foggy / Haze' };
-  if (code >= 600)              return { icon: '❄️',  desc: 'Snow' };
-  if (code >= 500)              return { icon: '🌧️', desc: 'Rain' };
-  if (code >= 300)              return { icon: '🌦️', desc: 'Drizzle' };
-  if (code >= 200)              return { icon: '⛈️',  desc: 'Thunderstorm' };
-  return { icon: '🌡️', desc: 'Unknown' };
+  if (!code) return { icon: 'thermometer', desc: 'Weather data loading...' };
+  if (code === 800)             return { icon: 'sun',  desc: 'Clear sky' };
+  if (code > 800)               return { icon: 'cloud',  desc: 'Cloudy' };
+  if (code >= 700)              return { icon: 'cloud-fog', desc: 'Foggy / Haze' };
+  if (code >= 600)              return { icon: 'snowflake',  desc: 'Snow' };
+  if (code >= 500)              return { icon: 'cloud-rain', desc: 'Rain' };
+  if (code >= 300)              return { icon: 'cloud-drizzle', desc: 'Drizzle' };
+  if (code >= 200)              return { icon: 'cloud-lightning',  desc: 'Thunderstorm' };
+  return { icon: 'thermometer', desc: 'Unknown' };
 }
 
 function compassDir(deg) {
@@ -48,15 +49,11 @@ export default function WeatherWidget({ district }) {
     : null;
 
   return (
-    <div id="weather-widget" style={{
+    <div id="weather-widget" className="card" style={{
       display: 'flex',
       alignItems: 'center',
       gap: '0',
-      background: 'linear-gradient(135deg, #0d1f3c 0%, #0f3460 100%)',
-      borderRadius: '16px',
       padding: '0',
-      border: '1px solid rgba(14,165,165,0.2)',
-      boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
       overflow: 'hidden',
       marginBottom: '20px',
       minHeight: '90px',
@@ -68,15 +65,18 @@ export default function WeatherWidget({ district }) {
         alignItems: 'center',
         justifyContent: 'center',
         padding: '20px 28px',
-        borderRight: '1px solid rgba(255,255,255,0.07)',
+        borderRight: '1px solid var(--color-border-light)',
         minWidth: '130px',
+        background: 'var(--color-bg-subtle)'
       }}>
         {loading
-          ? <div className="spinner" style={{ borderTopColor: '#0EA5A5' }} />
+          ? <div className="spinner" style={{ borderTopColor: 'var(--color-primary)' }} />
           : <>
-              <span style={{ fontSize: '36px', lineHeight: 1 }}>{icon}</span>
-              <span style={{ fontSize: '28px', fontWeight: 800, color: '#F1F5F9', lineHeight: 1.2, marginTop: '4px' }}>{temp}</span>
-              <span style={{ fontSize: '11px', color: '#64748B', marginTop: '2px' }}>{desc}</span>
+              <div style={{ color: 'var(--color-primary)' }}>
+                <Icon name={icon} size={36} />
+              </div>
+              <span style={{ fontSize: '28px', fontWeight: 800, color: 'var(--color-text-primary)', lineHeight: 1.2, marginTop: '4px' }}>{temp}</span>
+              <span style={{ fontSize: '11px', color: 'var(--color-text-secondary)', marginTop: '2px' }}>{desc}</span>
             </>
         }
       </div>
@@ -90,26 +90,26 @@ export default function WeatherWidget({ district }) {
         flexWrap: 'wrap',
       }}>
         {[
-          { icon: '🤔', label: 'Feels like', value: feelsLike },
-          { icon: '💧', label: 'Humidity',   value: humidity },
-          { icon: '💨', label: 'Wind',        value: wind },
-          { icon: '🌧️', label: 'Rainfall',   value: rainfall },
-        ].map(({ icon: ic, label, value }) => (
+          { icName: 'thermometer', label: 'Feels like', value: feelsLike },
+          { icName: 'droplet', label: 'Humidity',   value: humidity },
+          { icName: 'wind', label: 'Wind',        value: wind },
+          { icName: 'cloud-rain', label: 'Rainfall',   value: rainfall },
+        ].map(({ icName, label, value }) => (
           <div key={label} style={{
             display: 'flex', flexDirection: 'column',
             alignItems: 'flex-start', justifyContent: 'center',
             padding: '14px 20px',
-            borderRight: '1px solid rgba(255,255,255,0.05)',
+            borderRight: '1px solid var(--color-border-light)',
             flex: '1 0 auto',
             minWidth: '100px',
           }}>
             {loading
-              ? <div style={{ width: 40, height: 12, borderRadius: 6, background: 'rgba(255,255,255,0.06)' }} />
+              ? <div style={{ width: 40, height: 12, borderRadius: 6, background: 'var(--color-border)' }} />
               : <>
-                  <span style={{ fontSize: '11px', color: '#475569', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '4px' }}>
-                    {ic} {label}
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', color: 'var(--color-text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '4px' }}>
+                    <Icon name={icName} size={14} /> {label}
                   </span>
-                  <span style={{ fontSize: '15px', fontWeight: 700, color: '#CBD5E1' }}>{value}</span>
+                  <span style={{ fontSize: '15px', fontWeight: 700, color: 'var(--color-text-primary)' }}>{value}</span>
                 </>
             }
           </div>
@@ -121,13 +121,15 @@ export default function WeatherWidget({ district }) {
         display: 'flex', flexDirection: 'column', alignItems: 'flex-end',
         justifyContent: 'center', padding: '14px 20px', whiteSpace: 'nowrap',
       }}>
-        <span style={{ fontSize: '12px', color: '#0EA5A5', fontWeight: 700 }}>📍 {district}</span>
+        <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: 'var(--color-primary)', fontWeight: 700 }}>
+          <Icon name="map-pin" size={14} /> {district}
+        </span>
         {updatedAt && (
-          <span style={{ fontSize: '10px', color: '#334155', marginTop: '4px' }}>
+          <span style={{ fontSize: '10px', color: 'var(--color-text-secondary)', marginTop: '4px' }}>
             Updated {updatedAt}
           </span>
         )}
-        <span style={{ fontSize: '10px', color: '#1e3a5f', marginTop: '2px' }}>OpenWeatherMap</span>
+        <span style={{ fontSize: '10px', color: 'var(--color-text-muted)', marginTop: '2px' }}>OpenWeatherMap</span>
       </div>
     </div>
   );

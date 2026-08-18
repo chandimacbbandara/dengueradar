@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { MapContainer, TileLayer, GeoJSON } from 'react-leaflet';
+import { MapContainer, TileLayer, GeoJSON, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -18,7 +18,38 @@ const getRiskColor = (level) => {
   return 'rgba(148, 163, 184, 0.4)'; // unknown
 };
 
-export default function SriLankaMap({ riskData }) {
+const normalizeStr = (str) => {
+  if (!str) return '';
+  const s = str.toLowerCase().replace(/[^a-z]/g, '');
+  if (s.includes('mulathiv') || s.includes('mullaitiv') || s.includes('mulativ')) return 'mullaitivu';
+  return s;
+};
+
+// Component to handle programmatic zooming
+function MapZoomEffect({ selectedDistrict, geoData }) {
+  const map = useMap();
+  
+  useEffect(() => {
+    if (!selectedDistrict || !geoData) return;
+    
+    // Find the feature matching the selected district
+    const feature = geoData.features.find(f => {
+      const geoName = f.properties.name || f.properties.NAME_1 || f.properties.ADM2_EN;
+      return normalizeStr(geoName) === normalizeStr(selectedDistrict);
+    });
+    
+    if (feature) {
+      const layer = L.geoJSON(feature);
+      const bounds = layer.getBounds();
+      // Fly to bounds, padded a bit so it doesn't touch the edges
+      map.flyToBounds(bounds, { padding: [20, 20], duration: 1.5 });
+    }
+  }, [selectedDistrict, geoData, map]);
+  
+  return null;
+}
+
+export default function SriLankaMap({ riskData, selectedDistrict }) {
   const [geoData, setGeoData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -40,12 +71,7 @@ export default function SriLankaMap({ riskData }) {
   if (loading) return <div className="loading-center"><div className="spinner"></div></div>;
   if (error) return <div className="alert alert-error">Failed to load map data. Please try again later.</div>;
 
-  const normalizeStr = (str) => {
-    if (!str) return '';
-    const s = str.toLowerCase().replace(/[^a-z]/g, '');
-    if (s.includes('mulathiv') || s.includes('mullaitiv') || s.includes('mulativ')) return 'mullaitivu';
-    return s;
-  };
+  if (error) return <div className="alert alert-error">Failed to load map data. Please try again later.</div>;
 
   const styleFeature = (feature) => {
     const geoName = feature.properties.name || feature.properties.NAME_1 || feature.properties.ADM2_EN;
@@ -97,11 +123,14 @@ export default function SriLankaMap({ riskData }) {
           attribution='&copy; <a href="https://carto.com/">CARTO</a>'
         />
         {geoData && (
-          <GeoJSON 
-            data={geoData} 
-            style={styleFeature}
-            onEachFeature={onEachFeature}
-          />
+          <>
+            <GeoJSON 
+              data={geoData} 
+              style={styleFeature}
+              onEachFeature={onEachFeature}
+            />
+            {selectedDistrict && <MapZoomEffect selectedDistrict={selectedDistrict} geoData={geoData} />}
+          </>
         )}
       </MapContainer>
       <div style={{

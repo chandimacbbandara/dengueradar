@@ -1,0 +1,58 @@
+{
+  "nav": {
+    "home": "Home",
+    "riskMap": "Risk Map",
+    "alerts": "Alerts",
+    "about": "About",
+    "dashboard": "Dashboard",
+    "login": "Login",
+    "logout": "Logout",
+    "profile": "Profile"
+  },
+  "hero": {
+    "title": "Know Your Dengue Risk",
+    "subtitle": "Real-time risk monitoring and early-warning system for Sri Lanka. Stay safe with localized alerts.",
+    "cta": "View Live Map",
+    "ctaSecondary": "Sign Up for Alerts"
+  },
+  "stats": {
+    "activeUsers": "Active Users",
+    "districtsMonitored": "Districts Monitored",
+    "highRiskZonesToday": "High-Risk Zones Today",
+    "systemStatus": "System Status",
+    "nationalCases": "National Cases",
+    "districtsAlert": "Districts on Alert",
+    "temperature": "Avg Temperature",
+    "humidity": "Avg Humidity",
+    "live": "Live"
+  },
+  "map": {
+    "title": "Live Risk Map",
+    "lastUpdated": "Last Updated",
+    "riskLow": "Low Risk",
+    "riskModerate": "Moderate Risk",
+    "riskHigh": "High Risk",
+    "selectDistrict": "Select District"
+  },
+  "dashboard": {
+    "activeCases": "Active Cases",
+    "highRiskZones": "High-Risk Zones",
+    "alertsSent": "Alerts Sent This Week",
+    "exportCSV": "Export CSV",
+    "cooldown": "Alert Cooldown Active",
+    "sendAlert": "Send Alert"
+  },
+  "auth": {
+    "loginTitle": "Welcome Back",
+    "loginSubtitle": "Enter your credentials to access your account.",
+    "email": "Email Address",
+    "password": "Password",
+    "loginBtn": "Sign In"
+  },
+  "footer": {
+    "tagline": "Protecting communities through data-driven early warnings.",
+    "quickLinks": "Quick Links",
+    "contact": "Contact Us",
+    "rights": "All rights reserved."
+  }
+}

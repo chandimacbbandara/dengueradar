@@ -4,6 +4,7 @@ import { authAPI } from '../services/api.js';
 import toast from 'react-hot-toast';
 import DistrictZoneSelect from '../components/DistrictZoneSelect.jsx';
 import PasswordStrength from '../components/PasswordStrength.jsx';
+import Icon from '../components/Icon.jsx';
 
 /* ─── 6-box OTP input (shared pattern) ─────────────────────────── */
 function OtpInput({ value, onChange }) {
@@ -46,13 +47,13 @@ function OtpInput({ value, onChange }) {
           style={{
             width: '52px', height: '64px', textAlign: 'center',
             fontSize: '26px', fontWeight: 800,
-            border: `2px solid ${d && d !== ' ' ? '#2F80ED' : 'var(--color-border)'}`,
+            border: `2px solid ${d && d !== ' ' ? 'var(--color-primary)' : 'var(--color-border)'}`,
             borderRadius: '12px',
-            background: d && d !== ' ' ? 'rgba(47,128,237,0.08)' : 'var(--color-bg)',
+            background: d && d !== ' ' ? 'var(--color-bg)' : 'var(--color-bg)',
             color: 'var(--color-text-primary)',
             outline: 'none',
             transition: 'all 0.15s ease',
-            boxShadow: d && d !== ' ' ? '0 0 0 3px rgba(47,128,237,0.12)' : 'none',
+            boxShadow: d && d !== ' ' ? '0 0 0 3px rgba(14,165,165,0.15)' : 'none',
           }}
         />
       ))}
@@ -153,18 +154,18 @@ export default function SignupMohOfficer() {
   if (step === 'otp') {
     return (
       <div className="auth-layout">
-        <div className="auth-panel-left" style={{background:'linear-gradient(135deg,#1e3a5f 0%,#2F80ED 100%)'}}>
-          <Link to="/" className="text-2xl font-extrabold text-white mb-12 flex items-center gap-2">
-             Dengue<span style={{color:'#e0f7f7'}}>Radar</span>
+        <div className="auth-panel-left">
+          <Link to="/" className="text-2xl font-extrabold mb-12 flex items-center gap-2" style={{ color: 'var(--color-primary)' }}>
+             <Icon name="activity" /> Dengue<span>Radar</span>
           </Link>
           <h1 className="text-4xl font-extrabold mb-4">Check your inbox</h1>
-          <p className="text-lg opacity-90 mb-8 max-w-md">
+          <p className="text-lg mb-8 max-w-md" style={{ color: 'rgba(255,255,255,0.85)' }}>
             Your official email must be verified before your MOH officer application is submitted.
           </p>
           <ul className="flex flex-col gap-4">
-            <li className="flex items-center gap-3"><span className="text-xl"></span> Check spam/junk if you don't see it</li>
-            <li className="flex items-center gap-3"><span className="text-xl"></span> Code valid for 10 minutes</li>
-            <li className="flex items-center gap-3"><span className="text-xl"></span> Never share your code with anyone</li>
+            <li className="flex items-center gap-3"><Icon name="shield" size={20} /> Check spam/junk if you don't see it</li>
+            <li className="flex items-center gap-3"><Icon name="alert" size={20} /> Code valid for 10 minutes</li>
+            <li className="flex items-center gap-3"><Icon name="activity" size={20} /> Never share your code with anyone</li>
           </ul>
         </div>
 
@@ -174,11 +175,11 @@ export default function SignupMohOfficer() {
             <div style={{textAlign:'center', marginBottom:'8px'}}>
               <div style={{
                 width:'80px', height:'80px', borderRadius:'50%',
-                background:'linear-gradient(135deg,#1e3a5f,#2F80ED)',
+                background:'var(--color-primary-light)',
                 display:'flex', alignItems:'center', justifyContent:'center',
                 margin:'0 auto 16px', fontSize:'36px',
-                boxShadow:'0 8px 24px rgba(47,128,237,0.3)',
-              }}></div>
+                color: 'var(--color-primary)'
+              }}><Icon name="shield" size={40} /></div>
               <h2 className="auth-form-title" style={{marginBottom:'4px'}}>Enter your code</h2>
               <p className="auth-form-subtitle" style={{marginBottom:0}}>
                 Sent to <strong>{formData.email}</strong>
@@ -192,7 +193,6 @@ export default function SignupMohOfficer() {
                 type="submit"
                 className="btn btn-primary w-full justify-center"
                 disabled={loading || otp.replace(/\s/g,'').length < 6}
-                style={{background:'linear-gradient(135deg,#1e3a5f,#2F80ED)'}}
               >
                 {loading ? 'Verifying...' : 'Verify & Submit Application'}
               </button>
@@ -206,7 +206,7 @@ export default function SignupMohOfficer() {
                 disabled={resendCooldown > 0 || loading}
                 style={{
                   marginTop:'8px', background:'none', border:'none',
-                  color: resendCooldown > 0 ? 'var(--color-text-muted)' : '#2F80ED',
+                  color: resendCooldown > 0 ? 'var(--color-text-muted)' : 'var(--color-primary)',
                   fontWeight:600, fontSize:'14px',
                   cursor: resendCooldown > 0 ? 'default' : 'pointer',
                 }}
@@ -233,16 +233,16 @@ export default function SignupMohOfficer() {
   /* ── Registration form step ── */
   return (
     <div className="auth-layout">
-      <div className="auth-panel-left" style={{background:'linear-gradient(135deg,#1e3a5f 0%,#2F80ED 100%)'}}>
-        <Link to="/" className="text-2xl font-extrabold text-white mb-12 flex items-center gap-2">
-           Dengue<span style={{color:'#e0f7f7'}}>Radar</span>
+      <div className="auth-panel-left">
+        <Link to="/" className="text-2xl font-extrabold mb-12 flex items-center gap-2" style={{ color: 'var(--color-primary)' }}>
+           <Icon name="activity" /> Dengue<span>Radar</span>
         </Link>
         <h1 className="text-4xl font-extrabold mb-4">For MOH Officers</h1>
-        <p className="text-lg opacity-90 mb-8 max-w-md">Access specialized tools to monitor risks, manage resources, and coordinate public health responses.</p>
+        <p className="text-lg mb-8 max-w-md" style={{ color: 'rgba(255,255,255,0.85)' }}>Access specialized tools to monitor risks, manage resources, and coordinate public health responses.</p>
         <ul className="flex flex-col gap-4">
-          <li className="flex items-center gap-3"><span className="text-xl"></span> Detailed risk reports</li>
-          <li className="flex items-center gap-3"><span className="text-xl"></span> Zone-level trend analysis</li>
-          <li className="flex items-center gap-3"><span className="text-xl"></span> Community outreach tools</li>
+          <li className="flex items-center gap-3"><Icon name="shield" size={20} /> Detailed risk reports</li>
+          <li className="flex items-center gap-3"><Icon name="alert" size={20} /> Zone-level trend analysis</li>
+          <li className="flex items-center gap-3"><Icon name="activity" size={20} /> Community outreach tools</li>
         </ul>
       </div>
 
@@ -296,11 +296,10 @@ export default function SignupMohOfficer() {
             </div>
 
             <div className="alert alert-info mt-2">
-              ℹ️ MOH officer accounts require admin approval before you can log in.
+              <Icon name="alert" size={16} /> MOH officer accounts require admin approval before you can log in.
             </div>
 
-            <button id="officer-signup-btn" type="submit" className="btn btn-primary w-full justify-center mt-2" disabled={loading}
-              style={{background:'linear-gradient(135deg,#1e3a5f,#2F80ED)'}}>
+            <button id="officer-signup-btn" type="submit" className="btn btn-primary w-full justify-center mt-2" disabled={loading}>
               {loading ? 'Sending Code...' : 'Continue — Verify Email →'}
             </button>
           </form>

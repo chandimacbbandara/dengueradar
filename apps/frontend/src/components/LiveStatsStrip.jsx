@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { publicAPI } from '../services/api.js';
 
 function AnimatedCounter({ value }) {
@@ -29,6 +30,7 @@ function AnimatedCounter({ value }) {
 export default function LiveStatsStrip() {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
+  const { t } = useTranslation();
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -63,26 +65,26 @@ export default function LiveStatsStrip() {
 
   return (
     <div className="container" style={{ position: 'relative', top: '-40px', zIndex: 10 }}>
-      <div className="radar-glass-card" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '24px', padding: '32px' }}>
+      <div className="radar-glass-card card" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '24px', padding: '32px' }}>
         <div className="stat-item" style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: '36px', fontWeight: 800, color: '#0EA5A5' }}><AnimatedCounter value={stats?.totalUsers || 0} /></div>
-          <div style={{ fontSize: '13px', color: '#94A3B8', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px', marginTop: '8px' }}>Active Users</div>
+          <div style={{ fontSize: '36px', fontWeight: 800, color: 'var(--color-primary)' }}><AnimatedCounter value={stats?.totalUsers || 0} /></div>
+          <div style={{ fontSize: '13px', color: 'var(--color-text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px', marginTop: '8px' }}>{t('stats.activeUsers')}</div>
         </div>
         <div className="stat-item" style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: '36px', fontWeight: 800, color: '#0EA5A5' }}><AnimatedCounter value={stats?.districtsMonitored || 25} /></div>
-          <div style={{ fontSize: '13px', color: '#94A3B8', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px', marginTop: '8px' }}>Districts Monitored</div>
+          <div style={{ fontSize: '36px', fontWeight: 800, color: 'var(--color-primary)' }}><AnimatedCounter value={stats?.districtsMonitored || 25} /></div>
+          <div style={{ fontSize: '13px', color: 'var(--color-text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px', marginTop: '8px' }}>{t('stats.districtsMonitored')}</div>
         </div>
         <div className="stat-item" style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: '36px', fontWeight: 800, color: '#EF4444' }}><AnimatedCounter value={stats?.activeHighRiskZones || 0} /></div>
-          <div style={{ fontSize: '13px', color: '#94A3B8', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px', marginTop: '8px' }}>High-Risk Zones Today</div>
+          <div style={{ fontSize: '36px', fontWeight: 800, color: 'var(--color-risk-high)' }}><AnimatedCounter value={stats?.activeHighRiskZones || 0} /></div>
+          <div style={{ fontSize: '13px', color: 'var(--color-text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px', marginTop: '8px' }}>{t('stats.highRiskZonesToday')}</div>
         </div>
         <div className="stat-item" style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: '24px', fontWeight: 800, color: '#10B981', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '54px' }}>
-            Live
-            <span className="dot dot-high" style={{ marginLeft: '12px', animation: 'pulse 2s infinite', background: '#10B981', boxShadow: '0 0 12px #10B981' }}></span>
+          <div style={{ fontSize: '24px', fontWeight: 800, color: 'var(--color-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '54px' }}>
+            {t('stats.live')}
+            <span className="dot dot-high" style={{ marginLeft: '12px', animation: 'pulse 2s infinite', background: 'var(--color-primary)', boxShadow: '0 0 12px var(--color-primary)' }}></span>
           </div>
-          <div style={{ fontSize: '13px', color: '#94A3B8', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px', marginTop: '8px' }}>System Status</div>
-          <div style={{ fontSize: '11px', color: '#475569', marginTop: '4px' }}>Updated: {updatedAt}</div>
+          <div style={{ fontSize: '13px', color: 'var(--color-text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px', marginTop: '8px' }}>{t('stats.systemStatus')}</div>
+          <div style={{ fontSize: '11px', color: 'var(--color-text-secondary)', marginTop: '4px' }}>{t('map.lastUpdated')}: {updatedAt}</div>
         </div>
       </div>
     </div>

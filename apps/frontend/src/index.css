@@ -2,31 +2,34 @@
 
 :root {
   /* Colors */
-  --color-primary: #0EA5A5;
-  --color-primary-dark: #0d8f8f;
+  --color-primary: #0EA5A5; /* Deep teal base */
+  --color-primary-dark: #075959;
   --color-primary-light: #e0f7f7;
-  --color-secondary: #2F80ED;
+  --color-secondary: #0F172A; /* Navy */
   
-  --color-risk-low: #16A34A;
-  --color-risk-low-bg: #DCFCE7;
-  --color-risk-moderate: #D97706;
-  --color-risk-moderate-bg: #FEF3C7;
-  --color-risk-high: #DC2626;
+  /* Risk Scale */
+  --color-risk-low: #EAB308; /* Yellow/Amber for low */
+  --color-risk-low-bg: #FEF3C7;
+  --color-risk-moderate: #F97316; /* Stronger Orange */
+  --color-risk-moderate-bg: #FFEDD5;
+  --color-risk-high: #DC2626; /* Red */
   --color-risk-high-bg: #FEE2E2;
   
   --color-text-primary: #0F172A;
   --color-text-secondary: #475569;
   --color-text-muted: #94A3B8;
   
-  --color-bg: #FFFFFF;
-  --color-bg-subtle: #F8FAFC;
-  --color-bg-card: rgba(255,255,255,0.9);
+  /* Soft off-white backgrounds */
+  --color-bg: #F8FAFC; 
+  --color-bg-subtle: #F1F5F9;
+  --color-bg-card: rgba(255,255,255,0.95);
   
   --color-border: #E2E8F0;
   --color-border-light: #F1F5F9;
   
   /* Typography */
-  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-heading: 'Manrope', 'Inter', 'Noto Sans Sinhala', 'Noto Sans Tamil', sans-serif;
+  --font-body: 'Inter', 'Noto Sans Sinhala', 'Noto Sans Tamil', sans-serif;
   
   /* Spacing */
   --space-1: 4px;
@@ -62,15 +65,43 @@
   --transition-slow: 400ms ease;
 }
 
+/* Dark Mode Overrides */
+:root[data-theme='dark'] {
+  --color-secondary: #0F172A; /* Navy */
+  --color-text-primary: #F8FAFC;
+  --color-text-secondary: #CBD5E1;
+  --color-text-muted: #94A3B8;
+  
+  --color-bg: #0F172A; 
+  --color-bg-subtle: #1E293B;
+  --color-bg-card: rgba(30, 41, 59, 0.95);
+  
+  --color-border: #334155;
+  --color-border-light: rgba(51, 65, 85, 0.5);
+  
+  /* Update Risk Scale bg for dark mode so they don't look weird */
+  --color-risk-low-bg: rgba(217, 119, 6, 0.2);
+  --color-risk-moderate-bg: rgba(234, 88, 12, 0.2);
+  --color-risk-high-bg: rgba(220, 38, 38, 0.2);
+}
+
 /* Reset */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; }
 body {
-  font-family: var(--font-sans);
+  font-family: var(--font-body);
   color: var(--color-text-primary);
   background: var(--color-bg);
-  line-height: 1.6;
+  /* Use a slightly larger line-height for Sinhala/Tamil glyphs */
+  line-height: 1.7;
   -webkit-font-smoothing: antialiased;
+  /* Subtle organic motif background */
+  background-image: radial-gradient(circle at 100% 0%, rgba(14, 165, 165, 0.05) 0%, transparent 40%),
+                    radial-gradient(circle at 0% 100%, rgba(14, 165, 165, 0.03) 0%, transparent 40%);
+  background-attachment: fixed;
+}
+h1, h2, h3, h4, h5, h6, .nav-logo {
+  font-family: var(--font-heading);
 }
 a { color: inherit; text-decoration: none; }
 img { max-width: 100%; display: block; }
@@ -172,9 +203,9 @@ button { cursor: pointer; font-family: var(--font-sans); }
   border: 1.5px solid var(--color-border);
   border-radius: var(--radius-md);
   font-size: 15px;
-  font-family: var(--font-sans);
+  font-family: var(--font-body);
   color: var(--color-text-primary);
-  background: var(--color-bg);
+  background: white;
   transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
   outline: none;
   width: 100%;
@@ -342,11 +373,11 @@ select.form-input { appearance: none; background-image: url("data:image/svg+xml,
   left: 0;
   right: 0;
   z-index: 1000;
-  background: rgba(255,255,255,0.92);
+  background: var(--color-bg-card);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--color-border-light);
-  transition: box-shadow var(--transition-base);
+  transition: box-shadow var(--transition-base), background var(--transition-base);
 }
 .navbar.scrolled { box-shadow: var(--shadow-md); }
 .navbar-inner {
@@ -413,7 +444,7 @@ select.form-input { appearance: none; background-image: url("data:image/svg+xml,
 /* Hero section */
 .hero {
   padding: 140px 0 80px;
-  background: linear-gradient(135deg, #f0fdfd 0%, #e0f2fe 50%, #f8fafc 100%);
+  background: var(--color-bg);
   overflow: hidden;
   position: relative;
 }
@@ -473,7 +504,7 @@ select.form-input { appearance: none; background-image: url("data:image/svg+xml,
   width: 100%;
   max-width: 460px;
   aspect-ratio: 3/4;
-  background: white;
+  background: var(--color-bg-card);
   border-radius: var(--radius-2xl);
   box-shadow: var(--shadow-xl);
   overflow: hidden;
@@ -540,7 +571,7 @@ select.form-input { appearance: none; background-image: url("data:image/svg+xml,
 /* How it works */
 .how-section {
   padding: var(--space-20) 0;
-  background: linear-gradient(135deg, #f0fdfd 0%, #f8fafc 100%);
+  background: var(--color-bg-subtle);
 }
 .steps-grid {
   display: grid;
@@ -549,7 +580,7 @@ select.form-input { appearance: none; background-image: url("data:image/svg+xml,
   margin-top: var(--space-12);
 }
 .step-card {
-  background: white;
+  background: var(--color-bg-card);
   padding: var(--space-8);
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-md);
@@ -692,7 +723,7 @@ select.form-input { appearance: none; background-image: url("data:image/svg+xml,
   padding-top: 70px;
 }
 .dashboard-header {
-  background: white;
+  background: var(--color-bg-card);
   border-bottom: 1px solid var(--color-border-light);
   padding: var(--space-6) 0;
   box-shadow: var(--shadow-sm);
@@ -781,50 +812,7 @@ select.form-input { appearance: none; background-image: url("data:image/svg+xml,
 .p-8 { padding: var(--space-8); }
 .w-full { width: 100%; }
 
-/* ─── Premium Radar Aesthetic (Home Page Only) ─── */
-.home-radar-theme {
-  background: radial-gradient(circle at 50% -20%, #061b2e 0%, #030a13 100%);
-  color: #F8FAFC;
-  min-height: 100vh;
-}
-.home-radar-theme .hero {
-  background: transparent;
-}
-.home-radar-theme .map-section,
-.home-radar-theme .how-section,
-.home-radar-theme .trend-section {
-  background: transparent;
-}
-.home-radar-theme .section-label {
-  color: #0EA5A5;
-}
-.home-radar-theme .navbar {
-  background: rgba(3, 10, 19, 0.6);
-  backdrop-filter: blur(16px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-}
-.home-radar-theme .navbar-logo {
-  color: #fff;
-}
-.home-radar-theme .nav-link {
-  color: #94A3B8;
-}
-.home-radar-theme .nav-link:hover {
-  color: #fff;
-}
-.home-radar-theme .hero-title {
-  color: #fff;
-  text-shadow: 0 0 40px rgba(14, 165, 165, 0.3);
-}
-.home-radar-theme .hero-subtitle {
-  color: #94A3B8;
-}
-.home-radar-theme .section-title {
-  color: #fff;
-}
-.home-radar-theme .section-subtitle {
-  color: #64748B;
-}
+
 
 /* Glassmorphic Live Cards */
 .radar-glass-card {
