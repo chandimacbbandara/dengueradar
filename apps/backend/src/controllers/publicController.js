@@ -52,11 +52,20 @@ export const getNationalRisk = async (req, res) => {
             }
           }
       }},
-      { $sort: { severity: -1, riskScore: -1 } },
+      // 1. Group by district AND riskLevel to get the count
       { $group: {
-          _id: '$district',
+          _id: { district: '$district', riskLevel: '$riskLevel' },
+          count: { $sum: 1 },
+          severity: { $first: '$severity' },
+          riskScore: { $avg: '$riskScore' } // Average score for this group
+      }},
+      // 2. Sort by count DESC, then severity DESC (for ties)
+      { $sort: { count: -1, severity: -1 } },
+      // 3. Group by district to pick the top riskLevel (the majority)
+      { $group: {
+          _id: '$_id.district',
           riskScore: { $first: '$riskScore' },
-          riskLevel: { $first: '$riskLevel' }
+          riskLevel: { $first: '$_id.riskLevel' }
       }},
       { $project: {
           district: '$_id',
