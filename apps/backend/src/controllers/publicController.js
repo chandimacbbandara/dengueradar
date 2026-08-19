@@ -31,24 +31,55 @@ export const getNationalRisk = async (req, res) => {
   try {
     const livePredictions = await getLivePredictions();
     
-    const districtRiskMap = {};
+    const districtData = {};
     const severityMap = { 'high': 3, 'moderate': 2, 'medium': 2, 'low': 1 };
 
     for (const p of livePredictions) {
       const dist = p.district;
       const cleanRisk = p.riskLevel ? p.riskLevel.toLowerCase() : 'low';
-      const severity = severityMap[cleanRisk] || 1;
 
-      if (!districtRiskMap[dist]) {
-        districtRiskMap[dist] = { district: dist, riskScore: p.riskScore, riskLevel: cleanRisk, severity };
-      } else {
-        if (severity > districtRiskMap[dist].severity || (severity === districtRiskMap[dist].severity && p.riskScore > districtRiskMap[dist].riskScore)) {
-          districtRiskMap[dist] = { district: dist, riskScore: p.riskScore, riskLevel: cleanRisk, severity };
-        }
+      if (!districtData[dist]) {
+        districtData[dist] = { district: dist, counts: { high: 0, moderate: 0, low: 0 }, maxScore: 0 };
+      }
+      
+      const d = districtData[dist];
+      if (cleanRisk === 'high') d.counts.high++;
+      else if (cleanRisk === 'moderate' || cleanRisk === 'medium') d.counts.moderate++;
+      else d.counts.low++;
+      
+      if ((p.riskScore || 0) > d.maxScore) {
+        d.maxScore = p.riskScore || 0;
       }
     }
 
-    let nationalRisk = Object.values(districtRiskMap);
+    const nationalRisk = [];
+    for (const d of Object.values(districtData)) {
+      const c = d.counts;
+      const maxCount = Math.max(c.high, c.moderate, c.low);
+      
+      let finalRisk = 'low';
+      let finalSeverity = 1;
+      
+      // Tie breaker: higher severity wins
+      if (c.high === maxCount) {
+        finalRisk = 'high';
+        finalSeverity = 3;
+      } else if (c.moderate === maxCount) {
+        finalRisk = 'moderate';
+        finalSeverity = 2;
+      } else {
+        finalRisk = 'low';
+        finalSeverity = 1;
+      }
+      
+      nationalRisk.push({
+        district: d.district,
+        riskScore: d.maxScore,
+        riskLevel: finalRisk,
+        severity: finalSeverity
+      });
+    }
+
     nationalRisk.sort((a, b) => b.severity - a.severity || b.riskScore - a.riskScore);
     nationalRisk.forEach(d => delete d.severity);
 
