@@ -77,13 +77,6 @@ export const getZoneTrend = async (req, res) => {
       ...(mohZone ? { mohZone } : {}),
     }).sort({ date: -1 }).select('date');
     const now = latestCase ? new Date(latestCase.date) : new Date();
-    
-    console.log('[getZoneTrend] DEBUG:', {
-      latestCase,
-      now: now.toISOString(),
-      district,
-      mohZone,
-    });
 
     /* ── Date window ── */
     let since;
