@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../context/AuthContext.jsx';
+import { useThemeStore } from '../context/ThemeContext.jsx';
 import { authAPI } from '../services/api.js';
 import toast from 'react-hot-toast';
 import LanguageSwitcher from './LanguageSwitcher.jsx';
@@ -11,28 +12,12 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   
-  // Theme state initialization from localStorage or system preference
-  const [isDark, setIsDark] = useState(() => {
-    const saved = localStorage.getItem('theme');
-    if (saved) return saved === 'dark';
-    return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-  });
+  const { isDark, toggleTheme } = useThemeStore();
 
   const { isAuthenticated, user, logout } = useAuthStore();
   const navigate = useNavigate();
   const location = useLocation();
   const { t } = useTranslation();
-
-  // Apply theme to document element
-  useEffect(() => {
-    if (isDark) {
-      document.documentElement.setAttribute('data-theme', 'dark');
-      localStorage.setItem('theme', 'dark');
-    } else {
-      document.documentElement.removeAttribute('data-theme');
-      localStorage.setItem('theme', 'light');
-    }
-  }, [isDark]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -90,7 +75,7 @@ export default function Navbar() {
 
         <div className="nav-actions">
           <button 
-            onClick={() => setIsDark(!isDark)}
+            onClick={toggleTheme}
             style={{
               background: 'none', border: 'none', color: 'var(--color-text-secondary)',
               cursor: 'pointer', display: 'flex', alignItems: 'center', padding: '4px',

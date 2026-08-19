@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { MapContainer, TileLayer, GeoJSON, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import { useThemeStore } from '../context/ThemeContext.jsx';
 
 // Fix Leaflet icon issue
 delete L.Icon.Default.prototype._getIconUrl;
@@ -53,6 +54,8 @@ export default function SriLankaMap({ riskData, selectedDistrict }) {
   const [geoData, setGeoData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  
+  const { isDark } = useThemeStore();
 
   useEffect(() => {
     fetch('/srilanka-districts.json')
@@ -119,7 +122,9 @@ export default function SriLankaMap({ riskData, selectedDistrict }) {
         zoomControl={false}
       >
         <TileLayer
-          url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+          url={isDark 
+            ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+            : "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"}
           attribution='&copy; <a href="https://carto.com/">CARTO</a>'
         />
         {geoData && (
