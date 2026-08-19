@@ -268,7 +268,7 @@ export default function MohDashboard() {
               <thead>
                 <tr>
                   <th>Zone Name</th>
-                  <th>Risk Score</th>
+                  <th>Predicted Cases</th>
                   <th>Risk Level</th>
                   <th>Recent Cases</th>
                   <th>Registered Users</th>
@@ -279,7 +279,7 @@ export default function MohDashboard() {
                 {data?.zones?.map(zone => (
                   <tr key={zone.name}>
                     <td className="font-semibold text-gray-800">{zone.name}</td>
-                    <td>{Math.round(zone.riskScore)}</td>
+                    <td className="font-bold text-orange-600">{Math.round(zone.predictedCases || 0)}</td>
                     <td><RiskBadge level={zone.riskLevel} /></td>
                     <td>{zone.cases || 0}</td>
                     <td>{zone.users || 0}</td>

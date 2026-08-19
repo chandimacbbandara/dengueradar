@@ -149,11 +149,4 @@ export async function fetchAllDistrictWeather() {
     (failCount > 0 ? ` | ${failCount} failed` : '')
   );
 
-  // Trigger ML predictions automatically based on updated weather inputs
-  try {
-    const { runMLPredictionsAndAlerts } = await import('./predictionService.js');
-    await runMLPredictionsAndAlerts();
-  } catch (predErr) {
-    console.error('[WeatherFetcher] ⚠️ Prediction trigger failed:', predErr.message);
-  }
 }

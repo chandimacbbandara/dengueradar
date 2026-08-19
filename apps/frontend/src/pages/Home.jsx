@@ -25,6 +25,16 @@ export default function Home() {
       .catch(console.error);
   }, []);
 
+  const highRiskCount = riskData.filter(d => d.riskLevel === 'high').length;
+  const criticalRiskCount = riskData.filter(d => d.riskLevel === 'critical').length;
+  const severeCount = highRiskCount + criticalRiskCount;
+  
+  let nationalRiskLevel = 'Low';
+  if (severeCount > 5) nationalRiskLevel = 'High';
+  else if (severeCount > 0) nationalRiskLevel = 'Moderate';
+
+  const riskBadgeClass = nationalRiskLevel.toLowerCase();
+
   return (
     <>
       <Navbar />
@@ -64,12 +74,12 @@ export default function Home() {
                 <div className="kpi-icon">
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
                 </div>
-                <div className="kpi-trend up">▲ 2 districts</div>
+                <div className="kpi-trend up">▲ live update</div>
               </div>
-              <div className="kpi-value">{topZones.length || 6}</div>
+              <div className="kpi-value">{riskData.length > 0 ? severeCount : '...'}</div>
               <div className="kpi-label">High-Risk Districts</div>
               <svg className="spark" viewBox="0 0 100 28" preserveAspectRatio="none"><polyline points="0,22 20,20 40,14 60,16 80,8 100,6" fill="none" stroke="var(--risk-crit)" strokeWidth="2"/></svg>
-              <div className="kpi-updated">UPDATED 6 MIN AGO</div>
+              <div className="kpi-updated">UPDATED LIVE</div>
             </div>
             
             <div className="kpi"><div className="spectrum"></div>
@@ -77,12 +87,12 @@ export default function Home() {
                 <div className="kpi-icon">
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
                 </div>
-                <div className="kpi-trend flat">— stable</div>
+                <div className="kpi-trend flat">— live update</div>
               </div>
-              <div className="kpi-value">MODERATE</div>
+              <div className="kpi-value">{riskData.length > 0 ? nationalRiskLevel.toUpperCase() : '...'}</div>
               <div className="kpi-label">National Risk Level</div>
               <svg className="spark" viewBox="0 0 100 28" preserveAspectRatio="none"><polyline points="0,14 20,15 40,13 60,14 80,15 100,14" fill="none" stroke="var(--risk-mod)" strokeWidth="2"/></svg>
-              <div className="kpi-updated">UPDATED 6 MIN AGO</div>
+              <div className="kpi-updated">UPDATED LIVE</div>
             </div>
             
             <div className="kpi"><div className="spectrum"></div>
@@ -90,12 +100,12 @@ export default function Home() {
                 <div className="kpi-icon">
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
                 </div>
-                <div className="kpi-trend up">▲ next 14d</div>
+                <div className="kpi-trend up">▲ next week</div>
               </div>
-              <div className="kpi-value">HIGH</div>
+              <div className="kpi-value">{riskData.length > 0 ? nationalRiskLevel.toUpperCase() : '...'}</div>
               <div className="kpi-label">AI Predicted Risk</div>
               <svg className="spark" viewBox="0 0 100 28" preserveAspectRatio="none"><polyline points="0,20 20,17 40,18 60,10 80,9 100,3" fill="none" stroke="var(--risk-high)" strokeWidth="2"/></svg>
-              <div className="kpi-updated">MODEL RUN 6H AGO</div>
+              <div className="kpi-updated">MODEL RUN LIVE</div>
             </div>
             
             <div className="kpi"><div className="spectrum"></div>
@@ -164,12 +174,12 @@ export default function Home() {
             </div>
 
             <div className="panel">
-              <div className="panel-head"><h3>AI Risk Intelligence</h3><span className="risk-badge moderate">Confidence 82%</span></div>
+              <div className="panel-head"><h3>AI Risk Intelligence</h3><span className={`risk-badge ${riskData.length > 0 ? riskBadgeClass : ''}`}>Live</span></div>
               <div className="panel-body">
-                <div className="intel-row"><span className="intel-label">National Risk</span><span className="risk-badge moderate">Moderate</span></div>
-                <div className="intel-row"><span className="intel-label">Highest-Risk District</span><span className="intel-value">{topZones[0]?.district || 'Colombo'}</span></div>
-                <div className="intel-row"><span className="intel-label">Predicted Risk (14d)</span><span className="risk-badge high">High</span></div>
-                <div className="intel-row"><span className="intel-label">Prediction Horizon</span><span className="intel-value mono" style={{fontSize:'12px'}}>14 days</span></div>
+                <div className="intel-row"><span className="intel-label">National Risk</span><span className={`risk-badge ${riskBadgeClass}`}>{riskData.length > 0 ? nationalRiskLevel : '...'}</span></div>
+                <div className="intel-row"><span className="intel-label">Highest-Risk District</span><span className="intel-value">{topZones[0]?.district || '...'}</span></div>
+                <div className="intel-row"><span className="intel-label">Predicted Risk</span><span className={`risk-badge ${riskBadgeClass}`}>{riskData.length > 0 ? nationalRiskLevel : '...'}</span></div>
+                <div className="intel-row"><span className="intel-label">Prediction Horizon</span><span className="intel-value mono" style={{fontSize:'12px'}}>August 24</span></div>
                 <div style={{marginTop:'14px'}}>
                   <div style={{fontSize:'11px', color:'var(--text-3)', textTransform:'uppercase', letterSpacing:'.05em', marginBottom:'8px'}}>Contributing Factors</div>
                   <div className="factor-tags">

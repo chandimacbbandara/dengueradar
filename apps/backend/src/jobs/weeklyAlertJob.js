@@ -1,8 +1,7 @@
 import cron from 'node-cron';
-import RiskPrediction from '../models/RiskPrediction.js';
+import { getLivePredictions, sendRiskAlertEmail } from '../services/predictionService.js';
 import User from '../models/User.js';
 import Alert from '../models/Alert.js';
-import { sendRiskAlertEmail } from '../services/predictionService.js';
 
 const CRON_SCHEDULE = '0 0 * * 0'; // Every Sunday at midnight (every 7 days)
 
@@ -12,14 +11,10 @@ export function startWeeklyAlertJob() {
   cron.schedule(CRON_SCHEDULE, async () => {
     console.log(`[WeeklyAlertJob] ⏰ Cron triggered at ${new Date().toISOString()}`);
     try {
-      const latestPrediction = await RiskPrediction.findOne().sort({ generatedAt: -1 }).select('generatedAt');
-      if (!latestPrediction) return;
-      const windowStart = new Date(latestPrediction.generatedAt.getTime() - 6 * 60 * 60 * 1000);
+      const allPredictions = await getLivePredictions();
+      if (!allPredictions || allPredictions.length === 0) return;
 
-      const highRiskZones = await RiskPrediction.find({ 
-        generatedAt: { $gte: windowStart },
-        riskLevel: 'high'
-      }).lean();
+      const highRiskZones = allPredictions.filter(p => p.riskLevel === 'high');
 
       if (highRiskZones.length === 0) return;
 

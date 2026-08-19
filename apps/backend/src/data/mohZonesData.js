@@ -1,521 +1,360 @@
 /**
- * Official MOH (Medical Officer of Health) Zonal Areas by District — Sri Lanka
- *
- * Source: Epidemiology Unit of Sri Lanka — WEBIIS (moh area code.pdf),
- * cross-referenced with Ministry of Health provincial data, RDHS offices,
- * and PHI-PRO registry.
- *
- * Total: ~354 MOH areas across 25 districts.
- *
- * NOTE: "Kalmunai" is a separate RDHS area but lies within Ampara District
- * geographically. All Kalmunai MOH zones are listed under "Ampara" here so they
- * appear in the correct district dropdown cascade.
+ * Generated from dengueradar_training_table.csv to perfectly match the ML dataset.
+ * Total zones: 226
  */
 
 const MOH_ZONES_DATA = [
-  // ─── WESTERN PROVINCE ───────────────────────────────────────────────────────
-
   {
-    district: 'Colombo',
-    zones: [
-      'Dehiwala',
-      'Piliyandala',
-      'Homagama',
-      'Kaduwela',
-      'Kolonnawa',
-      'Pitakotte',
-      'Maharagama',
-      'Boralesgamuwa',
-      'Moratuwa',
-      'Ratmalana',
-      'Hanwella',
-      'Padukka',
-      'Seethawaka',
-      'Kesbewa',
-      'MC Colombo',
-      'Egoda Uyana',
-      'Battaramulla',
-      'Thalangama',
-    ],
+    "district": "Ampara",
+    "zones": [
+      "Akkaraipattu",
+      "Ampara",
+      "Damana",
+      "Dehiattakandiya",
+      "Kalmunai north ( td)",
+      "Kalmunai south (md)",
+      "Lahugala",
+      "Mahaoya",
+      "Padiyathalawa",
+      "Samanthurai",
+      "Thirukkovil",
+      "Uhana"
+    ]
   },
-
   {
-    district: 'Gampaha',
-    zones: [
-      'Attanagalla',
-      'Biyagama',
-      'Divulapitiya',
-      'Gampaha',
-      'Ja-Ela',
-      'Katana',
-      'Kelaniya',
-      'Dompe',
-      'Mahara',
-      'MC Negombo',
-      'Minuwangoda',
-      'Meerigama',
-      'Ragama',
-      'Wattala',
-      'Seeduwa',
-      'BOI Katunayake',
-    ],
+    "district": "Anuradhapura",
+    "zones": [
+      "Galenbindunuwewa",
+      "Galnewa",
+      "Ipalogama",
+      "Kahatagasdigiliya",
+      "Kekirawa(palugaswewa)",
+      "Medawachchiya",
+      "Nochchiyagama",
+      "Padaviya",
+      "Palagala",
+      "Rajanganaya",
+      "Rambewa",
+      "Thalawa",
+      "Thambuttegama",
+      "Thirappane"
+    ]
   },
-
   {
-    district: 'Kalutara',
-    zones: [
-      'Agalawatta',
-      'Bandaragama',
-      'Bulathsinhala',
-      'Horana',
-      'Matugama',
-      'Panadura',
-      'Walallavita',
-      'Madurawela',
-      'Ingiriya',
-      'Dodangoda',
-      'Millaniya',
-      'Beruwala',
-      'Kalutara',
-    ],
+    "district": "Badulla",
+    "zones": [
+      "Badulla",
+      "Bandarawela",
+      "Ella",
+      "Hali ela",
+      "Haputale",
+      "Kandaketiya",
+      "Lunugala",
+      "Mahiyanganaya",
+      "Meegahakivula",
+      "Passara",
+      "Rideemaliyadda",
+      "Uva paranagama",
+      "Welimada"
+    ]
   },
-
-  // ─── CENTRAL PROVINCE ───────────────────────────────────────────────────────
-
   {
-    district: 'Kandy',
-    zones: [
-      'Akurana',
-      'Galagedara',
-      'Ganga Ihala',
-      'Hatharaliyadda',
-      'Gangawata Korale',
-      'Hasalaka',
-      'Kundasale',
-      'Medadumbara',
-      'Nawalapitiya',
-      'Panvila',
-      'Poojapitiya',
-      'Thalathuoya',
-      'Udadumbara',
-      'Gampola',
-      'Udunuwara',
-      'Wattegama',
-      'Warallagama',
-      'Yatinuwara',
-      'Doluwa',
-      'Deltota',
-      'Manikhinna',
-      'Bambaradeniya',
-      'MC Kandy',
-    ],
+    "district": "Batticaloa",
+    "zones": [
+      "Eravur"
+    ]
   },
-
   {
-    district: 'Matale',
-    zones: [
-      'Matale',
-      'MC Matale',
-      'Dambulla',
-      'MC Dambulla',
-      'Galewela',
-      'Rattota',
-      'Ambanganga Korale',
-      'Naula',
-      'Laggala Pallegama',
-      'Wilgamuwa',
-      'Ukuwela',
-      'Yatawatta',
-      'Pallepola',
-    ],
+    "district": "Colombo",
+    "zones": [
+      "Dehiwala",
+      "Hanwella/avissawella",
+      "Homagama",
+      "Kaduwela",
+      "Kolonnawa",
+      "MC Colombo",
+      "Maharagama",
+      "Moratuwa",
+      "Padukka"
+    ]
   },
-
   {
-    district: 'Nuwara Eliya',
-    zones: [
-      'Nuwara Eliya',
-      'MC Nuwara Eliya',
-      'Kothmale',
-      'Maskeliya',
-      'Ambagamuwa',
-      'Walapane',
-      'Maturata',
-      'Nawathispane',
-      'Hanguranketha',
-      'Bogawanthalawa',
-      'Ragala',
-      'Lindula',
-      'Kotagala',
-    ],
+    "district": "Galle",
+    "zones": [
+      "Akmeemana",
+      "Ambalangoda",
+      "Baddegama",
+      "Balapitiya",
+      "Bope(poddala)",
+      "Elpitiya",
+      "Habaraduwa",
+      "Hikkaduwa",
+      "Imaduwa",
+      "Karandeniya",
+      "MC Galle",
+      "Neluwa",
+      "Niyagama",
+      "Yakkalamulla"
+    ]
   },
-
-  // ─── SABARAGAMUWA PROVINCE ──────────────────────────────────────────────────
-
   {
-    district: 'Kegalle',
-    zones: [
-      'Aranayake',
-      'Dehiowita',
-      'Deraniyagala',
-      'Galigamuwa',
-      'Kegalle',
-      'Mawanella',
-      'Rambukkana',
-      'Ruwanwella',
-      'Warakapola',
-      'Yatiyanthota',
-      'Bulathkohupitiya',
-    ],
+    "district": "Gampaha",
+    "zones": [
+      "Attanagalla",
+      "Biyagama",
+      "Divulapitiya",
+      "Dompe",
+      "Gampaha",
+      "Ja-Ela",
+      "Katana",
+      "Kelaniya",
+      "MC Negombo",
+      "Mahara",
+      "Minuwangoda",
+      "Wattala"
+    ]
   },
-
   {
-    district: 'Ratnapura',
-    zones: [
-      'Balangoda',
-      'Eheliyagoda',
-      'Embilipitiya',
-      'Godakawela',
-      'Kalawana',
-      'Kuruwita',
-      'Udawalawa',
-      'Nivithigala',
-      'Pelmadulla',
-      'Imbulpe',
-      'Ratnapura PS',
-      'Ratnapura MC',
-      'Elapatha',
-      'Kiriella',
-      'Ayagama',
-    ],
+    "district": "Hambantota",
+    "zones": [
+      "Angunakolapelessa",
+      "Beliatta",
+      "Hambantota",
+      "Katuwana",
+      "Lunugamvehera",
+      "Okewela",
+      "Sooriyawewa",
+      "Tangalle",
+      "Weeraketiya"
+    ]
   },
-
-  // ─── UVA PROVINCE ───────────────────────────────────────────────────────────
-
   {
-    district: 'Badulla',
-    zones: [
-      'Badulla',
-      'Bandarawela',
-      'Girandurukotte',
-      'Hali Ela',
-      'Haputale',
-      'Mahiyanganaya',
-      'Meegahakivula',
-      'Passara',
-      'Rideemaliyadda',
-      'Uva Paranagama',
-      'Welimada',
-      'Ella',
-      'Soranathota',
-      'Haldummulla',
-      'Kandaketiya',
-      'Lunugala',
-    ],
+    "district": "Jaffna",
+    "zones": [
+      "Mc jaffna",
+      "Nallur"
+    ]
   },
-
   {
-    district: 'Monaragala',
-    zones: [
-      'Badalkumbura',
-      'Bibila',
-      'Monaragala',
-      'Siyambalanduwa',
-      'Thanamalwila',
-      'Wellawaya',
-      'Madulla',
-      'Medagama',
-      'Buttala',
-      'Kataragama',
-      'Sevanagala',
-    ],
+    "district": "Kalutara",
+    "zones": [
+      "Agalawatta",
+      "Bandaragama",
+      "Beruwala (NIHS)",
+      "Bulathsinhala",
+      "Dodangoda",
+      "Horana",
+      "Ingiriya",
+      "Kalutara (NIHS)",
+      "Madurawala",
+      "Palindanuwara/baduraliya",
+      "Panadura"
+    ]
   },
-
-  // ─── SOUTHERN PROVINCE ──────────────────────────────────────────────────────
-
   {
-    district: 'Galle',
-    zones: [
-      'Akmeemana',
-      'Ambalangoda',
-      'Baddegama',
-      'Balapitiya',
-      'Bope-Poddala',
-      'Elpitiya',
-      'Habaraduwa',
-      'Hikkaduwa',
-      'Thawalama',
-      'Yakkalamulla',
-      'Induruwa',
-      'Karandeniya',
-      'MC Galle',
-      'Udugama',
-      'Niyagama',
-      'Neluwa',
-      'Imaduwa',
-      'Gonapinuwala',
-      'Divithura',
-      'Rathgama',
-    ],
+    "district": "Kandy",
+    "zones": [
+      "Akurana",
+      "Doluwa(hindagala project)",
+      "Harispattuwa (Werellagama)",
+      "Kundasale",
+      "Medadumbara (Meda-Mahanuwara)",
+      "Pasbage(nawalapitiya)",
+      "Poojapitiya",
+      "Udadumbara",
+      "Udunuwara",
+      "Yatinuwara"
+    ]
   },
-
   {
-    district: 'Matara',
-    zones: [
-      'Akuressa',
-      'Kotapola',
-      'Devinuwara',
-      'Dickwella',
-      'Hakmana',
-      'Kamburupitiya',
-      'Morawaka',
-      'Malimboda',
-      'PS Matara',
-      'Mulatiyana',
-      'Pasgoda',
-      'Thihagoda',
-    ],
+    "district": "Kegalle",
+    "zones": [
+      "Bulathkohupitiya",
+      "Deraniyagala",
+      "Galigamuwa",
+      "Kegalle",
+      "Mawanella",
+      "Rambukkana",
+      "Ruwanwella",
+      "Warakapola"
+    ]
   },
-
   {
-    district: 'Hambantota',
-    zones: [
-      'Ambalantota',
-      'Angunakolapelessa',
-      'Beliatta',
-      'Hambantota',
-      'Katuwana',
-      'Tangalle',
-      'Tissamaharama',
-      'Walasmulla',
-      'Weeraketiya',
-      'Sooriyawewa',
-      'Lunugamwehera',
-      'Okewela',
-    ],
+    "district": "Kilinochchi",
+    "zones": [
+      "Poonakary"
+    ]
   },
-
-  // ─── EASTERN PROVINCE ───────────────────────────────────────────────────────
-
   {
-    district: 'Ampara',
-    // Includes both Ampara RDHS (7) and Kalmunai RDHS (13) zones —
-    // both fall within Ampara District geographically.
-    zones: [
-      // Ampara RDHS
-      'Ampara',
-      'Dehiattakandiya',
-      'Uhana',
-      'Mahaoya',
-      'Padiyathalawa',
-      'Lahugala',
-      'Damana',
-      // Kalmunai RDHS (within Ampara District)
-      'Akkaraipattu',
-      'Kalmunai North',
-      'Thirukkovil',
-      'Sammanthurai',
-      'Nintavur',
-      'Kalmunai South',
-      'Karaitivu',
-      'Alayadivembu',
-      'Addalaichenai',
-      'Pottuvil',
-      'Sainthamaruththu',
-      'Irakkamam',
-      'Navithanveli',
-    ],
+    "district": "Kurunegala",
+    "zones": [
+      "Alawwa",
+      "Ambanpola",
+      "Bamunakotuwa",
+      "Bingiriya",
+      "Galgamuwa",
+      "Ganewatta",
+      "Giribawa",
+      "Ibbagamuwa",
+      "Kobeigane",
+      "Kotavehera",
+      "Kuliyapitiya",
+      "Kuliyapitiya-east(katupotha)",
+      "Kurunegala",
+      "MC Kurunegala",
+      "Mallawapitiya",
+      "Mawathagama",
+      "Narammala",
+      "Nikaweratiya",
+      "Panduwasnuwara",
+      "Pannala",
+      "Polgahawela",
+      "Polpithigama",
+      "Rideegama",
+      "Udubaddawa",
+      "Wariyapola",
+      "Weerambugedara"
+    ]
   },
-
   {
-    district: 'Batticaloa',
-    zones: [
-      'Batticaloa',
-      'Chenkalady',
-      'Kalavanchikudy',
-      'Valachchenai',
-      'Kattankudy',
-      'Eravur',
-      'Paddippalai',
-      'Vavunativu',
-      'Vakarai',
-      'Vellavely',
-      'Oddamavadai',
-      'Koralipattu Central',
-      'Araipattai',
-    ],
+    "district": "Mannar",
+    "zones": [
+      "Madhu",
+      "Mannar",
+      "Musali"
+    ]
   },
-
   {
-    district: 'Trincomalee',
-    zones: [
-      'Trincomalee',
-      'Kantale',
-      'Kinniya',
-      'Padavisripura',
-      'Muttur',
-      'Seruwila',
-      'Thampalakamam',
-      'Gomarankadawala',
-      'Kuchchavely',
-      'Eachchilampatthu',
-      'Uppuveli',
-      'Trincomalee Naval Base',
-    ],
+    "district": "Matale",
+    "zones": [
+      "Ambanganga korale",
+      "Dambulla",
+      "Galewela",
+      "Laggala(pallegama)",
+      "MC Dambulla",
+      "Matale",
+      "Mc matale",
+      "Naula",
+      "Pallepola",
+      "Rattota",
+      "Ukuwela",
+      "Wilgamuwa",
+      "Yatawatta"
+    ]
   },
-
-  // ─── NORTH CENTRAL PROVINCE ─────────────────────────────────────────────────
-
   {
-    district: 'Polonnaruwa',
-    zones: [
-      'Dimbulagala',
-      'Elahera',
-      'Hingurakgoda',
-      'Lankapura',
-      'Medirigiriya',
-      'Thamankaduwa',
-      'Welikanda',
-    ],
+    "district": "Matara",
+    "zones": [
+      "Akuressa",
+      "Devinuwara",
+      "Hakmana",
+      "Kamburupitiya",
+      "Kirinda(puhulwella)",
+      "Kotapola",
+      "Mc matara",
+      "Mulatiyana",
+      "Pasgoda",
+      "Thihagoda",
+      "Weligama",
+      "Welipitiya"
+    ]
   },
-
   {
-    district: 'Anuradhapura',
-    zones: [
-      'Anuradhapura CNP',
-      'Kahatagasdigiliya',
-      'Kekirawa',
-      'Medawachchiya',
-      'Padaviya',
-      'Thambuttegama',
-      'Galnewa',
-      'Nochchiyagama',
-      'Anuradhapura NNP',
-      'Mihintale',
-      'Rajanganaya',
-      'Galenbindunuwewa',
-      'Ipalogama',
-      'Thalawa',
-      'Thirappane',
-      'Rambewa',
-      'Kebithigollewa',
-      'Horowpothana',
-      'Palagala',
-    ],
+    "district": "Monaragala",
+    "zones": [
+      "Badalkumbura",
+      "Bibile",
+      "Buttala",
+      "Madulla",
+      "Medagama",
+      "Moneragala",
+      "Sevanagala",
+      "Siyambalanduwa",
+      "Wellawaya"
+    ]
   },
-
-  // ─── NORTH WESTERN PROVINCE ─────────────────────────────────────────────────
-
   {
-    district: 'Kurunegala',
-    zones: [
-      'Bingiriya',
-      'Galgamuwa',
-      'Ibbagamuwa',
-      'Kuliyapitiya',
-      'Kurunegala',
-      'Maho',
-      'Mawathagama',
-      'Narammala',
-      'Nikaweratiya',
-      'Panduwasnuwara',
-      'Pannala',
-      'Polgahawela',
-      'Polpithigama',
-      'Rideegama',
-      'Alawwa',
-      'Ambanpola',
-      'Bamunakotuwa',
-      'Ganewatta',
-      'Wariyapola',
-      'MC Kurunegala',
-      'Kuliyapitiya East',
-      'Kobeigane',
-      'Kotawehera',
-      'Ehetuwewa',
-      'Udubaddawa',
-    ],
+    "district": "Mullaitivu",
+    "zones": [
+      "Puthukudiyiruppu",
+      "Thunukkai(mallavi)"
+    ]
   },
-
   {
-    district: 'Puttalam',
-    zones: [
-      'Anamaduwa',
-      'Arachchikattuwa',
-      'Chilaw',
-      'Dankotuwa',
-      'Kalpitiya',
-      'Karuwalagaswewa',
-      'Puttalam',
-      'Mundel',
-      'Wennappuwa',
-      'Mahawewa',
-      'Nattandiya',
-    ],
+    "district": "Nuwara Eliya",
+    "zones": [
+      "Ambagamuwa (Ginigathhena)",
+      "Hanguranketha (Rikillagaskada)",
+      "MC Nuwara Eliya",
+      "Nuwara Eliya",
+      "Walapane"
+    ]
   },
-
-  // ─── NORTHERN PROVINCE ──────────────────────────────────────────────────────
-
   {
-    district: 'Jaffna',
-    zones: [
-      'Chavakachcheri',
-      'Kayts',
-      'Kopay',
-      'MC Jaffna',
-      'Point Pedro',
-      'Telippalai',
-      'Nallur',
-      'Uduvil',
-      'Chankanai',
-      'Karainagar',
-      'Maruthankerny',
-      'Sandilippay',
-      'Velanai',
-    ],
+    "district": "Polonnaruwa",
+    "zones": [
+      "Dimbulagala",
+      "Elahera",
+      "Hingurakgoda",
+      "Lankapura",
+      "Medirigiriya",
+      "Thamankaduwa",
+      "Welikanda"
+    ]
   },
-
   {
-    district: 'Kilinochchi',
-    zones: [
-      'Kilinochchi',
-      'Poonakary',
-      'Kandavalai',
-      'Palai',
-    ],
+    "district": "Puttalam",
+    "zones": [
+      "Anamaduwa",
+      "Arachchikattuwa",
+      "Chilaw",
+      "Dankotuwa",
+      "Kalpitiya",
+      "Karuwalagaswewa",
+      "Mahawewa",
+      "Nattandiya",
+      "Pallama",
+      "Puttalam",
+      "Wennappuwa"
+    ]
   },
-
   {
-    district: 'Mannar',
-    zones: [
-      'Mannar',
-      'Nanaddan',
-      'Madhu',
-      'Manthalai West',
-      'Musali',
-    ],
+    "district": "Ratnapura",
+    "zones": [
+      "Ayagama",
+      "Balangoda",
+      "Eheliyagoda",
+      "Elapatha",
+      "Embilipitiya",
+      "Godakawela",
+      "Imbulpe",
+      "Kalawana",
+      "Kiriella",
+      "Kolonna",
+      "MC Ratnapura",
+      "Nivithigala",
+      "PS Ratnapura",
+      "Pelmadulla",
+      "Weligepola"
+    ]
   },
-
   {
-    district: 'Vavuniya',
-    zones: [
-      'Vavuniya',
-      'Vavuniya South',
-      'Cheddikulam',
-      'Vavuniya North',
-    ],
+    "district": "Trincomalee",
+    "zones": [
+      "Gomarankadawala",
+      "Kinniya",
+      "Trincomale(naval base)",
+      "Trincomalee"
+    ]
   },
-
   {
-    district: 'Mullaitivu',
-    zones: [
-      'Mullaitivu',
-      'Thunukkai',
-      'Oddusuddan',
-      'Puthukkudiyiruppu',
-      'Welioya',
-      'Manthai East',
-    ],
-  },
+    "district": "Vavuniya",
+    "zones": [
+      "Vavuniya",
+      "Vavuniya north",
+      "Vavuniya south"
+    ]
+  }
 ];
 
 export default MOH_ZONES_DATA;

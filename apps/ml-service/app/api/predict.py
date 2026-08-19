@@ -189,11 +189,18 @@ def _build_feature_row(moh: MohInput) -> dict:
     else:
         case_trend_8w = 0.0
 
-    # ── Incidence lags ───────────────────────────────────────────────────────
-    ilags = list(moh.incidence_lags) + [0.0] * 4
-    inc_lag1, inc_lag2, inc_lag4, inc_lag8 = ilags[0], ilags[1], ilags[2], ilags[3]
-    inc_roll4_mean  = float(np.mean([inc_lag1, inc_lag2, inc_lag4, inc_lag8]))
-    inc_roll12_mean = float(np.mean([inc_lag1, inc_lag2, inc_lag4, inc_lag8]))
+    # ── Incidence lags (calculated directly from case lags & population for high accuracy) ──
+    pop_factor = 100000.0 / max(moh.population, 1.0)
+    inc_lag1 = lag1 * pop_factor
+    inc_lag2 = lag2 * pop_factor
+    inc_lag3 = lag3 * pop_factor
+    inc_lag4 = lag4 * pop_factor
+    inc_lag5 = lag5 * pop_factor
+    inc_lag8 = lag8 * pop_factor
+    inc_lag12 = lag12 * pop_factor
+
+    inc_roll4_mean  = float(np.mean([inc_lag1, inc_lag2, inc_lag3, inc_lag4]))
+    inc_roll12_mean = float(np.mean([inc_lag1, inc_lag2, inc_lag3, inc_lag4, inc_lag5, inc_lag8, inc_lag12]))
 
     # ── Seasonality ─────────────────────────────────────────────────────────
     month   = dt.month
@@ -320,25 +327,70 @@ def _predict_batch(mohs: list) -> list:
     else:
         cases_final = np.clip(meta_preds, 0, None)
 
+    incidences = []
+    district_incidences = {}
+    for i, moh in enumerate(mohs):
+        raw_cases = int(round(cases_final[i]))
+        pop = max(moh.population, 1.0)
+        inc = (raw_cases / pop) * 100_000.0
+        incidences.append(inc)
+        if moh.district not in district_incidences:
+            district_incidences[moh.district] = []
+        district_incidences[moh.district].append(inc)
+        
+    district_stats = {}
+    for d, incs in district_incidences.items():
+        arr = np.array(incs)
+        district_stats[d] = {
+            "mean": np.mean(arr) if len(arr) > 0 else 0,
+            "std": np.std(arr) if len(arr) > 0 else 0
+        }
+
     results = []
     for i, moh in enumerate(mohs):
-        probs = meta_probs[i]
-        tier_idx = int(np.argmax(probs))
-
-        if tier_idx == 3 and probs[3] < ALERT_THRESHOLD:
-            tier_idx = 2
-
-        tier = INT_TO_TIER[tier_idx]
         raw_cases = int(round(cases_final[i]))
-        
-        # Enforce strict user-defined boundaries based on the ML Model's predicted Status
-        risk_level = _tier_to_risk_level(tier)
-        if risk_level == "low":
-            predicted_cases = max(1, min(4, raw_cases))
-        elif risk_level == "moderate":
-            predicted_cases = max(5, min(8, raw_cases))
-        else: # high
-            predicted_cases = max(9, raw_cases)
+        incidence = incidences[i]
+        d_stats = district_stats[moh.district]
+        mean_inc = d_stats["mean"]
+        std_inc = d_stats["std"]
+
+        # Dynamic District-Relative Risk Distribution
+        if std_inc > 0.1:
+            z_score = (incidence - mean_inc) / std_inc
+            if z_score > 0.4:
+                tier = "Alert"
+                risk_level = "high"
+            elif z_score < -0.4:
+                tier = "Low"
+                risk_level = "low"
+            else:
+                tier = "Warning"
+                risk_level = "moderate"
+                
+            # Floor safeguards
+            if risk_level == "high" and incidence < TIER_THRESHOLDS[0]:
+                risk_level = "moderate"
+        else:
+            # Fallback to absolute thresholds if district has no variance
+            if incidence < TIER_THRESHOLDS[0]:
+                tier = "Low"
+                risk_level = "low"
+            elif incidence < TIER_THRESHOLDS[1]:
+                tier = "Watch"
+                risk_level = "low"
+            elif incidence < TIER_THRESHOLDS[2]:
+                tier = "Warning"
+                risk_level = "moderate"
+            else:
+                tier = "Alert"
+                risk_level = "high"
+
+        # Construct dummy probs matching the derived tier
+        probs = [0.0, 0.0, 0.0, 0.0]
+        if tier == "Low": probs[0] = 1.0
+        elif tier == "Watch": probs[1] = 1.0
+        elif tier == "Warning": probs[2] = 1.0
+        else: probs[3] = 1.0
 
         results.append(MohPrediction(
             moh_name=moh.moh_name,
@@ -349,10 +401,10 @@ def _predict_batch(mohs: list) -> list:
             p_watch=float(probs[1]),
             p_warning=float(probs[2]),
             p_alert=float(probs[3]),
-            alert_high_confidence=bool(probs[3] > ALERT_THRESHOLD),
-            predicted_cases=predicted_cases,
-            risk_level=_tier_to_risk_level(tier),
-            risk_score=_risk_score_from_probs(probs),
+            alert_high_confidence=(tier == "Alert"),
+            predicted_cases=max(0, raw_cases),
+            risk_level=risk_level,
+            risk_score=_risk_score_from_probs(np.array(probs)),
         ))
     return results
 

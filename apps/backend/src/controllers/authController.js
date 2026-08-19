@@ -4,7 +4,6 @@ import crypto from 'crypto';
 import User from '../models/User.js';
 import { sendOtpEmail } from '../services/emailService.js';
 import { fetchAllDistrictWeather } from '../services/weatherFetcher.js';
-import { runMLPredictionsAndAlerts } from '../services/predictionService.js';
 
 /* ─── OTP helpers ───────────────────────────────────────────────── */
 
@@ -141,7 +140,6 @@ export const signupGeneral = async (req, res) => {
       try {
         console.log(`[signupGeneral] Lively update triggered for new user in ${district} / ${mohZone}`);
         await fetchAllDistrictWeather();
-        await runMLPredictionsAndAlerts();
       } catch (e) {
         console.error('[signupGeneral] Lively update failed:', e.message);
       }
@@ -186,7 +184,6 @@ export const signupMohOfficer = async (req, res) => {
       try {
         console.log(`[signupMohOfficer] Lively update triggered for new MOH officer in ${district} / ${mohZone}`);
         await fetchAllDistrictWeather();
-        await runMLPredictionsAndAlerts();
       } catch (e) {
         console.error('[signupMohOfficer] Lively update failed:', e.message);
       }

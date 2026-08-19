@@ -16,7 +16,7 @@ export default function TrendChart({ data }) {
   
   if (data.predicted) {
     data.predicted.forEach(d => {
-      chartData.push({ name: d.week || d.month, historicalCases: null, predictedCases: d.riskScore || d.cases });
+      chartData.push({ name: d.week || d.month, historicalCases: null, predictedCases: d.cases !== undefined ? d.cases : d.predictedCases });
     });
   }
 

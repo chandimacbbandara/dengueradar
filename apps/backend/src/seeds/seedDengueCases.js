@@ -21,9 +21,9 @@ import { createInterface } from 'readline';
 import mongoose from 'mongoose';
 import DengueCase from '../models/DengueCase.js';
 
-const CSV_PATH = path.resolve(
-  '../../ml-pipeline/data/raw/dengueradar_training_table.csv'
-);
+import { fileURLToPath } from 'url';
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const CSV_PATH = path.resolve(__dirname, '../../../../ml-pipeline/data/raw/dengueradar_training_table.csv');
 
 /**
  * The CSV spells one district differently from the rest of the app.

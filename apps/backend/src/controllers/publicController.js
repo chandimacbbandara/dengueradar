@@ -1,29 +1,25 @@
 import User from '../models/User.js';
-import RiskPrediction from '../models/RiskPrediction.js';
 import DengueCase from '../models/DengueCase.js';
+import { getLivePredictions } from '../services/predictionService.js';
 
 export const getLiveStats = async (req, res) => {
   try {
-    const latestPrediction = await RiskPrediction.findOne().sort({ generatedAt: -1 }).select('generatedAt');
-    const windowStart = latestPrediction ? new Date(latestPrediction.generatedAt.getTime() - 6 * 60 * 60 * 1000) : new Date();
+    const livePredictions = await getLivePredictions();
+    const generatedAt = livePredictions.length > 0 ? livePredictions[0].generatedAt : new Date();
 
-    const [totalUsersReal, distinctDistricts, activeHighRiskZones] = await Promise.all([
-      User.countDocuments(),
-      RiskPrediction.distinct('district'),
-      latestPrediction 
-        ? RiskPrediction.distinct('mohZone', { riskLevel: 'high', generatedAt: { $gte: windowStart } }).then(zones => zones.length)
-        : Promise.resolve(0)
-    ]);
+    const distinctDistricts = new Set(livePredictions.map(p => p.district));
+    const activeHighRiskZones = livePredictions.filter(p => p.riskLevel === 'high').length;
 
+    const totalUsersReal = await User.countDocuments();
     const totalUsers = totalUsersReal + 1240; // Add dummy active users
 
     res.json({
       success: true,
       data: {
         totalUsers,
-        districtsMonitored: distinctDistricts.length,
+        districtsMonitored: distinctDistricts.size,
         activeHighRiskZones,
-        lastUpdated: latestPrediction ? latestPrediction.generatedAt : new Date()
+        lastUpdated: generatedAt
       }
     });
   } catch (err) {
@@ -33,47 +29,29 @@ export const getLiveStats = async (req, res) => {
 
 export const getNationalRisk = async (req, res) => {
   try {
-    const latestPrediction = await RiskPrediction.findOne().sort({ generatedAt: -1 }).select('generatedAt');
-    if (!latestPrediction) return res.json({ success: true, data: [] });
+    const livePredictions = await getLivePredictions();
     
-    const windowStart = new Date(latestPrediction.generatedAt.getTime() - 6 * 60 * 60 * 1000);
+    const districtRiskMap = {};
+    const severityMap = { 'high': 3, 'moderate': 2, 'medium': 2, 'low': 1 };
 
-    const nationalRisk = await RiskPrediction.aggregate([
-      { $match: { generatedAt: { $gte: windowStart } } },
-      { $addFields: {
-          severity: {
-            $switch: {
-              branches: [
-                { case: { $eq: ['$riskLevel', 'high'] }, then: 3 },
-                { case: { $in: ['$riskLevel', ['moderate', 'medium']] }, then: 2 },
-                { case: { $eq: ['$riskLevel', 'low'] }, then: 1 }
-              ],
-              default: 0
-            }
-          }
-      }},
-      // 1. Group by district AND riskLevel to get the count
-      { $group: {
-          _id: { district: '$district', riskLevel: '$riskLevel' },
-          count: { $sum: 1 },
-          severity: { $first: '$severity' },
-          riskScore: { $avg: '$riskScore' } // Average score for this group
-      }},
-      // 2. Sort by severity DESC to prioritize high risk, then count DESC
-      { $sort: { severity: -1, count: -1 } },
-      // 3. Group by district to pick the top riskLevel (the majority)
-      { $group: {
-          _id: '$_id.district',
-          riskScore: { $first: '$riskScore' },
-          riskLevel: { $first: '$_id.riskLevel' }
-      }},
-      { $project: {
-          district: '$_id',
-          riskScore: 1,
-          riskLevel: 1,
-          _id: 0
-      }}
-    ]);
+    for (const p of livePredictions) {
+      const dist = p.district;
+      const cleanRisk = p.riskLevel ? p.riskLevel.toLowerCase() : 'low';
+      const severity = severityMap[cleanRisk] || 1;
+
+      if (!districtRiskMap[dist]) {
+        districtRiskMap[dist] = { district: dist, riskScore: p.riskScore, riskLevel: cleanRisk, severity };
+      } else {
+        if (severity > districtRiskMap[dist].severity || (severity === districtRiskMap[dist].severity && p.riskScore > districtRiskMap[dist].riskScore)) {
+          districtRiskMap[dist] = { district: dist, riskScore: p.riskScore, riskLevel: cleanRisk, severity };
+        }
+      }
+    }
+
+    let nationalRisk = Object.values(districtRiskMap);
+    nationalRisk.sort((a, b) => b.severity - a.severity || b.riskScore - a.riskScore);
+    nationalRisk.forEach(d => delete d.severity);
+
     res.json({ success: true, data: nationalRisk });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
@@ -95,19 +73,22 @@ export const getNationalTrends = async (req, res) => {
       { $project: { month: '$_id', cases: 1, _id: 0 } }
     ]);
 
-    const today = new Date();
-    const fourWeeksLater = new Date();
-    fourWeeksLater.setDate(today.getDate() + 28);
+    const livePredictions = await getLivePredictions();
+    const predicted = [];
 
-    const predicted = await RiskPrediction.aggregate([
-      { $match: { predictedFor: { $gte: today, $lte: fourWeeksLater } } },
-      { $group: {
-          _id: { $isoWeek: '$predictedFor' },
-          riskScore: { $avg: '$riskScore' }
-      }},
-      { $sort: { _id: 1 } },
-      { $project: { week: '$_id', riskScore: { $round: ['$riskScore', 2] }, _id: 0 } }
-    ]);
+    if (livePredictions.length > 0) {
+      const avgScore = livePredictions.reduce((sum, p) => sum + p.riskScore, 0) / livePredictions.length;
+      
+      const targetDate = livePredictions[0].predictedFor;
+      const targetDateObj = new Date(targetDate);
+      
+      const isoWeek = Math.ceil((((targetDateObj - new Date(targetDateObj.getFullYear(),0,1)) / 86400000) + new Date(targetDateObj.getFullYear(),0,1).getDay()+1)/7);
+
+      predicted.push({
+        week: isoWeek,
+        riskScore: Math.round(avgScore * 100) / 100
+      });
+    }
 
     res.json({ success: true, data: { historical, predicted } });
   } catch (err) {
@@ -117,32 +98,18 @@ export const getNationalTrends = async (req, res) => {
 
 export const getTopZones = async (req, res) => {
   try {
-    const latestPrediction = await RiskPrediction.findOne().sort({ generatedAt: -1 }).select('generatedAt');
-    if (!latestPrediction) return res.json({ success: true, data: [] });
+    const livePredictions = await getLivePredictions();
     
-    const windowStart = new Date(latestPrediction.generatedAt.getTime() - 6 * 60 * 60 * 1000);
-
-    const topZones = await RiskPrediction.aggregate([
-      { $match: { generatedAt: { $gte: windowStart } } },
-      { $sort: { riskScore: -1 } },
-      { $group: {
-          _id: '$mohZone',
-          district: { $first: '$district' },
-          riskScore: { $first: '$riskScore' },
-          riskLevel: { $first: '$riskLevel' },
-          predictedFor: { $first: '$predictedFor' }
-      }},
-      { $sort: { riskScore: -1 } },
-      { $limit: 3 },
-      { $project: {
-          mohZone: '$_id',
-          district: 1,
-          riskScore: 1,
-          riskLevel: 1,
-          predictedFor: 1,
-          _id: 0
-      }}
-    ]);
+    // Sort by riskScore descending
+    const sorted = [...livePredictions].sort((a, b) => b.riskScore - a.riskScore);
+    
+    const topZones = sorted.slice(0, 3).map(p => ({
+      mohZone: p.mohZone,
+      district: p.district,
+      riskScore: p.riskScore,
+      riskLevel: p.riskLevel,
+      predictedFor: p.predictedFor
+    }));
 
     res.json({ success: true, data: topZones });
   } catch (err) {
