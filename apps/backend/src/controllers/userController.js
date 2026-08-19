@@ -105,7 +105,7 @@ export const getZoneTrend = async (req, res) => {
       pipeline = [
         { $match: matchStage },
         { $group: {
-            _id: { $dateToString: { format: '%Y-%m-%d', date: '$date' } },
+            _id: { $dateToString: { format: '%Y-%m-%d', date: '$date', timezone: 'Asia/Colombo' } },
             cases: { $sum: '$caseCount' },
         }},
         { $sort: { _id: 1 } },
@@ -116,8 +116,8 @@ export const getZoneTrend = async (req, res) => {
         { $match: matchStage },
         { $group: {
             _id: {
-              year: { $isoWeekYear: '$date' },
-              week: { $isoWeek:     '$date' },
+              year: { $isoWeekYear: { date: '$date', timezone: 'Asia/Colombo' } },
+              week: { $isoWeek: { date: '$date', timezone: 'Asia/Colombo' } },
             },
             cases: { $sum: '$caseCount' },
         }},
@@ -140,7 +140,10 @@ export const getZoneTrend = async (req, res) => {
       pipeline = [
         { $match: matchStage },
         { $group: {
-            _id: { year: { $year: '$date' }, month: { $month: '$date' } },
+            _id: { 
+              year: { $year: { date: '$date', timezone: 'Asia/Colombo' } }, 
+              month: { $month: { date: '$date', timezone: 'Asia/Colombo' } } 
+            },
             cases: { $sum: '$caseCount' },
         }},
         { $sort: { '_id.year': 1, '_id.month': 1 } },
@@ -166,7 +169,10 @@ export const getZoneTrend = async (req, res) => {
 
     if (period === 'daily') {
       while (cursor <= now) {
-        const key = cursor.toISOString().slice(0, 10);
+        const y = cursor.getFullYear();
+        const m = String(cursor.getMonth() + 1).padStart(2, '0');
+        const d = String(cursor.getDate()).padStart(2, '0');
+        const key = `${y}-${m}-${d}`;
         filledData.push({
           key,
           label: cursor.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
