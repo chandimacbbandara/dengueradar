@@ -71,7 +71,12 @@ export const getZoneTrend = async (req, res) => {
       ? req.query.period
       : 'monthly';
 
-    const now = new Date();
+    // Find the latest historical case for this zone/district to anchor the "now" date
+    const latestCase = await DengueCase.findOne({
+      district,
+      ...(mohZone ? { mohZone } : {}),
+    }).sort({ date: -1 }).select('date');
+    const now = latestCase ? new Date(latestCase.date) : new Date();
 
     /* ── Date window ── */
     let since;
@@ -231,16 +236,20 @@ export const getZoneTrend = async (req, res) => {
       }
 
       for (const pred of futurePredictions) {
+        // Shift prediction date to logically follow the latest historical data
+        const shiftedDate = new Date(now);
+        shiftedDate.setDate(shiftedDate.getDate() + 7);
+
         let key, label;
         if (period === 'weekly') {
-          key = isoWeekKey(pred.predictedFor);
-          label = isoWeekLabel(pred.predictedFor);
+          key = isoWeekKey(shiftedDate);
+          label = isoWeekLabel(shiftedDate);
         } else if (period === 'monthly') {
-          key = `${pred.predictedFor.getFullYear()}-${String(pred.predictedFor.getMonth() + 1).padStart(2, '0')}`;
-          label = pred.predictedFor.toLocaleString('en-US', { month: 'short', year: 'numeric' });
+          key = `${shiftedDate.getFullYear()}-${String(shiftedDate.getMonth() + 1).padStart(2, '0')}`;
+          label = shiftedDate.toLocaleString('en-US', { month: 'short', year: 'numeric' });
         } else {
-          key = pred.predictedFor.toISOString().slice(0, 10);
-          label = pred.predictedFor.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+          key = shiftedDate.toISOString().slice(0, 10);
+          label = shiftedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
         }
         
         if (!predictedTrendMap[key]) {

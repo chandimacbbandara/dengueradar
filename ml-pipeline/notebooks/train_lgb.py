@@ -43,9 +43,10 @@ INT_TO_TIER = {i: t for t, i in TIER_TO_INT.items()}
 def tier_mae(y_true, y_pred):
     return float(np.mean(np.abs(np.asarray(y_true) - np.asarray(y_pred))))
 
-from sklearn.metrics import accuracy_score, f1_score, classification_report, confusion_matrix
+from sklearn.metrics import accuracy_score, f1_score, classification_report, confusion_matrix, mean_absolute_error, mean_squared_error
 from sklearn.utils.class_weight import compute_sample_weight, compute_class_weight
-from sklearn.linear_model import LogisticRegression
+from sklearn.linear_model import LogisticRegression, Ridge
+from catboost import CatBoostClassifier, CatBoostRegressor
 
 print(f"Setup complete. Colab: {IN_COLAB}, Python: {sys.version.split()[0]}")
 
@@ -229,6 +230,11 @@ import lightgbm as lgb
 X_train = train[FEATURE_COLS].fillna(0); y_train = train["risk_tier_int"].values
 X_val   = val[FEATURE_COLS].fillna(0);   y_val   = val["risk_tier_int"].values
 X_test  = test[FEATURE_COLS].fillna(0);  y_test  = test["risk_tier_int"].values
+y_train_c = train["cases"].values.astype(float)
+y_val_c   = val["cases"].values.astype(float)
+y_test_c  = test["cases"].values.astype(float)
+y_train_log = np.log1p(y_train_c)
+y_val_log   = np.log1p(y_val_c)
 sw = compute_sample_weight("balanced", y_train)
 print(f"Train: {X_train.shape}  Val: {X_val.shape}  Test: {X_test.shape}")
 
@@ -274,6 +280,37 @@ cat_clf.fit(X_train, y_train, sample_weight=sw, eval_set=(X_val, y_val), use_bes
 cat_pred = cat_clf.predict(X_test).astype(int).ravel()
 cat_acc = accuracy_score(y_test, cat_pred)
 print(f"CatBoost test acc: {cat_acc:.4f}")
+
+print("Training LightGBM Regressor (cases)...")
+lgb_reg_params = {
+    "objective": "regression", "metric": "mae",
+    "learning_rate": 0.05, "num_leaves": 63, "min_child_samples": 30,
+    "feature_fraction": 0.8, "bagging_fraction": 0.8, "bagging_freq": 5,
+    "reg_alpha": 0.1, "reg_lambda": 0.5, "n_jobs": -1, "verbose": -1, "seed": RANDOM_SEED,
+}
+dtrain_r = lgb.Dataset(X_train, y_train_log, categorical_feature=["district_cat"])
+dval_r   = lgb.Dataset(X_val, y_val_log, reference=dtrain_r, categorical_feature=["district_cat"])
+lgb_reg = lgb.train(lgb_reg_params, dtrain_r, num_boost_round=2000,
+                    valid_sets=[dval_r], valid_names=["val"],
+                    callbacks=[lgb.early_stopping(80), lgb.log_evaluation(0)])
+
+print("Training XGBoost Regressor (cases)...")
+xgb_reg = xgb.XGBRegressor(
+    n_estimators=2000, max_depth=6, learning_rate=0.05,
+    subsample=0.8, colsample_bytree=0.8, reg_alpha=0.1, reg_lambda=0.5, min_child_weight=5,
+    objective="reg:squarederror", random_state=RANDOM_SEED, n_jobs=-1,
+    eval_metric="mae", early_stopping_rounds=80, tree_method="hist",
+)
+xgb_reg.fit(X_train, y_train_log, eval_set=[(X_val, y_val_log)], verbose=0)
+
+print("Training CatBoost Regressor (cases)...")
+cat_reg = CatBoostRegressor(
+    iterations=2000, depth=7, learning_rate=0.05,
+    loss_function="MAE", eval_metric="MAE",
+    random_seed=RANDOM_SEED, verbose=0, early_stopping_rounds=80, l2_leaf_reg=3.0,
+    cat_features=["district_cat"], task_type="CPU",
+)
+cat_reg.fit(X_train, y_train_log, eval_set=(X_val, y_val_log), use_best_model=True)
 
 
 import tensorflow as tf
@@ -378,6 +415,11 @@ ens_3 = meta_3.predict(test_p3)
 ens_3_acc = accuracy_score(y_test, ens_3)
 print(f"\n3-model ensemble (PRODUCTION): {ens_3_acc:.4f}  on {len(y_test)} test rows")
 
+val_r3  = np.column_stack([lgb_reg.predict(X_val),  xgb_reg.predict(X_val),  cat_reg.predict(X_val)])
+test_r3 = np.column_stack([lgb_reg.predict(X_test), xgb_reg.predict(X_test), cat_reg.predict(X_test)])
+meta_reg = Ridge(alpha=1.0, random_state=RANDOM_SEED)
+meta_reg.fit(val_r3, y_val_log)
+
 meta_4 = LogisticRegression(max_iter=2000, C=1.0, n_jobs=-1, random_state=RANDOM_SEED,
                             class_weight="balanced", solver="lbfgs")
 meta_4.fit(val_p4, y_val_4)
@@ -405,9 +447,13 @@ print("Saving deployment artifacts...")
 lgb_model.save_model(f"{MODEL_DIR}/lgb_classifier.txt")
 xgb_clf.save_model(f"{MODEL_DIR}/xgb_classifier.json")
 cat_clf.save_model(f"{MODEL_DIR}/cat_classifier.cbm")
+lgb_reg.save_model(f"{MODEL_DIR}/lgb_regressor.txt")
+xgb_reg.save_model(f"{MODEL_DIR}/xgb_regressor.json")
+cat_reg.save_model(f"{MODEL_DIR}/cat_regressor.cbm")
 lstm_model.save(f"{MODEL_DIR}/lstm_model.keras")
 
-with open(f"{MODEL_DIR}/meta_3model.pkl", "wb") as f: pickle.dump(meta_3, f)
+with open(f"{MODEL_DIR}/meta_classifier.pkl", "wb") as f: pickle.dump(meta_3, f)
+with open(f"{MODEL_DIR}/meta_regressor.pkl", "wb") as f: pickle.dump(meta_reg, f)
 with open(f"{MODEL_DIR}/meta_4model.pkl", "wb") as f: pickle.dump(meta_4, f)
 
 lstm_stats = {"mean": mu.tolist(), "std": sd.tolist(), "seq_features": SEQ_FEATURES, "seq_len": SEQ_LEN}
@@ -420,10 +466,15 @@ meta_json = {
     "int_to_tier": {str(k): v for k, v in INT_TO_TIER.items()},
     "tier_thresholds": [float(T1), float(T2), float(T3)],
     "alert_decision_threshold": 0.5,
+    "case_count_log_transform": True,
     "seq_features": SEQ_FEATURES,
     "seq_len": SEQ_LEN,
     "random_seed": RANDOM_SEED,
     "district_to_idx": district_to_idx,
+    "models": {
+        "tier_classifier":   ["lgb_classifier.txt", "xgb_classifier.json", "cat_classifier.cbm", "meta_classifier.pkl"],
+        "case_regressor":    ["lgb_regressor.txt",  "xgb_regressor.json",  "cat_regressor.cbm",  "meta_regressor.pkl"],
+    },
 }
 with open(f"{MODEL_DIR}/pipeline_meta.json", "w") as f: json.dump(meta_json, f, indent=2)
 

@@ -329,7 +329,16 @@ def _predict_batch(mohs: list) -> list:
             tier_idx = 2
 
         tier = INT_TO_TIER[tier_idx]
-        predicted_cases = int(round(cases_final[i]))
+        raw_cases = int(round(cases_final[i]))
+        
+        # Enforce strict user-defined boundaries based on the ML Model's predicted Status
+        risk_level = _tier_to_risk_level(tier)
+        if risk_level == "low":
+            predicted_cases = max(1, min(4, raw_cases))
+        elif risk_level == "moderate":
+            predicted_cases = max(5, min(8, raw_cases))
+        else: # high
+            predicted_cases = max(9, raw_cases)
 
         results.append(MohPrediction(
             moh_name=moh.moh_name,
