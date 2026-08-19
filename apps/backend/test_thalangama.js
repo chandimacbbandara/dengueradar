@@ -1,11 +1,14 @@
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import RiskPrediction from './src/models/RiskPrediction.js';
+
 dotenv.config();
+
 async function run() {
   await mongoose.connect(process.env.MONGO_URI);
-  const predictions = await RiskPrediction.find({ district: 'Colombo' }).sort({ riskScore: -1 }).lean();
-  predictions.forEach(p => console.log(`${p.mohZone} -> ${p.riskLevel.toUpperCase()} (Score: ${Math.round(p.riskScore)})`));
+  const p = await RiskPrediction.findOne({ mohZone: 'Thalangama' }).lean();
+  console.log("Thalangama prediction:", p);
   process.exit(0);
 }
+
 run().catch(console.error);

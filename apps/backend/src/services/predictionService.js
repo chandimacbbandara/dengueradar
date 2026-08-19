@@ -5,7 +5,6 @@ import { fileURLToPath } from 'url';
 
 import DengueCase from '../models/DengueCase.js';
 import LiveWeather from '../models/LiveWeather.js';
-import RiskPrediction from '../models/RiskPrediction.js';
 import User from '../models/User.js';
 import Alert from '../models/Alert.js';
 import { sendOtpEmail } from './emailService.js';
@@ -24,47 +23,48 @@ try {
 
 const ML_SERVICE_URL = 'http://127.0.0.1:8000/api/predict';
 
-/** Normalise spelling differences between OpenWeather centroids and target CSVs */
 const DISTRICT_ALIAS = {
   'Monaragala': 'Moneragala',
   'Moneragala': 'Moneragala',
 };
 
-// ── Tier thresholds from pipeline_meta (incidence per 100k, from training data)
 const TIER_MIDPOINTS = { Low: 1.4, Watch: 5.3, Warning: 15.5, Alert: 50.0 };
 
-/**
- * Convert a risk tier string to an approximate weekly case count.
- * Uses tier midpoints derived from pipeline_meta tier_thresholds.
- * @param {string} tier  "Low" | "Watch" | "Warning" | "Alert"
- * @param {number} population  MOH zone population
- */
 function tierToCases(tier, population) {
   const incidence = TIER_MIDPOINTS[tier] ?? TIER_MIDPOINTS.Low;
   return Math.round((incidence / 100_000) * population);
 }
 
-/**
- * Automatically fetch inputs, call the stacking ensemble ML service,
- * save predictions, and trigger email notifications when risk escalates.
- *
- * The model predicts 1 week ahead using real observed lags and current weather.
- */
-export async function runMLPredictionsAndAlerts() {
-  try {
-    console.log('[PredictionService] 🤖 Triggering ML predictions pipeline...');
+let liveCache = { timestamp: 0, predictions: [] };
+const CACHE_TTL = 15 * 60 * 1000;
 
-    const now = new Date();
-    // Clear any future predictions to prevent stale accumulation
-    await RiskPrediction.deleteMany({ predictedFor: { $gt: now } });
+export async function getLivePredictions(districtFilter = null) {
+  try {
+    if (Date.now() - liveCache.timestamp < CACHE_TTL && liveCache.predictions.length > 0) {
+      if (districtFilter) return liveCache.predictions.filter(p => p.district === districtFilter);
+      return liveCache.predictions;
+    }
+
+    console.log('[PredictionService] 🤖 Generating LIVE predictions on-the-fly...');
+
+    const maxDates = await DengueCase.aggregate([
+      { $group: { _id: '$district', maxDate: { $max: '$date' } } }
+    ]);
+    const districtLatestDates = {};
+    for (const d of maxDates) districtLatestDates[d._id] = new Date(d.maxDate);
+
+    const globalLatestRecord = await DengueCase.findOne().sort({ date: -1 }).lean();
+    const globalNow = globalLatestRecord ? new Date(globalLatestRecord.date) : new Date();
 
     const weekDur = 7 * 24 * 60 * 60 * 1000;
+    
+    // Explicitly target August 24, 2026 for the model
+    const targetDateStr = '2026-08-24T00:00:00.000Z';
+    const targetDateObj = new Date(targetDateStr);
 
-    // 1. Fetch current weather from the database
     const currentLiveWeather = await LiveWeather.find({}).lean();
     const weatherMap = Object.fromEntries(currentLiveWeather.map(w => [w.district, w]));
 
-    // 2. Fetch all active MOH zones
     const { default: MohZone } = await import('../models/MohZone.js');
     const allMohZones = await MohZone.find({}).lean();
 
@@ -74,81 +74,73 @@ export async function runMLPredictionsAndAlerts() {
       districtZonesMap[z.district].push(z.zoneName);
     }
 
-    // 3. Fetch historical cases (last 52 weeks to support all lags)
-    const fiftyThreeWeeksAgo = new Date(now.getTime() - 54 * weekDur);
+    const fiftyThreeWeeksAgo = new Date(globalNow.getTime() - 54 * weekDur);
     const recentCases = await DengueCase.find({ date: { $gte: fiftyThreeWeeksAgo } })
       .sort({ date: -1 })
       .lean();
 
-    // Group: district → zone → sorted array of {date, caseCount}
     const casesByZone = {};
     for (const record of recentCases) {
       if (!casesByZone[record.district]) casesByZone[record.district] = {};
-      if (!casesByZone[record.district][record.mohZone])
-        casesByZone[record.district][record.mohZone] = [];
-      casesByZone[record.district][record.mohZone].push({
-        date: new Date(record.date),
-        count: record.caseCount ?? 0,
-      });
+      if (!casesByZone[record.district][record.mohZone]) casesByZone[record.district][record.mohZone] = {};
+      
+      const d = new Date(record.date);
+      const dayNum = d.getUTCDay() || 7;
+      d.setUTCDate(d.getUTCDate() - dayNum + 1);
+      const key = d.toISOString().split('T')[0];
+      
+      casesByZone[record.district][record.mohZone][key] = record.caseCount ?? 0;
     }
 
-    // Sort each zone's history newest-first
-    for (const district of Object.keys(casesByZone)) {
-      for (const zone of Object.keys(casesByZone[district])) {
-        casesByZone[district][zone].sort((a, b) => b.date - a.date);
-      }
+    function getAnchorDate(district) {
+      return districtLatestDates[district] || globalNow;
     }
 
-    /**
-     * Extract lag arrays for a given zone from casesByZone.
-     * Returns {
-     *   caseLags:      [lag1..lag52] (9 values: indices 0,1,2,3,4,7,11,25,51)
-     *   incLags:       [lag1,lag2,lag4,lag8] (4 values)
-     *   weeksSinceOutbreak
-     * }
-     */
     function extractLags(district, zone, population) {
-      const records = casesByZone[district]?.[zone] ?? [];
-      const get = (i) => records[i]?.count ?? 0;
+      const anchorDate = getAnchorDate(district);
+      const zoneMap = casesByZone[district]?.[zone];
+      const hasZoneData = zoneMap && Object.keys(zoneMap).length > 0;
+      
+      const getLagCount = (lagWeeks) => {
+        const d = new Date(anchorDate.getTime() - (lagWeeks - 1) * weekDur);
+        const key = d.toISOString().split('T')[0];
+        return hasZoneData ? (zoneMap[key] ?? 0) : 0;
+      };
 
       const caseLags = [
-        get(0),  // lag1
-        get(1),  // lag2
-        get(2),  // lag3
-        get(3),  // lag4
-        get(4),  // lag5
-        get(7),  // lag8
-        get(11), // lag12
-        get(25), // lag26
-        get(51), // lag52
+        getLagCount(1), getLagCount(2), getLagCount(3), getLagCount(4), getLagCount(5),
+        getLagCount(8), getLagCount(12), getLagCount(26), getLagCount(52),
       ];
 
       const incLags = [
-        population > 0 ? (get(0) / population) * 100_000 : 0,  // lag1
-        population > 0 ? (get(1) / population) * 100_000 : 0,  // lag2
-        population > 0 ? (get(3) / population) * 100_000 : 0,  // lag4
-        population > 0 ? (get(7) / population) * 100_000 : 0,  // lag8
+        population > 0 ? (getLagCount(1) / population) * 100_000 : 0,
+        population > 0 ? (getLagCount(2) / population) * 100_000 : 0,
+        population > 0 ? (getLagCount(4) / population) * 100_000 : 0,
+        population > 0 ? (getLagCount(8) / population) * 100_000 : 0,
       ];
 
-      // weeks since last outbreak (cases > 20)
-      let weeksSince = 0;
-      let found = false;
-      for (let i = 0; i < records.length; i++) {
-        if (records[i].count > 20) { weeksSince = i; found = true; break; }
+      let weeksSince = 52;
+      for (let w = 1; w <= 52; w++) {
+        if (getLagCount(w) > 20) { weeksSince = w - 1; break; }
       }
-      if (!found) weeksSince = 52;
-      weeksSince = Math.min(weeksSince, 52);
 
       return { caseLags, incLags, weeksSince };
     }
 
-    // 4. Compute district-level aggregates for lag1/lag2/lag4 and rolling windows
-    //    We build these once from the current state of casesByZone.
     function buildDistrictStats(rawDistrict, zones, casesByZone) {
-      // For each zone, grab lag1 value
-      const lag1Vals = zones.map(z => casesByZone[rawDistrict]?.[z]?.[0]?.count ?? 0);
-      const lag2Vals = zones.map(z => casesByZone[rawDistrict]?.[z]?.[1]?.count ?? 0);
-      const lag4Vals = zones.map(z => casesByZone[rawDistrict]?.[z]?.[3]?.count ?? 0);
+      const anchorDate = getAnchorDate(rawDistrict);
+      const getLagStr = (lagWeeks) => {
+        const d = new Date(anchorDate.getTime() - (lagWeeks - 1) * weekDur);
+        return d.toISOString().split('T')[0];
+      };
+      
+      const lag1Str = getLagStr(1);
+      const lag2Str = getLagStr(2);
+      const lag4Str = getLagStr(4);
+
+      const lag1Vals = zones.map(z => { const zm = casesByZone[rawDistrict]?.[z]; return zm ? (zm[lag1Str] ?? 0) : 0; });
+      const lag2Vals = zones.map(z => { const zm = casesByZone[rawDistrict]?.[z]; return zm ? (zm[lag2Str] ?? 0) : 0; });
+      const lag4Vals = zones.map(z => { const zm = casesByZone[rawDistrict]?.[z]; return zm ? (zm[lag4Str] ?? 0) : 0; });
 
       const total1 = lag1Vals.reduce((a, b) => a + b, 0);
       const total2 = lag2Vals.reduce((a, b) => a + b, 0);
@@ -156,33 +148,28 @@ export async function runMLPredictionsAndAlerts() {
       const mean1  = lag1Vals.length > 0 ? total1 / lag1Vals.length : 0;
       const max1   = lag1Vals.length > 0 ? Math.max(...lag1Vals) : 0;
 
-      // Rolling 4-week and 12-week district totals (sum across all zones, avg over weeks)
       const roll4Totals  = [];
       const roll12Totals = [];
-      for (let w = 0; w < 4;  w++) roll4Totals.push(zones.reduce((s, z) => s + (casesByZone[rawDistrict]?.[z]?.[w]?.count ?? 0), 0));
-      for (let w = 0; w < 12; w++) roll12Totals.push(zones.reduce((s, z) => s + (casesByZone[rawDistrict]?.[z]?.[w]?.count ?? 0), 0));
+      for (let w = 1; w <= 4;  w++) {
+        const str = getLagStr(w);
+        roll4Totals.push(zones.reduce((s, z) => { const zm = casesByZone[rawDistrict]?.[z]; return s + (zm ? (zm[str] ?? 0) : 0); }, 0));
+      }
+      for (let w = 1; w <= 12; w++) {
+        const str = getLagStr(w);
+        roll12Totals.push(zones.reduce((s, z) => { const zm = casesByZone[rawDistrict]?.[z]; return s + (zm ? (zm[str] ?? 0) : 0); }, 0));
+      }
 
       const roll4Mean  = roll4Totals.reduce((a, b) => a + b, 0) / Math.max(roll4Totals.length, 1);
       const roll12Mean = roll12Totals.reduce((a, b) => a + b, 0) / Math.max(roll12Totals.length, 1);
 
-      return {
-        // Per-zone stats will be derived from this; we return district-level totals.
-        total1, total2, total4, mean1, max1, roll4Mean, roll12Mean,
-        lag1Vals, // used for rank/zscore computation
-      };
+      return { total1, total2, total4, mean1, max1, roll4Mean, roll12Mean, lag1Vals };
     }
 
-    // Build district stats once for week 1
     const districtStatsCache = {};
     for (const [rawDistrict, zones] of Object.entries(districtZonesMap)) {
       districtStatsCache[rawDistrict] = buildDistrictStats(rawDistrict, zones, casesByZone);
     }
 
-    /**
-     * Build district_stats array for a specific zone.
-     * [total_lag1, total_lag2, total_lag4, mean_lag1, max_lag1,
-     *  total_roll4, total_roll12, rank_lag1, zscore_lag1]
-     */
     function getDistrictStatsArray(rawDistrict, zone, dsCache) {
       const ds = dsCache[rawDistrict];
       if (!ds) return Array(9).fill(0);
@@ -190,33 +177,18 @@ export async function runMLPredictionsAndAlerts() {
       const zoneIdx  = (districtZonesMap[rawDistrict] ?? []).indexOf(zone);
       const zoneVal  = zoneIdx >= 0 ? (lag1Vals[zoneIdx] ?? 0) : 0;
 
-      // Percentile rank within district
       const below = lag1Vals.filter(v => v < zoneVal).length;
       const rank  = lag1Vals.length > 1 ? below / (lag1Vals.length - 1) : 0.5;
 
-      // Z-score within district
       const mean = ds.mean1;
       const std  = Math.sqrt(lag1Vals.reduce((s, v) => s + Math.pow(v - mean, 2), 0) / Math.max(lag1Vals.length, 1));
       const zscore = std > 1e-3 ? (zoneVal - mean) / (std + 1e-3) : 0;
 
-      return [
-        ds.total1, ds.total2, ds.total4,
-        ds.mean1, ds.max1,
-        ds.roll4Mean, ds.roll12Mean,
-        rank, zscore,
-      ];
+      return [ds.total1, ds.total2, ds.total4, ds.mean1, ds.max1, ds.roll4Mean, ds.roll12Mean, rank, zscore];
     }
 
-    // ── Single 1-week prediction ──────────────────────────────────────────────
-    const targetDate = new Date(now.getTime() + weekDur);
-    // Normalize to Monday
-    const day = targetDate.getDay() || 7;
-    targetDate.setDate(targetDate.getDate() - day + 1);
-    targetDate.setHours(0, 0, 0, 0);
-    const weekStartStr = targetDate.toISOString().split('T')[0];
-
     const mohPayloads = [];
-    const payloadMeta = [];  // parallel array: { rawDistrict, zone, population }
+    const payloadMeta = [];
 
     for (const [rawDistrict, zones] of Object.entries(districtZonesMap)) {
       const mlDistrictName = DISTRICT_ALIAS[rawDistrict] ?? rawDistrict;
@@ -224,39 +196,17 @@ export async function runMLPredictionsAndAlerts() {
       if (!weather) continue;
 
       for (const zone of zones) {
-        const demographicKey = `${mlDistrictName}_${zone}`;
-        let demo = MOH_DEMOGRAPHICS[demographicKey];
-        
-        if (!demo) {
-          // Check specific known aliases
-          if (mlDistrictName === 'Mullaitivu') {
-            if (zone === 'Puthukkudiyiruppu') demo = MOH_DEMOGRAPHICS['Mullaitivu_Puthukudiyiruppu'];
-            if (zone === 'Thunukkai') demo = MOH_DEMOGRAPHICS['Mullaitivu_Thunukkai(mallavi)'];
-          }
+        let demo = MOH_DEMOGRAPHICS[`${mlDistrictName}_${zone}`];
+        if (!demo && mlDistrictName === 'Mullaitivu') {
+          if (zone === 'Puthukkudiyiruppu') demo = MOH_DEMOGRAPHICS['Mullaitivu_Puthukudiyiruppu'];
+          if (zone === 'Thunukkai') demo = MOH_DEMOGRAPHICS['Mullaitivu_Thunukkai(mallavi)'];
         }
-
-        if (!demo) {
-          // Fallback to district average
-          const districtDemos = Object.entries(MOH_DEMOGRAPHICS)
-            .filter(([k, v]) => k.startsWith(`${mlDistrictName}_`))
-            .map(([k, v]) => v);
-          
-          if (districtDemos.length > 0) {
-            const avgPop = districtDemos.reduce((sum, d) => sum + d[0], 0) / districtDemos.length;
-            const avgDens = districtDemos.reduce((sum, d) => sum + d[1], 0) / districtDemos.length;
-            demo = [avgPop, avgDens];
-          } else {
-            demo = [50000, 500]; // Absolute fallback
-          }
-        }
+        if (!demo) demo = [50000, 500];
 
         const [population, pop_density] = demo;
-
-        // Use real observed lags from the database
-        const extracted   = extractLags(rawDistrict, zone, population);
+        const extracted = extractLags(rawDistrict, zone, population);
         const districtStats = getDistrictStatsArray(rawDistrict, zone, districtStatsCache);
 
-        // Build weather inputs from current + accumulated multi-week data
         const weatherInputs = {
           temp_avg:     weather.temperature_mean ?? 27.0,
           temp_max:     weather.temperature_max  ?? 30.0,
@@ -272,7 +222,7 @@ export async function runMLPredictionsAndAlerts() {
         mohPayloads.push({
           moh_name:              zone,
           district:              mlDistrictName,
-          week_start:            weekStartStr,
+          week_start:            targetDateStr.split('T')[0],
           cases_lags:            extracted.caseLags,
           incidence_lags:        extracted.incLags,
           district_stats:        districtStats,
@@ -286,161 +236,43 @@ export async function runMLPredictionsAndAlerts() {
       }
     }
 
-    if (mohPayloads.length === 0) {
-      console.log('[PredictionService] ⚠️  No MOH zones found. Skipping prediction.');
-      return;
-    }
+    if (mohPayloads.length === 0) return [];
 
-    // 5. Call the ML service
-    let predictions = [];
-    try {
-      const mlResponse = await axios.post(
-        ML_SERVICE_URL,
-        { mohs: mohPayloads },
-        { timeout: 30_000 }
-      );
-      predictions = mlResponse.data?.predictions ?? [];
-      console.log(`[PredictionService] 🤖 ML returned ${predictions.length} predictions`);
-    } catch (axiosErr) {
-      console.error('[PredictionService] ❌ ML service call failed:', axiosErr.message);
-      return;
-    }
-
-    // 6. Persist predictions + trigger escalation alerts
+    const mlResponse = await axios.post(ML_SERVICE_URL, { mohs: mohPayloads }, { timeout: 30_000 });
+    const rawPredictions = mlResponse.data?.predictions ?? [];
     
-    // Fetch the most recent prediction for ALL zones in one query to avoid 332 separate network calls
-    const prevPreds = await RiskPrediction.aggregate([
-      { $sort: { predictedFor: -1 } },
-      { $group: {
-          _id: { district: "$district", mohZone: "$mohZone" },
-          riskLevel: { $first: "$riskLevel" }
-      }}
-    ]);
-    const prevMap = {};
-    for (const p of prevPreds) {
-      prevMap[`${p._id.district}_${p._id.mohZone}`] = p.riskLevel;
-    }
-
-    const bulkOps = [];
-    
-    for (let i = 0; i < predictions.length; i++) {
-      const pred = predictions[i];
+    const formattedPredictions = rawPredictions.map((pred, i) => {
       const meta = payloadMeta[i];
-
-      const riskLevel = pred.risk_level;   // "low" | "moderate" | "high"
+      const riskLevel = pred.risk_level;
       const predCases = pred.predicted_cases ?? tierToCases(pred.predicted_tier, meta.population);
-
-      // Check if risk has escalated compared to the previous prediction
-      const prevRiskLevel = prevMap[`${meta.rawDistrict}_${meta.zone}`];
-
-      if (isEscalated(prevRiskLevel, riskLevel)) {
-        await dispatchEscalationAlerts(meta.rawDistrict, meta.zone, riskLevel);
-      }
-
-      // Prepare bulk operation
-      bulkOps.push({
-        updateOne: {
-          filter: {
-            district:     meta.rawDistrict,
-            mohZone:      meta.zone,
-            predictedFor: targetDate,
-          },
-          update: {
-            $set: {
-              district:       meta.rawDistrict,
-              mohZone:        meta.zone,
-              riskScore:      pred.risk_score,
-              riskLevel,
-              predictedCases: predCases,
-              predictedFor:   targetDate,
-              generatedAt:    new Date(),
-              predictedTier:  pred.predicted_tier,
-              pLow:           pred.p_low,
-              pWatch:         pred.p_watch,
-              pWarning:       pred.p_warning,
-              pAlert:         pred.p_alert,
-              alertHighConfidence: pred.alert_high_confidence,
-              modelVersion:   'v2-stacking',
-            }
-          },
-          upsert: true
-        }
-      });
-    }
-
-    if (bulkOps.length > 0) {
-      await RiskPrediction.bulkWrite(bulkOps);
-    }
-
-    console.log('[PredictionService] ✅ 1-week prediction pipeline completed successfully');
-  } catch (err) {
-    console.error('[PredictionService] ❌ Pipeline error:', err.message, err.stack);
-  }
-}
-
-// ── Helpers ──────────────────────────────────────────────────────────────────
-
-/** Returns true if the current risk tier is higher than the previous */
-function isEscalated(prev, current) {
-  if (!prev) return false;
-  const order = { low: 0, moderate: 1, medium: 1, high: 2 };
-  return (order[current] ?? 0) > (order[prev] ?? 0);
-}
-
-/**
- * Find all citizens/MOH officers in the zone, create Alert docs, and send HTML emails.
- */
-async function dispatchEscalationAlerts(district, mohZone, riskLevel) {
-  try {
-    const users = await User.find({ district, mohZone, isVerified: true }).lean();
-    if (users.length === 0) return;
-
-    const alertDocs       = [];
-    const sevenDaysAgo    = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-
-    for (const user of users) {
-      const recentAlert = await Alert.findOne({
-        userId: user._id,
-        sentAt: { $gte: sevenDaysAgo },
-      }).lean();
-
-      if (recentAlert) continue;
-
-      const email = user.email;
-      const name  = user.firstName || user.officerName || 'Member';
-
-      alertDocs.push({
-        userId:   user._id,
-        district,
-        mohZone,
+      return {
+        district: meta.rawDistrict,
+        mohZone: meta.zone,
+        riskScore: pred.risk_score,
         riskLevel,
-        channel:  'web',
-        message:  `ALERT: The dengue risk level for ${mohZone} has escalated to ${riskLevel.toUpperCase()}. Please take immediate precautions.`,
-        sentAt:   new Date(),
-        status:   'sent',
-      });
+        predictedCases: predCases,
+        predictedFor: targetDateObj,
+        generatedAt: new Date(),
+        predictedTier: pred.predicted_tier,
+        pLow: pred.p_low,
+        pWatch: pred.p_watch,
+        pWarning: pred.p_warning,
+        pAlert: pred.p_alert,
+      };
+    });
 
-      if (process.env.NODE_ENV === 'production') {
-        try {
-          await sendRiskAlertEmail(email, name, mohZone, riskLevel, 'escalation');
-        } catch (emailErr) {
-          console.error(`[PredictionService] Failed to send email to ${email}:`, emailErr.message);
-        }
-      }
-    }
+    liveCache.predictions = formattedPredictions;
+    liveCache.timestamp = Date.now();
 
-    if (alertDocs.length > 0) {
-      await Alert.insertMany(alertDocs);
-      console.log(`[PredictionService] 🚨 Escalation! Dispatched ${alertDocs.length} alerts in ${mohZone}`);
-    }
+    if (districtFilter) return formattedPredictions.filter(p => p.district === districtFilter);
+    return formattedPredictions;
+
   } catch (err) {
-    console.error('[PredictionService] Failed to dispatch alerts:', err.message);
+    console.error('[PredictionService] ❌ Live Pipeline error:', err.message);
+    return [];
   }
 }
 
-/**
- * Beautiful HTML email notifying users about risk level escalation, weekly high risk, or manual MOH alerts.
- */
 export async function sendRiskAlertEmail(to, name, mohZone, riskLevel, alertType = 'escalation') {
   const nodemailer = await import('nodemailer');
 

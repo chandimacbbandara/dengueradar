@@ -1,18 +1,14 @@
-import RiskPrediction from '../models/RiskPrediction.js';
 import Alert from '../models/Alert.js';
 import DengueCase from '../models/DengueCase.js';
 import User from '../models/User.js';
+import { getLivePredictions } from '../services/predictionService.js';
 
 export const getDashboard = async (req, res) => {
   try {
     const { district, mohZone, _id } = req.user;
     
-    const latestPrediction = await RiskPrediction.findOne().sort({ generatedAt: -1 }).select('generatedAt');
-    const windowStart = latestPrediction ? new Date(latestPrediction.generatedAt.getTime() - 6 * 60 * 60 * 1000) : new Date();
-
-    const riskInfo = await RiskPrediction.findOne({ district, mohZone, generatedAt: { $gte: windowStart } })
-      .sort({ predictedFor: 1 })
-      .select('district mohZone riskScore riskLevel predictedFor -_id');
+    const allPredictions = await getLivePredictions(district);
+    const riskInfo = allPredictions.find(p => p.mohZone === mohZone) || null;
 
     const alerts = await Alert.find({ userId: _id })
       .sort({ sentAt: -1 })
@@ -79,23 +75,11 @@ export const getZoneTrend = async (req, res) => {
     };
     const searchZone = MOH_ZONE_ALIASES[mohZone] || mohZone;
 
-    // Find the latest historical case for this zone/district to anchor the "now" date
-    let latestCase = await DengueCase.findOne({
-      district,
-      ...(mohZone ? { mohZone: { $regex: new RegExp(searchZone.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i') } } : {}),
-    }).sort({ date: -1 }).select('date');
-    
-    // Fallback 1: District's latest case
-    if (!latestCase) {
-      latestCase = await DengueCase.findOne({ district }).sort({ date: -1 }).select('date');
-    }
-    
-    // Fallback 2: Global latest case
-    if (!latestCase) {
-      latestCase = await DengueCase.findOne().sort({ date: -1 }).select('date');
-    }
-
-    const now = latestCase ? new Date(latestCase.date) : new Date();
+    // Use the district's latest case to anchor the "now" date.
+    // This ensures districts with differing timeline boundaries (e.g. Colombo ending in May, Kegalle in August)
+    // always show their active historical windows rather than stretching into flat zero periods.
+    let districtLatestCase = await DengueCase.findOne({ district }).sort({ date: -1 }).select('date');
+    const now = districtLatestCase ? new Date(districtLatestCase.date) : new Date();
 
     /* ── Date window ── */
     let since;
@@ -114,13 +98,11 @@ export const getZoneTrend = async (req, res) => {
     const matchStage = {
       district,
       date: { $gte: since },
-      ...(mohZone ? { 
-        $or: [
-          { mohZone: { $regex: new RegExp(searchZone.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i') } }, 
-          { mohZone: { $exists: false } }
-        ] 
-      } : {}),
     };
+
+    if (mohZone) {
+      matchStage.mohZone = { $regex: new RegExp(searchZone.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i') };
+    }
 
     /* ── Aggregation pipeline per period ── */
     let pipeline;
@@ -128,23 +110,14 @@ export const getZoneTrend = async (req, res) => {
     if (period === 'daily') {
       pipeline = [
         { $match: matchStage },
-        { $group: {
-            _id: { $dateToString: { format: '%Y-%m-%d', date: '$date' } },
-            cases: { $sum: '$caseCount' },
-        }},
+        { $group: { _id: { $dateToString: { format: '%Y-%m-%d', date: '$date' } }, cases: { $sum: '$caseCount' } } },
         { $sort: { _id: 1 } },
-        { $project: { _id: 0, key: '$_id', cases: 1 } },
+        { $project: { _id: 0, key: '$_id', cases: 1 } }
       ];
     } else if (period === 'weekly') {
       pipeline = [
         { $match: matchStage },
-        { $group: {
-            _id: {
-              year: { $isoWeekYear: '$date' },
-              week: { $isoWeek:     '$date' },
-            },
-            cases: { $sum: '$caseCount' },
-        }},
+        { $group: { _id: { year: { $isoWeekYear: '$date' }, week: { $isoWeek: '$date' } }, cases: { $sum: '$caseCount' } } },
         { $sort: { '_id.year': 1, '_id.week': 1 } },
         { $project: {
             _id: 0,
@@ -157,16 +130,13 @@ export const getZoneTrend = async (req, res) => {
               ],
             },
             cases: 1,
-        }},
+        }}
       ];
     } else {
       // monthly
       pipeline = [
         { $match: matchStage },
-        { $group: {
-            _id: { year: { $year: '$date' }, month: { $month: '$date' } },
-            cases: { $sum: '$caseCount' },
-        }},
+        { $group: { _id: { year: { $year: '$date' }, month: { $month: '$date' } }, cases: { $sum: '$caseCount' } } },
         { $sort: { '_id.year': 1, '_id.month': 1 } },
         { $project: {
             _id: 0,
@@ -177,7 +147,7 @@ export const getZoneTrend = async (req, res) => {
               },
             },
             cases: 1,
-        }},
+        }}
       ];
     }
 
@@ -191,12 +161,14 @@ export const getZoneTrend = async (req, res) => {
     if (period === 'daily') {
       while (cursor <= now) {
         const key = cursor.toISOString().slice(0, 10);
-        filledData.push({
-          key,
-          label: cursor.toLocaleDateString('en-US', { timeZone: 'UTC', month: 'short', day: 'numeric' }),
-          cases: dataMap[key] ?? 0,
-        });
-        cursor.setUTCDate(cursor.getUTCDate() + 1);
+        if (dataMap[key] !== undefined) {
+          filledData.push({
+            key,
+            label: cursor.toLocaleDateString('en-US', { timeZone: 'UTC', month: 'short', day: 'numeric' }),
+            cases: dataMap[key]
+          });
+        }
+        cursor.setDate(cursor.getDate() + 1);
       }
     } else if (period === 'weekly') {
       // Advance cursor to the Monday of its ISO week
@@ -208,7 +180,7 @@ export const getZoneTrend = async (req, res) => {
         filledData.push({
           key,
           label: isoWeekLabel(cursor),
-          cases: dataMap[key] ?? 0,
+          cases: Math.round(dataMap[key] ?? 0),
         });
         cursor.setUTCDate(cursor.getUTCDate() + 7);
       }
@@ -219,32 +191,17 @@ export const getZoneTrend = async (req, res) => {
         filledData.push({
           key,
           label: cursor.toLocaleDateString('en-US', { timeZone: 'UTC', month: 'short', year: 'numeric' }),
-          cases: dataMap[key] ?? 0,
+          cases: Math.round(dataMap[key] ?? 0),
         });
         cursor.setUTCMonth(cursor.getUTCMonth() + 1);
       }
     }
 
-    /* ── Current risk snapshot: pick the HIGHEST risk upcoming week ── */
-    const latestPrediction = await RiskPrediction.findOne().sort({ generatedAt: -1 }).select('generatedAt');
-    const windowStart = latestPrediction ? new Date(latestPrediction.generatedAt.getTime() - 6 * 60 * 60 * 1000) : new Date();
-
-    // Get ALL predictions from the latest run, then surface the worst one for the badge
-    const allFuturePredictions = await RiskPrediction.find({
-      district,
-      mohZone,
-      generatedAt: { $gte: windowStart }
-    }).sort({ predictedFor: 1 }).lean();
-
-    // Pick the highest-risk prediction for the badge (safety-first)
-    const RISK_ORDER = { high: 2, moderate: 1, low: 0 };
-    const riskInfo = allFuturePredictions.length > 0
-      ? allFuturePredictions.reduce((best, cur) =>
-          (RISK_ORDER[cur.riskLevel] ?? 0) >= (RISK_ORDER[best.riskLevel] ?? 0) ? cur : best
-        )
-      : null;
-
-    const futurePredictions = allFuturePredictions;
+    /* ── Current risk snapshot ── */
+    const allFuturePredictionsRaw = await getLivePredictions(district);
+    const zonePred = allFuturePredictionsRaw.find(p => p.mohZone === searchZone || p.mohZone === mohZone);
+    const futurePredictions = zonePred ? [zonePred] : [];
+    const riskInfo = zonePred || null;
 
     if (futurePredictions.length > 0 && filledData.length > 0) {
       // Connect the prediction line to the last historical point

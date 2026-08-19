@@ -13,37 +13,43 @@ L.Icon.Default.mergeOptions({
 });
 
 const getRiskColor = (level) => {
-  if (level === 'high') return 'rgba(220, 38, 38, 0.7)';
-  if (level === 'moderate' || level === 'medium') return 'rgba(217, 119, 6, 0.7)';
-  if (level === 'low') return 'rgba(22, 163, 74, 0.7)';
+  const l = (level || '').toLowerCase();
+  if (l === 'high' || l === 'alert' || l === 'warning') return 'rgba(220, 38, 38, 0.7)';
+  if (l === 'moderate' || l === 'medium' || l === 'watch') return 'rgba(217, 119, 6, 0.7)';
+  if (l === 'low') return 'rgba(22, 163, 74, 0.7)';
   return 'rgba(148, 163, 184, 0.4)'; // unknown
 };
 
 const normalizeStr = (str) => {
   if (!str) return '';
-  const s = str.toLowerCase().replace(/[^a-z]/g, '');
+  const s = String(str).toLowerCase().replace(/[^a-z]/g, '');
   if (s.includes('mulathiv') || s.includes('mullaitiv') || s.includes('mulativ')) return 'mullaitivu';
+  if (s.includes('nuwara') || s.includes('eliya')) return 'nuwaraeliya';
   return s;
 };
 
-// Component to handle programmatic zooming
+// Component to handle programmatic zooming safely
 function MapZoomEffect({ selectedDistrict, geoData }) {
   const map = useMap();
   
   useEffect(() => {
-    if (!selectedDistrict || !geoData) return;
-    
-    // Find the feature matching the selected district
-    const feature = geoData.features.find(f => {
-      const geoName = f.properties.name || f.properties.NAME_1 || f.properties.ADM2_EN;
-      return normalizeStr(geoName) === normalizeStr(selectedDistrict);
-    });
-    
-    if (feature) {
-      const layer = L.geoJSON(feature);
-      const bounds = layer.getBounds();
-      // Fly to bounds, padded a bit so it doesn't touch the edges
-      map.flyToBounds(bounds, { padding: [20, 20], duration: 1.5 });
+    try {
+      if (!selectedDistrict || !geoData || !Array.isArray(geoData.features)) return;
+      
+      const feature = geoData.features.find(f => {
+        const geoName = f?.properties?.name || f?.properties?.NAME_1 || f?.properties?.ADM2_EN;
+        return normalizeStr(geoName) === normalizeStr(selectedDistrict);
+      });
+      
+      if (feature) {
+        const layer = L.geoJSON(feature);
+        const bounds = layer.getBounds();
+        if (bounds && bounds.isValid()) {
+          map.flyToBounds(bounds, { padding: [20, 20], duration: 1.5 });
+        }
+      }
+    } catch (err) {
+      console.warn('[MapZoomEffect] zoom error:', err);
     }
   }, [selectedDistrict, geoData, map]);
   
@@ -58,60 +64,82 @@ export default function SriLankaMap({ riskData, selectedDistrict }) {
   const { isDark } = useThemeStore();
 
   useEffect(() => {
+    let isMounted = true;
     fetch('/srilanka-districts.json')
       .then(res => res.json())
       .then(data => {
-        setGeoData(data);
-        setLoading(false);
+        if (isMounted) {
+          setGeoData(data);
+          setLoading(false);
+        }
       })
       .catch(err => {
         console.error('Failed to load map data', err);
-        setError(true);
-        setLoading(false);
+        if (isMounted) {
+          setError(true);
+          setLoading(false);
+        }
       });
+    return () => { isMounted = false; };
   }, []);
 
   if (loading) return <div className="loading-center"><div className="spinner"></div></div>;
   if (error) return <div className="alert alert-error">Failed to load map data. Please try again later.</div>;
 
-  if (error) return <div className="alert alert-error">Failed to load map data. Please try again later.</div>;
+  const safeRiskData = Array.isArray(riskData) ? riskData : [];
 
   const styleFeature = (feature) => {
-    const geoName = feature.properties.name || feature.properties.NAME_1 || feature.properties.ADM2_EN;
-    const districtData = riskData?.find(d => normalizeStr(d.district) === normalizeStr(geoName));
-    return {
-      fillColor: getRiskColor(districtData?.riskLevel),
-      weight: 1,
-      opacity: 1,
-      color: 'white',
-      fillOpacity: 0.8
-    };
+    try {
+      const geoName = feature?.properties?.name || feature?.properties?.NAME_1 || feature?.properties?.ADM2_EN;
+      const districtData = safeRiskData.find(d => normalizeStr(d?.district) === normalizeStr(geoName));
+      return {
+        fillColor: getRiskColor(districtData?.riskLevel),
+        weight: 1,
+        opacity: 1,
+        color: 'white',
+        fillOpacity: 0.8
+      };
+    } catch(err) {
+      return { fillColor: 'rgba(148, 163, 184, 0.4)', weight: 1, opacity: 1, color: 'white', fillOpacity: 0.8 };
+    }
   };
 
   const onEachFeature = (feature, layer) => {
-    const geoName = feature.properties.name || feature.properties.NAME_1 || feature.properties.ADM2_EN;
-    const districtData = riskData?.find(d => normalizeStr(d.district) === normalizeStr(geoName));
-    
-    let popupContent = `<strong>${geoName}</strong><br/>`;
-    if (districtData) {
-      popupContent += `Risk Score: ${Math.round(districtData.riskScore)}<br/>
-      Level: <span class="risk-badge ${districtData.riskLevel}">${districtData.riskLevel.toUpperCase()}</span>`;
-    } else {
-      popupContent += `Data unavailable`;
-    }
-    
-    layer.bindPopup(popupContent);
-    layer.on({
-      mouseover: (e) => {
-        const layer = e.target;
-        layer.setStyle({ weight: 3, fillOpacity: 1 });
-      },
-      mouseout: (e) => {
-        const layer = e.target;
-        layer.setStyle({ weight: 1, fillOpacity: 0.8 });
+    try {
+      const geoName = feature?.properties?.name || feature?.properties?.NAME_1 || feature?.properties?.ADM2_EN || 'District';
+      const districtData = safeRiskData.find(d => normalizeStr(d?.district) === normalizeStr(geoName));
+      
+      let popupContent = `<strong>${geoName}</strong><br/>`;
+      if (districtData) {
+        const scoreVal = districtData.riskScore != null ? Math.round(districtData.riskScore) : '—';
+        const levelStr = (districtData.riskLevel || 'low').toUpperCase();
+        popupContent += `Risk Score: ${scoreVal}<br/>
+        Level: <span class="risk-badge ${(districtData.riskLevel || 'low').toLowerCase()}">${levelStr}</span>`;
+      } else {
+        popupContent += `Data unavailable`;
       }
-    });
+      
+      layer.bindPopup(popupContent);
+      layer.on({
+        mouseover: (e) => {
+          try {
+            const l = e.target;
+            l.setStyle({ weight: 3, fillOpacity: 1 });
+          } catch(err) {}
+        },
+        mouseout: (e) => {
+          try {
+            const l = e.target;
+            l.setStyle({ weight: 1, fillOpacity: 0.8 });
+          } catch(err) {}
+        }
+      });
+    } catch(err) {
+      console.warn('[onEachFeature] error:', err);
+    }
   };
+
+  const geoKey = `geojson-${safeRiskData.length}-${selectedDistrict || 'all'}`;
 
   return (
     <div style={{ height: '100%', width: '100%', position: 'relative' }}>
@@ -130,6 +158,7 @@ export default function SriLankaMap({ riskData, selectedDistrict }) {
         {geoData && (
           <>
             <GeoJSON 
+              key={geoKey}
               data={geoData} 
               style={styleFeature}
               onEachFeature={onEachFeature}

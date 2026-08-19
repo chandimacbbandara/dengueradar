@@ -33,7 +33,6 @@ console.log(`[DevServer] ✅ Connected to MongoDB: ${mongoose.connection.host}`)
 // ── 2. Load models & seed data ────────────────────────────────────────────────
 const { default: MohZone }        = await import('./models/MohZone.js');
 const { default: DengueCase }     = await import('./models/DengueCase.js');
-const { default: RiskPrediction } = await import('./models/RiskPrediction.js');
 const { default: MOH_ZONES_DATA } = await import('./data/mohZonesData.js');
 
 const DISTRICTS = MOH_ZONES_DATA.map(d => d.district);

@@ -1,43 +1,24 @@
-import RiskPrediction from '../models/RiskPrediction.js';
 import DengueCase from '../models/DengueCase.js';
 import User from '../models/User.js';
 import Alert from '../models/Alert.js';
-import { sendRiskAlertEmail } from '../services/predictionService.js';
+import { getLivePredictions, sendRiskAlertEmail } from '../services/predictionService.js';
 
 export const getMohDashboard = async (req, res) => {
   try {
-    // 1. Allow querying by any district (defaulting to the officer's own district)
     const district = req.query.district || req.user.district;
     
-    // 2. Fetch data required by the MohDashboard.jsx stats row
-    const thirtyDaysAgo = new Date(new Date().setDate(new Date().getDate() - 30));
+    const latestCase = await DengueCase.findOne({ district }).sort({ date: -1 }).lean();
+    const referenceDate = latestCase ? new Date(latestCase.date) : new Date();
+    const thirtyDaysAgo = new Date(referenceDate.getTime() - 30 * 24 * 60 * 60 * 1000);
     
-    // Find all cases in this district over the last 30 days
-    const recentCases = await DengueCase.find({ district, date: { $gte: thirtyDaysAgo } }).lean();
+    const recentCases = await DengueCase.find({ district, date: { $gte: thirtyDaysAgo, $lte: referenceDate } }).lean();
     const totalCasesMonth = recentCases.reduce((sum, record) => sum + record.caseCount, 0);
     
-    // Count citizens registered in this district
     const registeredCitizens = await User.countDocuments({ district, role: 'general' });
 
-    // Find the current risk predictions (week 1) for all zones in this district
-    const latestPrediction = await RiskPrediction.findOne().sort({ generatedAt: -1 }).select('generatedAt');
-    const windowStart = latestPrediction ? new Date(latestPrediction.generatedAt.getTime() - 6 * 60 * 60 * 1000) : new Date();
-
-    const riskPredictions = await RiskPrediction.aggregate([
-      { $match: { district, generatedAt: { $gte: windowStart } } },
-      // Sort: highest riskScore first so $first picks the worst prediction for each zone
-      { $sort: { riskScore: -1 } },
-      { $group: {
-          _id: '$mohZone',
-          riskScore:      { $first: '$riskScore' },
-          riskLevel:      { $first: '$riskLevel' },
-          predictedTier:  { $first: '$predictedTier' },
-          pAlert:         { $first: '$pAlert' },
-          predictedFor:   { $first: '$predictedFor' }
-      }}
-    ]);
-
-    // Count citizens registered in this district, grouped by MOH Zone
+    // LIVE PREDICTIONS
+    const allPredictions = await getLivePredictions(district);
+    
     const userCountsByZone = await User.aggregate([
       { $match: { district, role: 'general' } },
       { $group: { _id: '$mohZone', count: { $sum: 1 } } }
@@ -47,39 +28,30 @@ export const getMohDashboard = async (req, res) => {
       return map;
     }, {});
 
-    // Format zones array expected by the dashboard table and charts
-    const zones = riskPredictions.map(rp => {
-      // Find cases specifically for this zone
+    const zones = allPredictions.map(rp => {
       const zoneCasesSum = recentCases
-        .filter(c => c.mohZone === rp._id)
+        .filter(c => c.mohZone === rp.mohZone)
         .reduce((sum, record) => sum + record.caseCount, 0);
 
       return {
-        name: rp._id,
+        name: rp.mohZone,
         riskScore: rp.riskScore,
+        predictedCases: rp.predictedCases,
         riskLevel: rp.riskLevel,
         cases: zoneCasesSum,
-        users: userCountMap[rp._id] || 0
+        users: userCountMap[rp.mohZone] || 0
       };
     });
 
-    // Derive overall district risk level based on the average risk score
-    const avgScore = zones.length > 0 
-      ? zones.reduce((sum, z) => sum + (z.riskScore || 0), 0) / zones.length 
-      : 0;
+    const maxScore = zones.length > 0 ? Math.max(...zones.map(z => z.riskScore || 0)) : 0;
       
     let districtRiskLevel = 'low';
-    if (avgScore >= 66) districtRiskLevel = 'high';
-    else if (avgScore >= 33) districtRiskLevel = 'moderate';
+    if (maxScore >= 60) districtRiskLevel = 'high';
+    else if (maxScore >= 30) districtRiskLevel = 'moderate';
 
     res.json({ 
       success: true, 
-      data: { 
-        districtRiskLevel,
-        totalCasesMonth,
-        registeredCitizens,
-        zones
-      } 
+      data: { districtRiskLevel, totalCasesMonth, registeredCitizens, zones } 
     });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
@@ -90,12 +62,11 @@ export const getZoneReport = async (req, res) => {
   try {
     const { mohZone } = req.params;
     
-    const recentCases = await DengueCase.find({ mohZone })
-      .sort({ date: -1 })
-      .limit(30);
+    const recentCases = await DengueCase.find({ mohZone }).sort({ date: -1 }).limit(30);
       
-    const latestPrediction = await RiskPrediction.findOne({ mohZone })
-      .sort({ predictedFor: -1 });
+    // Since we need live prediction for a specific zone, fetch all and filter
+    const allPredictions = await getLivePredictions();
+    const latestPrediction = allPredictions.find(p => p.mohZone === mohZone) || null;
 
     res.json({ success: true, data: { recentCases, latestPrediction } });
   } catch (err) {
@@ -107,29 +78,26 @@ export const exportZoneReport = async (req, res) => {
   try {
     const { mohZone } = req.params;
     
-    const [recentCases, predictions] = await Promise.all([
-      DengueCase.find({ mohZone }).sort({ date: -1 }).limit(30).lean(),
-      RiskPrediction.find({ mohZone }).sort({ predictedFor: 1 }).lean()
-    ]);
-
-    // Build CSV Content
-    let csv = `Report For MOH Zone,${mohZone}\n\n`;
+    const recentCases = await DengueCase.find({ mohZone }).sort({ date: -1 }).limit(30).lean();
     
-    // 1. Predictions Section
+    const allPredictions = await getLivePredictions();
+    const latestPrediction = allPredictions.find(p => p.mohZone === mohZone);
+    const predictions = latestPrediction ? [latestPrediction] : [];
+
+    let csv = `Report For MOH Zone,${mohZone}\n\n`;
     csv += `AI FUTURE FORECAST & PREDICTIONS\n`;
     csv += `Forecast Target Date,Predicted Cases,Risk Level,Risk Score / 100\n`;
-    const futurePredictions = predictions.filter(p => new Date(p.predictedFor) >= new Date().setHours(0,0,0,0));
-    if (futurePredictions.length === 0) {
+    
+    if (predictions.length === 0) {
       csv += `No future predictions generated,\n`;
     } else {
-      futurePredictions.forEach(p => {
+      predictions.forEach(p => {
         const d = new Date(p.predictedFor).toLocaleDateString();
         csv += `${d},${p.predictedCases || 0},${p.riskLevel.toUpperCase()},${Math.round(p.riskScore)}\n`;
       });
     }
     csv += `\n`;
 
-    // 2. Historical Cases Section
     csv += `HISTORICAL REPORTED CASES (LAST 30 ENTRIES)\n`;
     csv += `Date,Reported Cases\n`;
     if (recentCases.length === 0) {
@@ -141,10 +109,8 @@ export const exportZoneReport = async (req, res) => {
       });
     }
 
-    // Set headers for file download
     res.setHeader('Content-Type', 'text/csv');
     res.setHeader('Content-Disposition', `attachment; filename="dengue_report_${mohZone.replace(/\s+/g, '_')}.csv"`);
-    
     res.send(csv);
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
@@ -161,7 +127,8 @@ export const notifyZone = async (req, res) => {
       return res.json({ success: true, message: 'No registered citizens found in this zone.' });
     }
 
-    const latestPrediction = await RiskPrediction.findOne({ mohZone }).sort({ predictedFor: -1 }).lean();
+    const allPredictions = await getLivePredictions();
+    const latestPrediction = allPredictions.find(p => p.mohZone === mohZone);
     const riskLevel = latestPrediction ? latestPrediction.riskLevel : 'high';
 
     const alertDocs = [];

@@ -153,15 +153,16 @@ export default function ZoneTrendChart({ district, mohZone }) {
 
   const { zone, district: dataDistrict, riskInfo, trend = [], predictedTrend = [] } = trendData ?? {};
   const combinedTrend = [...trend, ...predictedTrend];
-  const totalCases = trend.reduce((s, d) => s + (d.cases || 0), 0);
-  const peakPoint  = trend.reduce((a, b) => (b.cases > a.cases ? b : a), { cases: 0 });
-  const last       = trend[trend.length - 1] ?? {};
-  const prev       = trend[trend.length - 2] ?? {};
-  const delta      = (last.cases || 0) - (prev.cases || 0);
-  const deltaPos   = delta >= 0;
-  const riskLevel  = riskInfo?.riskLevel ?? 'low';
-  const riskScore  = riskInfo?.riskScore ?? 0;
-  const riskColor  = RISK_COLOR[riskLevel];
+  const totalCases    = trend.reduce((s, d) => s + (d.cases || 0), 0);
+  const peakPoint     = trend.reduce((a, b) => (b.cases > a.cases ? b : a), { cases: 0 });
+  const last          = trend[trend.length - 1] ?? {};
+  const prev          = trend[trend.length - 2] ?? {};
+  const delta         = (last.cases || 0) - (prev.cases || 0);
+  const deltaPos      = delta >= 0;
+  const rawRiskLevel  = (riskInfo?.riskLevel ?? 'low').toLowerCase();
+  const riskLevel     = rawRiskLevel === 'medium' ? 'moderate' : rawRiskLevel;
+  const riskScore     = riskInfo?.riskScore ?? 0;
+  const riskColor     = RISK_COLOR[riskLevel] || '#10B981';
 
   // Unique gradient ID per zone to avoid SVG conflicts
   const gradId = `ztc-grad-${(zone ?? 'x').replace(/\W+/g, '')}`;
