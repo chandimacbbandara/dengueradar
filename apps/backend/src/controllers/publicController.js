@@ -39,7 +39,7 @@ export const getNationalRisk = async (req, res) => {
       const cleanRisk = p.riskLevel ? p.riskLevel.toLowerCase() : 'low';
 
       if (!districtData[dist]) {
-        districtData[dist] = { district: dist, counts: { high: 0, moderate: 0, low: 0 }, maxScore: 0 };
+        districtData[dist] = { district: dist, counts: { high: 0, moderate: 0, low: 0 }, sumScore: 0, totalZones: 0 };
       }
       
       const d = districtData[dist];
@@ -47,9 +47,8 @@ export const getNationalRisk = async (req, res) => {
       else if (cleanRisk === 'moderate' || cleanRisk === 'medium') d.counts.moderate++;
       else d.counts.low++;
       
-      if ((p.riskScore || 0) > d.maxScore) {
-        d.maxScore = p.riskScore || 0;
-      }
+      d.sumScore += (p.riskScore || 0);
+      d.totalZones++;
     }
 
     const nationalRisk = [];
@@ -72,9 +71,11 @@ export const getNationalRisk = async (req, res) => {
         finalSeverity = 1;
       }
       
+      const avgScore = d.totalZones > 0 ? d.sumScore / d.totalZones : 0;
+      
       nationalRisk.push({
         district: d.district,
-        riskScore: d.maxScore,
+        riskScore: avgScore,
         riskLevel: finalRisk,
         severity: finalSeverity
       });
@@ -134,7 +135,7 @@ export const getTopZones = async (req, res) => {
     // Sort by riskScore descending
     const sorted = [...livePredictions].sort((a, b) => b.riskScore - a.riskScore);
     
-    const topZones = sorted.slice(0, 3).map(p => ({
+    const topZones = sorted.slice(0, 5).map(p => ({
       mohZone: p.mohZone,
       district: p.district,
       riskScore: p.riskScore,
