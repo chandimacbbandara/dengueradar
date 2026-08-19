@@ -59,8 +59,8 @@ export const getNationalRisk = async (req, res) => {
           severity: { $first: '$severity' },
           riskScore: { $avg: '$riskScore' } // Average score for this group
       }},
-      // 2. Sort by count DESC, then severity DESC (for ties)
-      { $sort: { count: -1, severity: -1 } },
+      // 2. Sort by severity DESC to prioritize high risk, then count DESC
+      { $sort: { severity: -1, count: -1 } },
       // 3. Group by district to pick the top riskLevel (the majority)
       { $group: {
           _id: '$_id.district',
