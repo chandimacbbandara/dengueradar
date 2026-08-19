@@ -25,6 +25,7 @@ const normalizeStr = (str) => {
   const s = String(str).toLowerCase().replace(/[^a-z]/g, '');
   if (s.includes('mulathiv') || s.includes('mullaitiv') || s.includes('mulativ')) return 'mullaitivu';
   if (s.includes('nuwara') || s.includes('eliya')) return 'nuwaraeliya';
+  if (s.includes('monaragala') || s.includes('moneragala')) return 'monaragala';
   return s;
 };
 

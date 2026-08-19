@@ -48,14 +48,14 @@ function OtpInput({ value, onChange }) {
             width: '52px', height: '64px',
             textAlign: 'center',
             fontSize: '26px', fontWeight: 800,
-            border: `2px solid ${d && d !== ' ' ? 'var(--color-primary)' : 'var(--color-border)'}`,
+            border: `2px solid ${d && d !== ' ' ? 'var(--brand)' : 'var(--border)'}`,
             borderRadius: '12px',
             background: d && d !== ' ' ? 'var(--color-bg)' : 'var(--color-bg)',
-            color: 'var(--color-text-primary)',
+            color: 'var(--text)',
             outline: 'none',
             transition: 'all 0.15s ease',
             boxShadow: d && d !== ' ' ? '0 0 0 3px rgba(14,165,165,0.15)' : 'none',
-            caretColor: 'var(--color-primary)',
+            caretColor: 'var(--brand)',
           }}
         />
       ))}
@@ -168,7 +168,7 @@ export default function SignupGeneral() {
     return (
       <div className="auth-layout">
         <div className="auth-panel-left">
-          <Link to="/" className="text-2xl font-extrabold mb-12 flex items-center gap-2" style={{ color: 'var(--color-primary)' }}>
+          <Link to="/" className="text-2xl font-extrabold mb-12 flex items-center gap-2" style={{ color: 'var(--brand)' }}>
              <Icon name="activity" /> Dengue<span>Radar</span>
           </Link>
           <h1 className="text-4xl font-extrabold mb-4">Check your inbox</h1>
@@ -190,10 +190,10 @@ export default function SignupGeneral() {
             <div style={{textAlign:'center', marginBottom:'8px'}}>
               <div style={{
                 width:'80px', height:'80px', borderRadius:'50%',
-                background:'var(--color-primary-light)',
+                background:'var(--brand-light)',
                 display:'flex', alignItems:'center', justifyContent:'center',
                 margin:'0 auto 16px', fontSize:'36px',
-                color: 'var(--color-primary)'
+                color: 'var(--brand)'
               }}><Icon name="shield" size={40} /></div>
               <h2 className="auth-form-title" style={{marginBottom:'4px'}}>Enter your code</h2>
               <p className="auth-form-subtitle" style={{marginBottom:0}}>
@@ -222,7 +222,7 @@ export default function SignupGeneral() {
                 disabled={resendCooldown > 0 || loading}
                 style={{
                   marginTop:'8px', background:'none', border:'none',
-                  color: resendCooldown > 0 ? 'var(--color-text-muted)' : 'var(--color-primary)',
+                  color: resendCooldown > 0 ? 'var(--text-3)' : 'var(--brand)',
                   fontWeight: 600, fontSize:'14px', cursor: resendCooldown > 0 ? 'default' : 'pointer',
                 }}
               >
@@ -233,7 +233,7 @@ export default function SignupGeneral() {
             <div style={{textAlign:'center', marginTop:'16px'}}>
               <button
                 onClick={() => setStep('form')}
-                style={{background:'none', border:'none', color:'var(--color-text-secondary)', fontSize:'13px', cursor:'pointer'}}
+                style={{background:'none', border:'none', color:'var(--text-2)', fontSize:'13px', cursor:'pointer'}}
               >
                 ← Back to sign up form
               </button>
@@ -249,7 +249,7 @@ export default function SignupGeneral() {
   return (
     <div className="auth-layout">
       <div className="auth-panel-left">
-        <Link to="/" className="text-2xl font-extrabold mb-12 flex items-center gap-2" style={{ color: 'var(--color-primary)' }}>
+        <Link to="/" className="text-2xl font-extrabold mb-12 flex items-center gap-2" style={{ color: 'var(--brand)' }}>
            <Icon name="activity" /> Dengue<span>Radar</span>
         </Link>
         <h1 className="text-4xl font-extrabold mb-4">Join DengueRadar</h1>
@@ -288,7 +288,7 @@ export default function SignupGeneral() {
             <div className="form-group" style={{marginBottom:0}}>
               <label className="form-label">WhatsApp Number</label>
               <div style={{display:'flex'}}>
-                <span style={{padding:'12px',background:'var(--color-bg-subtle)',border:'1.5px solid var(--color-border)',borderRight:'none',borderRadius:'var(--radius-md) 0 0 var(--radius-md)'}}>+94</span>
+                <span style={{padding:'12px',background:'var(--surface-2)',border:'1.5px solid var(--border)',borderRight:'none',borderRadius:'var(--radius-md) 0 0 var(--radius-md)'}}>+94</span>
                 <input type="text" className={`form-input ${errors.whatsappNumber?'error':''}`} style={{borderRadius:'0 var(--radius-md) var(--radius-md) 0'}} placeholder="771234567" value={formData.whatsappNumber} onChange={e=>setFormData({...formData,whatsappNumber:e.target.value})} />
               </div>
               {errors.whatsappNumber && <span className="form-error">{errors.whatsappNumber}</span>}

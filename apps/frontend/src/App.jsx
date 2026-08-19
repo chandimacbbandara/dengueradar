@@ -9,6 +9,7 @@ import Dashboard from './pages/Dashboard.jsx';
 import MohDashboard from './pages/MohDashboard.jsx';
 import AdminDashboard from './pages/AdminDashboard.jsx';
 import Profile from './pages/Profile.jsx';
+import HowItWorks from './pages/HowItWorks.jsx';
 import ErrorBoundary from './components/ErrorBoundary.jsx';
 import ThemeInit from './components/ThemeInit.jsx';
 
@@ -20,6 +21,7 @@ export default function App() {
         <Toaster position="top-right" toastOptions={{ duration: 4000, style: { fontFamily: 'Inter, sans-serif', borderRadius: '12px' } }} />
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/how-it-works" element={<HowItWorks />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup/general" element={<SignupGeneral />} />
           <Route path="/signup/moh-officer" element={<SignupMohOfficer />} />

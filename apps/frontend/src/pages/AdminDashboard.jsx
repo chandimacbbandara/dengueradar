@@ -23,8 +23,8 @@ function StatCard({ icon, label, value, loading }) {
 
 /* ─── Risk badge ────────────────────────────────────────────────── */
 function StatusBadge({ approved, active }) {
-  if (!approved && active === false) return <span style={{ background:'var(--color-risk-high-bg)', color:'var(--color-risk-high)', fontSize:'11px', fontWeight:700, padding:'3px 10px', borderRadius:'999px' }}>Rejected</span>;
-  if (!approved) return <span style={{ background:'var(--color-risk-low-bg)', color:'var(--color-risk-low)', fontSize:'11px', fontWeight:700, padding:'3px 10px', borderRadius:'999px' }}>Pending</span>;
+  if (!approved && active === false) return <span style={{ background:'var(--risk-high-bg)', color:'var(--risk-high)', fontSize:'11px', fontWeight:700, padding:'3px 10px', borderRadius:'999px' }}>Rejected</span>;
+  if (!approved) return <span style={{ background:'var(--risk-low-bg)', color:'var(--risk-low)', fontSize:'11px', fontWeight:700, padding:'3px 10px', borderRadius:'999px' }}>Pending</span>;
   return <span style={{ background:'#D1FAE5', color:'#10B981', fontSize:'11px', fontWeight:700, padding:'3px 10px', borderRadius:'999px' }}>Approved</span>;
 }
 
@@ -36,24 +36,24 @@ function OfficerRow({ officer, onApprove, onReject, onDelete, actionLoading }) {
 
   return (
     <>
-      <tr style={{ borderBottom: '1px solid var(--color-border-light)' }}>
+      <tr style={{ borderBottom: '1px solid var(--border)' }}>
         <td style={{ padding: '14px 16px' }}>
-          <div style={{ fontWeight: 700, color: 'var(--color-text-primary)' }}>{officer.officerName}</div>
-          <div style={{ fontSize: '12px', color: 'var(--color-text-muted)' }}>{officer.email}</div>
+          <div style={{ fontWeight: 700, color: 'var(--text)' }}>{officer.officerName}</div>
+          <div style={{ fontSize: '12px', color: 'var(--text-3)' }}>{officer.email}</div>
         </td>
-        <td style={{ padding: '14px 16px', fontSize: '13px', color: 'var(--color-text-secondary)' }}>
+        <td style={{ padding: '14px 16px', fontSize: '13px', color: 'var(--text-2)' }}>
           {officer.district}
         </td>
-        <td style={{ padding: '14px 16px', fontSize: '13px', color: 'var(--color-text-secondary)' }}>
+        <td style={{ padding: '14px 16px', fontSize: '13px', color: 'var(--text-2)' }}>
           {officer.mohZone}
         </td>
-        <td style={{ padding: '14px 16px', fontSize: '12px', color: 'var(--color-text-muted)' }}>
+        <td style={{ padding: '14px 16px', fontSize: '12px', color: 'var(--text-3)' }}>
           {officer.employeeId || '—'}
         </td>
         <td style={{ padding: '14px 16px' }}>
           <StatusBadge approved={officer.isApproved} active={officer.isActive} />
         </td>
-        <td style={{ padding: '14px 16px', fontSize: '12px', color: 'var(--color-text-muted)' }}>
+        <td style={{ padding: '14px 16px', fontSize: '12px', color: 'var(--text-3)' }}>
           {new Date(officer.createdAt).toLocaleDateString()}
         </td>
         <td style={{ padding: '14px 16px' }}>
@@ -79,7 +79,7 @@ function OfficerRow({ officer, onApprove, onReject, onDelete, actionLoading }) {
                 disabled={busy}
                 style={{
                   padding: '6px 14px', borderRadius: '8px', border: 'none',
-                  background: 'var(--color-risk-low)', color: '#fff', fontSize: '12px',
+                  background: 'var(--risk-low)', color: '#fff', fontSize: '12px',
                   fontWeight: 700, cursor: 'pointer',
                 }}
               >
@@ -93,8 +93,8 @@ function OfficerRow({ officer, onApprove, onReject, onDelete, actionLoading }) {
                 disabled={busy}
                 style={{
                   padding: '6px 14px', borderRadius: '8px',
-                  border: '1px solid var(--color-risk-high)', background: 'transparent',
-                  color: 'var(--color-risk-high)', fontSize: '12px', fontWeight: 700, cursor: 'pointer',
+                  border: '1px solid var(--risk-high)', background: 'transparent',
+                  color: 'var(--risk-high)', fontSize: '12px', fontWeight: 700, cursor: 'pointer',
                 }}
               >
                 ✗ Reject
@@ -106,8 +106,8 @@ function OfficerRow({ officer, onApprove, onReject, onDelete, actionLoading }) {
               disabled={busy}
               style={{
                 padding: '6px 10px', borderRadius: '8px',
-                border: '1px solid var(--color-border)', background: 'transparent',
-                color: 'var(--color-text-muted)', fontSize: '12px', cursor: 'pointer',
+                border: '1px solid var(--border)', background: 'transparent',
+                color: 'var(--text-3)', fontSize: '12px', cursor: 'pointer',
               }}
             >
               🗑
@@ -118,7 +118,7 @@ function OfficerRow({ officer, onApprove, onReject, onDelete, actionLoading }) {
 
       {/* Inline reject reason input */}
       {showReject && (
-        <tr style={{ background: 'var(--color-risk-high-bg)' }}>
+        <tr style={{ background: 'var(--risk-high-bg)' }}>
           <td colSpan={7} style={{ padding: '12px 16px' }}>
             <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
               <input
@@ -128,16 +128,16 @@ function OfficerRow({ officer, onApprove, onReject, onDelete, actionLoading }) {
                 onChange={e => setReason(e.target.value)}
                 style={{
                   flex: 1, padding: '8px 12px', borderRadius: '8px',
-                  border: '1px solid var(--color-risk-high)', outline: 'none', fontSize: '13px',
+                  border: '1px solid var(--risk-high)', outline: 'none', fontSize: '13px',
                 }}
               />
               <button
                 onClick={() => { onReject(officer._id, reason); setShowReject(false); }}
-                style={{ padding:'8px 16px', borderRadius:'8px', border:'none', background:'var(--color-risk-high)', color:'#fff', fontWeight:700, fontSize:'13px', cursor:'pointer' }}
+                style={{ padding:'8px 16px', borderRadius:'8px', border:'none', background:'var(--risk-high)', color:'#fff', fontWeight:700, fontSize:'13px', cursor:'pointer' }}
               >Confirm Reject</button>
               <button
                 onClick={() => setShowReject(false)}
-                style={{ padding:'8px 16px', borderRadius:'8px', border:'1px solid var(--color-border)', background:'#fff', fontSize:'13px', cursor:'pointer' }}
+                style={{ padding:'8px 16px', borderRadius:'8px', border:'1px solid var(--border)', background:'#fff', fontSize:'13px', cursor:'pointer' }}
               >Cancel</button>
             </div>
           </td>
@@ -238,7 +238,7 @@ export default function AdminDashboard() {
         {/* ── Tab bar ── */}
         <div style={{
           display: 'flex', gap: '4px',
-          background: 'var(--color-bg-subtle)', borderRadius: '12px', padding: '4px', width: 'fit-content',
+          background: 'var(--surface-2)', borderRadius: '12px', padding: '4px', width: 'fit-content',
         }}>
           {[
             { key: 'pending',  label: ` Pending${stats?.pendingOfficers > 0 ? ` (${stats.pendingOfficers})` : ''}` },
@@ -253,7 +253,7 @@ export default function AdminDashboard() {
                 padding: '10px 20px', borderRadius: '9px', border: 'none', cursor: 'pointer',
                 fontWeight: 700, fontSize: '13px', transition: 'all 0.2s',
                 background: tab === t.key ? 'white' : 'transparent',
-                color: tab === t.key ? 'var(--color-text-primary)' : 'var(--color-text-secondary)',
+                color: tab === t.key ? 'var(--text)' : 'var(--text-2)',
                 boxShadow: tab === t.key ? 'var(--shadow-sm)' : 'none',
               }}
             >
@@ -265,8 +265,8 @@ export default function AdminDashboard() {
         {/* ── Officers table ── */}
         {tab !== 'citizens' && (
           <div className="card">
-            <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--color-border-light)' }}>
-              <h2 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--color-text-primary)' }}>
+            <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border)' }}>
+              <h2 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text)' }}>
                 {tab === 'pending' ? 'Pending MOH Officer Applications' : 'Approved MOH Officers'}
               </h2>
             </div>
@@ -275,7 +275,7 @@ export default function AdminDashboard() {
               <div className="loading-center"><div className="spinner"></div></div>
             ) : officers.length === 0 ? (
               <div style={{ padding: '48px', textAlign: 'center' }}>
-                <p style={{ color: 'var(--color-text-secondary)', fontWeight: 600 }}>
+                <p style={{ color: 'var(--text-2)', fontWeight: 600 }}>
                   {tab === 'pending' ? 'No pending applications right now.' : 'No approved officers yet.'}
                 </p>
               </div>
@@ -310,8 +310,8 @@ export default function AdminDashboard() {
         {/* ── Citizens table ── */}
         {tab === 'citizens' && (
           <div className="card">
-            <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--color-border-light)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <h2 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--color-text-primary)' }}>Registered Citizens</h2>
+            <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h2 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text)' }}>Registered Citizens</h2>
               <button
                 onClick={loadCitizens}
                 className="btn btn-sm btn-ghost"
@@ -321,7 +321,7 @@ export default function AdminDashboard() {
             </div>
 
             {citizens.length === 0 ? (
-              <div style={{ padding: '32px', textAlign: 'center', color: 'var(--color-text-muted)' }}>
+              <div style={{ padding: '32px', textAlign: 'center', color: 'var(--text-3)' }}>
                 <button
                   onClick={loadCitizens}
                   className="btn btn-primary"
@@ -342,7 +342,7 @@ export default function AdminDashboard() {
                   <tbody>
                     {citizens.map(c => (
                       <tr key={c._id}>
-                        <td style={{ fontWeight: 600, color: 'var(--color-text-primary)' }}>
+                        <td style={{ fontWeight: 600, color: 'var(--text)' }}>
                           {c.firstName} {c.lastName}
                         </td>
                         <td>{c.email}</td>

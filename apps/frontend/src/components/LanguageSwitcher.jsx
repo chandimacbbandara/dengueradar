@@ -12,21 +12,21 @@ export default function LanguageSwitcher() {
     <div className="language-switcher" style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', fontWeight: '600' }}>
       <button 
         onClick={() => changeLanguage('en')} 
-        style={{ background: 'none', border: 'none', color: i18n.language === 'en' ? 'var(--color-primary)' : 'var(--color-text-secondary)', cursor: 'pointer', padding: '0' }}
+        style={{ background: 'none', border: 'none', color: i18n.language === 'en' ? 'var(--brand)' : 'var(--text-2)', cursor: 'pointer', padding: '0' }}
       >
         EN
       </button>
-      <span style={{ color: 'var(--color-border)' }}>|</span>
+      <span style={{ color: 'var(--border)' }}>|</span>
       <button 
         onClick={() => changeLanguage('si')} 
-        style={{ background: 'none', border: 'none', color: i18n.language === 'si' ? 'var(--color-primary)' : 'var(--color-text-secondary)', cursor: 'pointer', padding: '0', fontFamily: 'var(--font-heading)' }}
+        style={{ background: 'none', border: 'none', color: i18n.language === 'si' ? 'var(--brand)' : 'var(--text-2)', cursor: 'pointer', padding: '0', fontFamily: 'var(--font-heading)' }}
       >
         සිං
       </button>
-      <span style={{ color: 'var(--color-border)' }}>|</span>
+      <span style={{ color: 'var(--border)' }}>|</span>
       <button 
         onClick={() => changeLanguage('ta')} 
-        style={{ background: 'none', border: 'none', color: i18n.language === 'ta' ? 'var(--color-primary)' : 'var(--color-text-secondary)', cursor: 'pointer', padding: '0', fontFamily: 'var(--font-heading)' }}
+        style={{ background: 'none', border: 'none', color: i18n.language === 'ta' ? 'var(--brand)' : 'var(--text-2)', cursor: 'pointer', padding: '0', fontFamily: 'var(--font-heading)' }}
       >
         தமிழ்
       </button>

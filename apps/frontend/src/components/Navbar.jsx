@@ -62,6 +62,7 @@ export default function Navbar() {
         </Link>
         <nav className="links">
           <Link to="/" className={location.pathname === '/' ? 'active' : ''}>Overview</Link>
+          <Link to="/how-it-works" className={location.pathname === '/how-it-works' ? 'active' : ''}>How It Works</Link>
           <a href="#map">Risk Map</a>
           <a href="#forecast">Predictions</a>
           <a href="#trends">Trends</a>
