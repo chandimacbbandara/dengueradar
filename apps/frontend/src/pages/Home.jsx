@@ -71,7 +71,7 @@ export default function Home() {
                     </div>
                     <div className="kpi-trend up">Rank #{i + 1}</div>
                   </div>
-                  <div className="kpi-value" style={{ fontSize: '22px', marginBottom: '4px', wordBreak: 'break-word', lineHeight: '1.2' }}>{zone.district}</div>
+                  <div className="kpi-value" style={{ fontSize: '22px', marginBottom: '4px', wordBreak: 'break-word', lineHeight: '1.2' }}>{zone.mohZone}</div>
                   <div className="kpi-label">{riskLevel.toUpperCase()} RISK</div>
                   <div style={{ marginTop: '14px', height: '4px', background: 'var(--border)', borderRadius: '2px', overflow: 'hidden' }}>
                     <div style={{ width: `${Math.min(zone.riskScore, 100)}%`, height: '100%', background: `var(--risk-${riskColor})`, transition: 'width 1s ease-in-out' }}></div>
