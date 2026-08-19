@@ -45,7 +45,7 @@ export const getNationalRisk = async (req, res) => {
             $switch: {
               branches: [
                 { case: { $eq: ['$riskLevel', 'high'] }, then: 3 },
-                { case: { $eq: ['$riskLevel', 'moderate'] }, then: 2 },
+                { case: { $in: ['$riskLevel', ['moderate', 'medium']] }, then: 2 },
                 { case: { $eq: ['$riskLevel', 'low'] }, then: 1 }
               ],
               default: 0

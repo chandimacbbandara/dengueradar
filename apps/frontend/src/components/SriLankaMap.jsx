@@ -14,7 +14,7 @@ L.Icon.Default.mergeOptions({
 
 const getRiskColor = (level) => {
   if (level === 'high') return 'rgba(220, 38, 38, 0.7)';
-  if (level === 'moderate') return 'rgba(217, 119, 6, 0.7)';
+  if (level === 'moderate' || level === 'medium') return 'rgba(217, 119, 6, 0.7)';
   if (level === 'low') return 'rgba(22, 163, 74, 0.7)';
   return 'rgba(148, 163, 184, 0.4)'; // unknown
 };

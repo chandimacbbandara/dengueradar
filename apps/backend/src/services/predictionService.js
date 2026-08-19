@@ -383,7 +383,7 @@ export async function runMLPredictionsAndAlerts() {
 /** Returns true if the current risk tier is higher than the previous */
 function isEscalated(prev, current) {
   if (!prev) return false;
-  const order = { low: 0, moderate: 1, high: 2 };
+  const order = { low: 0, moderate: 1, medium: 1, high: 2 };
   return (order[current] ?? 0) > (order[prev] ?? 0);
 }
 
