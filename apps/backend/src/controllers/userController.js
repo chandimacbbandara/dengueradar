@@ -49,9 +49,9 @@ function isoWeekKey(date) {
 function isoWeekLabel(date) {
   // "Monday dd Mon" short form
   const monday = new Date(date);
-  const day = monday.getDay() || 7;
-  monday.setDate(monday.getDate() - day + 1);
-  return monday.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  const day = monday.getUTCDay() || 7;
+  monday.setUTCDate(monday.getUTCDate() - day + 1);
+  return monday.toLocaleDateString('en-US', { timeZone: 'UTC', month: 'short', day: 'numeric' });
 }
 
 /**
@@ -82,14 +82,14 @@ export const getZoneTrend = async (req, res) => {
     let since;
     if (period === 'daily') {
       since = new Date(now);
-      since.setDate(since.getDate() - 30);
-      since.setHours(0, 0, 0, 0);
+      since.setUTCDate(since.getUTCDate() - 30);
+      since.setUTCHours(0, 0, 0, 0);
     } else if (period === 'weekly') {
       since = new Date(now);
-      since.setDate(since.getDate() - 84); // 12 weeks
-      since.setHours(0, 0, 0, 0);
+      since.setUTCDate(since.getUTCDate() - 84); // 12 weeks
+      since.setUTCHours(0, 0, 0, 0);
     } else {
-      since = new Date(now.getFullYear(), now.getMonth() - 12, 1);
+      since = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 12, 1));
     }
 
     const matchStage = {
@@ -105,7 +105,7 @@ export const getZoneTrend = async (req, res) => {
       pipeline = [
         { $match: matchStage },
         { $group: {
-            _id: { $dateToString: { format: '%Y-%m-%d', date: '$date', timezone: 'Asia/Colombo' } },
+            _id: { $dateToString: { format: '%Y-%m-%d', date: '$date' } },
             cases: { $sum: '$caseCount' },
         }},
         { $sort: { _id: 1 } },
@@ -116,8 +116,8 @@ export const getZoneTrend = async (req, res) => {
         { $match: matchStage },
         { $group: {
             _id: {
-              year: { $isoWeekYear: { date: '$date', timezone: 'Asia/Colombo' } },
-              week: { $isoWeek: { date: '$date', timezone: 'Asia/Colombo' } },
+              year: { $isoWeekYear: '$date' },
+              week: { $isoWeek:     '$date' },
             },
             cases: { $sum: '$caseCount' },
         }},
@@ -140,10 +140,7 @@ export const getZoneTrend = async (req, res) => {
       pipeline = [
         { $match: matchStage },
         { $group: {
-            _id: { 
-              year: { $year: { date: '$date', timezone: 'Asia/Colombo' } }, 
-              month: { $month: { date: '$date', timezone: 'Asia/Colombo' } } 
-            },
+            _id: { year: { $year: '$date' }, month: { $month: '$date' } },
             cases: { $sum: '$caseCount' },
         }},
         { $sort: { '_id.year': 1, '_id.month': 1 } },
@@ -169,21 +166,18 @@ export const getZoneTrend = async (req, res) => {
 
     if (period === 'daily') {
       while (cursor <= now) {
-        const y = cursor.getFullYear();
-        const m = String(cursor.getMonth() + 1).padStart(2, '0');
-        const d = String(cursor.getDate()).padStart(2, '0');
-        const key = `${y}-${m}-${d}`;
+        const key = cursor.toISOString().slice(0, 10);
         filledData.push({
           key,
-          label: cursor.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+          label: cursor.toLocaleDateString('en-US', { timeZone: 'UTC', month: 'short', day: 'numeric' }),
           cases: dataMap[key] ?? 0,
         });
-        cursor.setDate(cursor.getDate() + 1);
+        cursor.setUTCDate(cursor.getUTCDate() + 1);
       }
     } else if (period === 'weekly') {
       // Advance cursor to the Monday of its ISO week
-      const startDay = cursor.getDay() || 7;
-      cursor.setDate(cursor.getDate() - startDay + 1);
+      const startDay = cursor.getUTCDay() || 7;
+      cursor.setUTCDate(cursor.getUTCDate() - startDay + 1);
 
       while (cursor <= now) {
         const key = isoWeekKey(cursor);
@@ -192,18 +186,18 @@ export const getZoneTrend = async (req, res) => {
           label: isoWeekLabel(cursor),
           cases: dataMap[key] ?? 0,
         });
-        cursor.setDate(cursor.getDate() + 7);
+        cursor.setUTCDate(cursor.getUTCDate() + 7);
       }
     } else {
       // monthly
       while (cursor <= now) {
-        const key = `${cursor.getFullYear()}-${String(cursor.getMonth() + 1).padStart(2, '0')}`;
+        const key = `${cursor.getUTCFullYear()}-${String(cursor.getUTCMonth() + 1).padStart(2, '0')}`;
         filledData.push({
           key,
-          label: cursor.toLocaleString('en-US', { month: 'short', year: 'numeric' }),
+          label: cursor.toLocaleDateString('en-US', { timeZone: 'UTC', month: 'short', year: 'numeric' }),
           cases: dataMap[key] ?? 0,
         });
-        cursor.setMonth(cursor.getMonth() + 1);
+        cursor.setUTCMonth(cursor.getUTCMonth() + 1);
       }
     }
 
