@@ -9,10 +9,12 @@ import Dashboard from './pages/Dashboard.jsx';
 import MohDashboard from './pages/MohDashboard.jsx';
 import AdminDashboard from './pages/AdminDashboard.jsx';
 import Profile from './pages/Profile.jsx';
+import ThemeInit from './components/ThemeInit.jsx';
 
 export default function App() {
   return (
     <BrowserRouter>
+      <ThemeInit />
       <Toaster position="top-right" toastOptions={{ duration: 4000, style: { fontFamily: 'Inter, sans-serif', borderRadius: '12px' } }} />
       <Routes>
         <Route path="/" element={<Home />} />

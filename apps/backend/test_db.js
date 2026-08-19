@@ -1,23 +1,27 @@
 import mongoose from 'mongoose';
 import 'dotenv/config';
 
-async function run() {
-  try {
-    await mongoose.connect(process.env.MONGO_URI, { serverSelectionTimeoutMS: 5000 });
-    const RiskPrediction = mongoose.connection.collection('riskpredictions');
-    
-    console.log("\nLatest Predictions distribution (predictedTier):");
-    const dist1 = await RiskPrediction.aggregate([{ $group: { _id: '$predictedTier', count: { $sum: 1 } } }]).toArray();
-    console.log(dist1);
+mongoose.connect(process.env.MONGO_URI || 'mongodb+srv://dengueradar_admin:F8fB2aR3Kx@dengueradar-cluster.ckv9cjs.mongodb.net/dengueradar_dev?retryWrites=true&w=majority')
+  .then(async () => {
+    const DengueCase = mongoose.model('DengueCase', new mongoose.Schema({
+      district: String,
+      mohZone: String,
+      date: Date,
+      caseCount: Number
+    }, { collection: 'denguecases' }));
 
-    console.log("\nLatest Predictions distribution (riskLevel):");
-    const dist2 = await RiskPrediction.aggregate([{ $group: { _id: '$riskLevel', count: { $sum: 1 } } }]).toArray();
-    console.log(dist2);
+    const now = new Date('2026-05-11T00:00:00.000Z');
+    let since = new Date(now);
+    since.setDate(since.getDate() - 30);
+
+    const docs = await DengueCase.find({ district: 'Colombo', mohZone: 'Homagama', date: { $gte: since, $lte: now } }).sort({ date: -1 });
+    console.log(`Found ${docs.length} cases for Colombo/Homagama in the last 30 days.`);
+    
+    // Check weekly window
+    since = new Date(now);
+    since.setDate(since.getDate() - 84);
+    const weeklyDocs = await DengueCase.find({ district: 'Colombo', mohZone: 'Homagama', date: { $gte: since, $lte: now } });
+    console.log(`Found ${weeklyDocs.length} cases for Colombo/Homagama in the last 12 weeks.`);
 
     process.exit(0);
-  } catch(e) {
-    console.error("Error:", e.message);
-    process.exit(1);
-  }
-}
-run();
+  });

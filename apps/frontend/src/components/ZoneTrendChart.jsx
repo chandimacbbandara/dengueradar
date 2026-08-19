@@ -23,7 +23,10 @@ const RISK_LABEL = { high: '🔴 High Risk', moderate: '🟡 Moderate Risk', low
 /* ─── Custom tooltip ────────────────────────────────────────────── */
 function CryptoTooltip({ active, payload, label }) {
   if (!active || !payload?.length) return null;
-  const data = payload[0];
+  
+  // Pick the valid data point (if cases is null, use predictedCases)
+  const data = payload.find(p => p.value != null) || payload[0];
+  
   const isPredicted = data.dataKey === 'predictedCases';
   const cases = data.value ?? 0;
   const riskLevel = data.payload?.riskLevel;

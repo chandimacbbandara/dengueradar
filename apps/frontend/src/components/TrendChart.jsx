@@ -35,7 +35,7 @@ export default function TrendChart({ data }) {
   const renderData = chartData.length > 0 ? chartData : defaultData;
 
   return (
-    <div style={{ width: '100%', height: '400px' }}>
+    <div style={{ width: '100%', height: '100%' }}>
       <ResponsiveContainer>
         <AreaChart data={renderData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
           <defs>
@@ -50,8 +50,8 @@ export default function TrendChart({ data }) {
           </defs>
           <XAxis dataKey="name" tick={{fontSize: 12, fill: '#94A3B8'}} axisLine={false} tickLine={false} />
           <YAxis tick={{fontSize: 12, fill: '#94A3B8'}} axisLine={false} tickLine={false} />
-          <Tooltip 
-            contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 16px rgba(0,0,0,0.1)' }}
+          <Tooltip
+            contentStyle={{ borderRadius: '12px', border: '1px solid var(--color-border-light)', background: 'var(--color-bg-card)', color: 'var(--color-text-primary)', boxShadow: '0 4px 16px rgba(0,0,0,0.1)' }}
           />
           <Legend verticalAlign="top" height={36} wrapperStyle={{ fontSize: '14px', fontWeight: 500 }} />
           <Area 
