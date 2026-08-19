@@ -71,9 +71,19 @@ export const getZoneTrend = async (req, res) => {
       ? req.query.period
       : 'monthly';
 
-    // Find the latest historical case to anchor the "now" date
-    const latestCase = await DengueCase.findOne().sort({ date: -1 }).select('date');
+    // Find the latest historical case for this zone/district to anchor the "now" date
+    const latestCase = await DengueCase.findOne({
+      district,
+      ...(mohZone ? { mohZone } : {}),
+    }).sort({ date: -1 }).select('date');
     const now = latestCase ? new Date(latestCase.date) : new Date();
+    
+    console.log('[getZoneTrend] DEBUG:', {
+      latestCase,
+      now: now.toISOString(),
+      district,
+      mohZone,
+    });
 
     /* ── Date window ── */
     let since;
