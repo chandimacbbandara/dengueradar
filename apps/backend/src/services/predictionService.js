@@ -307,6 +307,22 @@ export async function runMLPredictionsAndAlerts() {
     }
 
     // 6. Persist predictions + trigger escalation alerts
+    
+    // Fetch the most recent prediction for ALL zones in one query to avoid 332 separate network calls
+    const prevPreds = await RiskPrediction.aggregate([
+      { $sort: { predictedFor: -1 } },
+      { $group: {
+          _id: { district: "$district", mohZone: "$mohZone" },
+          riskLevel: { $first: "$riskLevel" }
+      }}
+    ]);
+    const prevMap = {};
+    for (const p of prevPreds) {
+      prevMap[`${p._id.district}_${p._id.mohZone}`] = p.riskLevel;
+    }
+
+    const bulkOps = [];
+    
     for (let i = 0; i < predictions.length; i++) {
       const pred = predictions[i];
       const meta = payloadMeta[i];
@@ -315,42 +331,45 @@ export async function runMLPredictionsAndAlerts() {
       const predCases = pred.predicted_cases ?? tierToCases(pred.predicted_tier, meta.population);
 
       // Check if risk has escalated compared to the previous prediction
-      const prevPred = await RiskPrediction.findOne({
-        district: meta.rawDistrict,
-        mohZone:  meta.zone,
-      }).sort({ predictedFor: -1 }).lean();
+      const prevRiskLevel = prevMap[`${meta.rawDistrict}_${meta.zone}`];
 
-      if (isEscalated(prevPred?.riskLevel, riskLevel)) {
+      if (isEscalated(prevRiskLevel, riskLevel)) {
         await dispatchEscalationAlerts(meta.rawDistrict, meta.zone, riskLevel);
       }
 
-      // Upsert prediction document
-      await RiskPrediction.findOneAndUpdate(
-        {
-          district:     meta.rawDistrict,
-          mohZone:      meta.zone,
-          predictedFor: targetDate,
-        },
-        {
-          $set: {
-            district:       meta.rawDistrict,
-            mohZone:        meta.zone,
-            riskScore:      pred.risk_score,
-            riskLevel,
-            predictedCases: predCases,
-            predictedFor:   targetDate,
-            generatedAt:    new Date(),
-            predictedTier:  pred.predicted_tier,
-            pLow:           pred.p_low,
-            pWatch:         pred.p_watch,
-            pWarning:       pred.p_warning,
-            pAlert:         pred.p_alert,
-            alertHighConfidence: pred.alert_high_confidence,
-            modelVersion:   'v2-stacking',
-          }
-        },
-        { upsert: true }
-      );
+      // Prepare bulk operation
+      bulkOps.push({
+        updateOne: {
+          filter: {
+            district:     meta.rawDistrict,
+            mohZone:      meta.zone,
+            predictedFor: targetDate,
+          },
+          update: {
+            $set: {
+              district:       meta.rawDistrict,
+              mohZone:        meta.zone,
+              riskScore:      pred.risk_score,
+              riskLevel,
+              predictedCases: predCases,
+              predictedFor:   targetDate,
+              generatedAt:    new Date(),
+              predictedTier:  pred.predicted_tier,
+              pLow:           pred.p_low,
+              pWatch:         pred.p_watch,
+              pWarning:       pred.p_warning,
+              pAlert:         pred.p_alert,
+              alertHighConfidence: pred.alert_high_confidence,
+              modelVersion:   'v2-stacking',
+            }
+          },
+          upsert: true
+        }
+      });
+    }
+
+    if (bulkOps.length > 0) {
+      await RiskPrediction.bulkWrite(bulkOps);
     }
 
     console.log('[PredictionService] ✅ 1-week prediction pipeline completed successfully');
