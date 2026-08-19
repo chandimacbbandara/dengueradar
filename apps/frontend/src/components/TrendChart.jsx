@@ -51,7 +51,7 @@ export default function TrendChart({ data }) {
           <XAxis dataKey="name" tick={{fontSize: 12, fill: '#94A3B8'}} axisLine={false} tickLine={false} />
           <YAxis tick={{fontSize: 12, fill: '#94A3B8'}} axisLine={false} tickLine={false} />
           <Tooltip
-            contentStyle={{ borderRadius: '12px', border: '1px solid var(--color-border-light)', background: 'var(--color-bg-card)', color: 'var(--color-text-primary)', boxShadow: '0 4px 16px rgba(0,0,0,0.1)' }}
+            contentStyle={{ borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', boxShadow: '0 4px 16px rgba(0,0,0,0.1)' }}
           />
           <Legend verticalAlign="top" height={36} wrapperStyle={{ fontSize: '14px', fontWeight: 500 }} />
           <Area 

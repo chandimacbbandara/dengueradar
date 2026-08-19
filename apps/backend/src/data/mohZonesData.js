@@ -1,9 +1,4 @@
-/**
- * Generated from dengueradar_training_table.csv to perfectly match the ML dataset.
- * Total zones: 226
- */
-
-const MOH_ZONES_DATA = [
+export default [
   {
     "district": "Ampara",
     "zones": [
@@ -260,7 +255,7 @@ const MOH_ZONES_DATA = [
     ]
   },
   {
-    "district": "Monaragala",
+    "district": "Moneragala",
     "zones": [
       "Badalkumbura",
       "Bibile",
@@ -356,5 +351,3 @@ const MOH_ZONES_DATA = [
     ]
   }
 ];
-
-export default MOH_ZONES_DATA;

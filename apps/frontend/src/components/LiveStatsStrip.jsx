@@ -67,24 +67,24 @@ export default function LiveStatsStrip() {
     <div className="container" style={{ position: 'relative', top: '-40px', zIndex: 10 }}>
       <div className="radar-glass-card card" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '24px', padding: '32px' }}>
         <div className="stat-item" style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: '36px', fontWeight: 800, color: 'var(--color-primary)' }}><AnimatedCounter value={stats?.totalUsers || 0} /></div>
-          <div style={{ fontSize: '13px', color: 'var(--color-text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px', marginTop: '8px' }}>{t('stats.activeUsers')}</div>
+          <div style={{ fontSize: '36px', fontWeight: 800, color: 'var(--brand)' }}><AnimatedCounter value={stats?.totalUsers || 0} /></div>
+          <div style={{ fontSize: '13px', color: 'var(--text-3)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px', marginTop: '8px' }}>{t('stats.activeUsers')}</div>
         </div>
         <div className="stat-item" style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: '36px', fontWeight: 800, color: 'var(--color-primary)' }}><AnimatedCounter value={stats?.districtsMonitored || 25} /></div>
-          <div style={{ fontSize: '13px', color: 'var(--color-text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px', marginTop: '8px' }}>{t('stats.districtsMonitored')}</div>
+          <div style={{ fontSize: '36px', fontWeight: 800, color: 'var(--brand)' }}><AnimatedCounter value={stats?.districtsMonitored || 25} /></div>
+          <div style={{ fontSize: '13px', color: 'var(--text-3)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px', marginTop: '8px' }}>{t('stats.districtsMonitored')}</div>
         </div>
         <div className="stat-item" style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: '36px', fontWeight: 800, color: 'var(--color-risk-high)' }}><AnimatedCounter value={stats?.activeHighRiskZones || 0} /></div>
-          <div style={{ fontSize: '13px', color: 'var(--color-text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px', marginTop: '8px' }}>{t('stats.highRiskZonesToday')}</div>
+          <div style={{ fontSize: '36px', fontWeight: 800, color: 'var(--risk-high)' }}><AnimatedCounter value={stats?.activeHighRiskZones || 0} /></div>
+          <div style={{ fontSize: '13px', color: 'var(--text-3)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px', marginTop: '8px' }}>{t('stats.highRiskZonesToday')}</div>
         </div>
         <div className="stat-item" style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: '24px', fontWeight: 800, color: 'var(--color-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '54px' }}>
+          <div style={{ fontSize: '24px', fontWeight: 800, color: 'var(--brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '54px' }}>
             {t('stats.live')}
-            <span className="dot dot-high" style={{ marginLeft: '12px', animation: 'pulse 2s infinite', background: 'var(--color-primary)', boxShadow: '0 0 12px var(--color-primary)' }}></span>
+            <span className="dot dot-high" style={{ marginLeft: '12px', animation: 'pulse 2s infinite', background: 'var(--brand)', boxShadow: '0 0 12px var(--brand)' }}></span>
           </div>
-          <div style={{ fontSize: '13px', color: 'var(--color-text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px', marginTop: '8px' }}>{t('stats.systemStatus')}</div>
-          <div style={{ fontSize: '11px', color: 'var(--color-text-secondary)', marginTop: '4px' }}>{t('map.lastUpdated')}: {updatedAt}</div>
+          <div style={{ fontSize: '13px', color: 'var(--text-3)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px', marginTop: '8px' }}>{t('stats.systemStatus')}</div>
+          <div style={{ fontSize: '11px', color: 'var(--text-2)', marginTop: '4px' }}>{t('map.lastUpdated')}: {updatedAt}</div>
         </div>
       </div>
     </div>

@@ -50,7 +50,7 @@ export default function Login() {
   return (
     <div className="auth-layout">
       <div className="auth-panel-left">
-        <Link to="/" className="text-2xl font-extrabold mb-12 flex items-center gap-2" style={{ color: 'var(--color-primary)' }}>
+        <Link to="/" className="text-2xl font-extrabold mb-12 flex items-center gap-2" style={{ color: 'var(--brand)' }}>
           <Icon name="activity" /> Dengue<span>Radar</span>
         </Link>
         <h1 className="text-4xl font-extrabold mb-4">Welcome Back</h1>
@@ -98,7 +98,7 @@ export default function Login() {
                 <button 
                   type="button" 
                   onClick={() => setShowPassword(!showPassword)}
-                  style={{position: 'absolute', right: '12px', top: '12px', background: 'none', border: 'none', color: 'var(--color-text-muted)'}}
+                  style={{position: 'absolute', right: '12px', top: '12px', background: 'none', border: 'none', color: 'var(--text-3)'}}
                 >
                   {showPassword ? 'Hide' : 'Show'}
                 </button>

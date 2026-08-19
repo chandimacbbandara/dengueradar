@@ -41,7 +41,10 @@ const CACHE_TTL = 15 * 60 * 1000;
 export async function getLivePredictions(districtFilter = null) {
   try {
     if (Date.now() - liveCache.timestamp < CACHE_TTL && liveCache.predictions.length > 0) {
-      if (districtFilter) return liveCache.predictions.filter(p => p.district === districtFilter);
+      if (districtFilter) {
+        const aliasFilter = DISTRICT_ALIAS[districtFilter] || districtFilter;
+        return liveCache.predictions.filter(p => (DISTRICT_ALIAS[p.district] || p.district) === aliasFilter);
+      }
       return liveCache.predictions;
     }
 
@@ -51,7 +54,12 @@ export async function getLivePredictions(districtFilter = null) {
       { $group: { _id: '$district', maxDate: { $max: '$date' } } }
     ]);
     const districtLatestDates = {};
-    for (const d of maxDates) districtLatestDates[d._id] = new Date(d.maxDate);
+    for (const d of maxDates) {
+      const aliasDist = DISTRICT_ALIAS[d._id] ?? d._id;
+      if (!districtLatestDates[aliasDist] || new Date(d.maxDate) > districtLatestDates[aliasDist]) {
+        districtLatestDates[aliasDist] = new Date(d.maxDate);
+      }
+    }
 
     const globalLatestRecord = await DengueCase.findOne().sort({ date: -1 }).lean();
     const globalNow = globalLatestRecord ? new Date(globalLatestRecord.date) : new Date();
@@ -81,15 +89,16 @@ export async function getLivePredictions(districtFilter = null) {
 
     const casesByZone = {};
     for (const record of recentCases) {
-      if (!casesByZone[record.district]) casesByZone[record.district] = {};
-      if (!casesByZone[record.district][record.mohZone]) casesByZone[record.district][record.mohZone] = {};
+      const aliasDistrict = DISTRICT_ALIAS[record.district] ?? record.district;
+      if (!casesByZone[aliasDistrict]) casesByZone[aliasDistrict] = {};
+      if (!casesByZone[aliasDistrict][record.mohZone]) casesByZone[aliasDistrict][record.mohZone] = {};
       
       const d = new Date(record.date);
       const dayNum = d.getUTCDay() || 7;
       d.setUTCDate(d.getUTCDate() - dayNum + 1);
       const key = d.toISOString().split('T')[0];
       
-      casesByZone[record.district][record.mohZone][key] = record.caseCount ?? 0;
+      casesByZone[aliasDistrict][record.mohZone][key] = record.caseCount ?? 0;
     }
 
     function getAnchorDate(district) {
@@ -192,7 +201,8 @@ export async function getLivePredictions(districtFilter = null) {
 
     for (const [rawDistrict, zones] of Object.entries(districtZonesMap)) {
       const mlDistrictName = DISTRICT_ALIAS[rawDistrict] ?? rawDistrict;
-      const weather        = weatherMap[rawDistrict];
+      let weather = weatherMap[rawDistrict];
+      if (!weather && rawDistrict === 'Moneragala') weather = weatherMap['Monaragala'];
       if (!weather) continue;
 
       for (const zone of zones) {
@@ -264,7 +274,10 @@ export async function getLivePredictions(districtFilter = null) {
     liveCache.predictions = formattedPredictions;
     liveCache.timestamp = Date.now();
 
-    if (districtFilter) return formattedPredictions.filter(p => p.district === districtFilter);
+    if (districtFilter) {
+      const aliasFilter = DISTRICT_ALIAS[districtFilter] || districtFilter;
+      return formattedPredictions.filter(p => (DISTRICT_ALIAS[p.district] || p.district) === aliasFilter);
+    }
     return formattedPredictions;
 
   } catch (err) {

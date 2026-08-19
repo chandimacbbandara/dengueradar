@@ -13,11 +13,11 @@ export default function Dashboard() {
       <Navbar />
 
       {/* ── Page header ── */}
-      <div className="dashboard-header" style={{ background: 'var(--color-bg-subtle)' }}>
+      <div className="dashboard-header" style={{ background: 'var(--surface-2)' }}>
         <div className="container flex justify-between items-center">
           <div>
-            <h1 className="text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>Welcome back, {user?.firstName}!</h1>
-            <p className="text-muted mt-1" style={{ color: 'var(--color-text-secondary)' }}> {user?.mohZone}, {user?.district} District</p>
+            <h1 className="text-2xl font-bold" style={{ color: 'var(--text)' }}>Welcome back, {user?.firstName}!</h1>
+            <p className="text-muted mt-1" style={{ color: 'var(--text-2)' }}> {user?.mohZone}, {user?.district} District</p>
           </div>
           <Link to="/profile" className="btn btn-outline btn-sm">Edit Profile</Link>
         </div>

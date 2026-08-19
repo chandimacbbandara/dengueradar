@@ -56,70 +56,50 @@ export default function Home() {
       <section className="section">
         <div className="wrap">
           <div className="kpi-grid">
-            <div className="kpi"><div className="spectrum"></div>
-              <div className="kpi-top">
-                <div className="kpi-icon">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 22s-8-5.5-8-12a8 8 0 0116 0c0 6.5-8 12-8 12z"/></svg>
+            {topZones.slice(0, 5).map((zone, i) => {
+              const riskLevel = zone.riskLevel || 'low';
+              const riskColor = riskLevel === 'critical' ? 'crit' : riskLevel;
+              
+              return (
+                <div key={i} className="kpi">
+                  <div className="spectrum" style={{ background: `var(--risk-${riskColor})` }}></div>
+                  <div className="kpi-top">
+                    <div className="kpi-icon">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M12 22s-8-5.5-8-12a8 8 0 0116 0c0 6.5-8 12-8 12z"/>
+                      </svg>
+                    </div>
+                    <div className="kpi-trend up">Rank #{i + 1}</div>
+                  </div>
+                  <div className="kpi-value" style={{ fontSize: '22px', marginBottom: '4px', wordBreak: 'break-word', lineHeight: '1.2' }}>{zone.mohZone}</div>
+                  <div className="kpi-label">{riskLevel.toUpperCase()} RISK</div>
+                  <div style={{ marginTop: '14px', height: '4px', background: 'var(--border)', borderRadius: '2px', overflow: 'hidden' }}>
+                    <div style={{ width: `${Math.min(zone.riskScore, 100)}%`, height: '100%', background: `var(--risk-${riskColor})`, transition: 'width 1s ease-in-out' }}></div>
+                  </div>
+                  <div className="kpi-updated" style={{ marginTop: '8px' }}>RISK SCORE: {Math.round(zone.riskScore)}</div>
                 </div>
-                <div className="kpi-trend up">▲ 4.2%</div>
-              </div>
-              <div className="kpi-value">1,284</div>
-              <div className="kpi-label">Current Dengue Cases</div>
-              <svg className="spark" viewBox="0 0 100 28" preserveAspectRatio="none"><polyline points="0,20 15,18 30,15 45,17 60,10 75,12 90,4 100,6" fill="none" stroke="var(--risk-high)" strokeWidth="2"/></svg>
-              <div className="kpi-updated">UPDATED 2 MIN AGO</div>
-            </div>
+              );
+            })}
             
-            <div className="kpi"><div className="spectrum"></div>
-              <div className="kpi-top">
-                <div className="kpi-icon">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+            {/* Fill empty spots if less than 5 top zones */}
+            {topZones.length < 5 && Array.from({ length: 5 - topZones.length }).map((_, i) => (
+              <div key={`empty-${i}`} className="kpi" style={{ opacity: 0.5 }}>
+                <div className="kpi-top">
+                  <div className="kpi-icon">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <circle cx="12" cy="12" r="10"/>
+                      <line x1="12" y1="8" x2="12" y2="12"/>
+                      <line x1="12" y1="16" x2="12.01" y2="16"/>
+                    </svg>
+                  </div>
+                  <div className="kpi-trend flat">—</div>
                 </div>
-                <div className="kpi-trend up">▲ live update</div>
+                <div className="kpi-value" style={{ fontSize: '22px', color: 'var(--text-3)' }}>Safe Area</div>
+                <div className="kpi-label">LOW RISK</div>
+                <div style={{ marginTop: '14px', height: '4px', background: 'var(--border)', borderRadius: '2px' }}></div>
+                <div className="kpi-updated" style={{ marginTop: '8px' }}>—</div>
               </div>
-              <div className="kpi-value">{riskData.length > 0 ? severeCount : '...'}</div>
-              <div className="kpi-label">High-Risk Districts</div>
-              <svg className="spark" viewBox="0 0 100 28" preserveAspectRatio="none"><polyline points="0,22 20,20 40,14 60,16 80,8 100,6" fill="none" stroke="var(--risk-crit)" strokeWidth="2"/></svg>
-              <div className="kpi-updated">UPDATED LIVE</div>
-            </div>
-            
-            <div className="kpi"><div className="spectrum"></div>
-              <div className="kpi-top">
-                <div className="kpi-icon">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
-                </div>
-                <div className="kpi-trend flat">— live update</div>
-              </div>
-              <div className="kpi-value">{riskData.length > 0 ? nationalRiskLevel.toUpperCase() : '...'}</div>
-              <div className="kpi-label">National Risk Level</div>
-              <svg className="spark" viewBox="0 0 100 28" preserveAspectRatio="none"><polyline points="0,14 20,15 40,13 60,14 80,15 100,14" fill="none" stroke="var(--risk-mod)" strokeWidth="2"/></svg>
-              <div className="kpi-updated">UPDATED LIVE</div>
-            </div>
-            
-            <div className="kpi"><div className="spectrum"></div>
-              <div className="kpi-top">
-                <div className="kpi-icon">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-                </div>
-                <div className="kpi-trend up">▲ next week</div>
-              </div>
-              <div className="kpi-value">{riskData.length > 0 ? nationalRiskLevel.toUpperCase() : '...'}</div>
-              <div className="kpi-label">AI Predicted Risk</div>
-              <svg className="spark" viewBox="0 0 100 28" preserveAspectRatio="none"><polyline points="0,20 20,17 40,18 60,10 80,9 100,3" fill="none" stroke="var(--risk-high)" strokeWidth="2"/></svg>
-              <div className="kpi-updated">MODEL RUN LIVE</div>
-            </div>
-            
-            <div className="kpi"><div className="spectrum"></div>
-              <div className="kpi-top">
-                <div className="kpi-icon">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 16.2A4.5 4.5 0 0017.5 8h-1.8A7 7 0 104 14.9"/><path d="M12 12v9M9 18l3 3 3-3"/></svg>
-                </div>
-                <div className="kpi-trend up">▲ rainfall</div>
-              </div>
-              <div className="kpi-value">ELEVATED</div>
-              <div className="kpi-label">Weather Risk Factor</div>
-              <svg className="spark" viewBox="0 0 100 28" preserveAspectRatio="none"><polyline points="0,24 20,20 40,22 60,10 80,14 100,6" fill="none" stroke="var(--risk-mod)" strokeWidth="2"/></svg>
-              <div className="kpi-updated">UPDATED 12 MIN AGO</div>
-            </div>
+            ))}
           </div>
         </div>
       </section>
@@ -136,35 +116,9 @@ export default function Home() {
                 </div>
               </div>
               <div className="map-wrap" id="mapArea">
-                <div className="map-controls">
-                  <div className="glass-panel search-box">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.3-4.3"/></svg>
-                    <input placeholder="Search district…" />
-                  </div>
-                  <div className="filter-group">
-                    <div className="glass-panel">
-                      <select className="filter-select" style={{background:'none', border:'none', color:'var(--text-2)'}}>
-                        <option>All Risk Levels</option><option>Low</option><option>Moderate</option><option>High</option><option>Critical</option>
-                      </select>
-                    </div>
-                    <div className="glass-panel">
-                      <select className="filter-select" style={{background:'none', border:'none', color:'var(--text-2)'}}>
-                        <option>Prediction: 7 days</option><option>14 days</option><option>30 days</option>
-                      </select>
-                    </div>
-                  </div>
-                </div>
-                
                 {/* Embed existing React map */}
                 <SharedMapCard riskData={riskData} title="" />
 
-                <div className="map-legend glass-panel" style={{flexDirection:'column', alignItems:'flex-start', padding:'12px 14px'}}>
-                  <div style={{fontSize:'10.5px', color:'var(--text-3)', textTransform:'uppercase', letterSpacing:'.05em', marginBottom:'6px'}}>Risk Legend</div>
-                  <div className="legend-row"><span className="legend-swatch" style={{background:'var(--risk-low)'}}></span> Low Risk</div>
-                  <div className="legend-row"><span className="legend-swatch" style={{background:'var(--risk-mod)'}}></span> Moderate Risk</div>
-                  <div className="legend-row"><span className="legend-swatch" style={{background:'var(--risk-high)'}}></span> High Risk</div>
-                  <div className="legend-row"><span className="legend-swatch" style={{background:'var(--risk-crit)'}}></span> Very High Risk</div>
-                </div>
                 <div className="map-corner-actions">
                   <button className="icon-btn" title="Reset view" style={{background:'var(--glass)'}}>
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 12a9 9 0 109-9 9.75 9.75 0 00-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
@@ -179,14 +133,32 @@ export default function Home() {
                 <div className="intel-row"><span className="intel-label">National Risk</span><span className={`risk-badge ${riskBadgeClass}`}>{riskData.length > 0 ? nationalRiskLevel : '...'}</span></div>
                 <div className="intel-row"><span className="intel-label">Highest-Risk District</span><span className="intel-value">{topZones[0]?.district || '...'}</span></div>
                 <div className="intel-row"><span className="intel-label">Predicted Risk</span><span className={`risk-badge ${riskBadgeClass}`}>{riskData.length > 0 ? nationalRiskLevel : '...'}</span></div>
-                <div className="intel-row"><span className="intel-label">Prediction Horizon</span><span className="intel-value mono" style={{fontSize:'12px'}}>August 24</span></div>
+                <div className="intel-row"><span className="intel-label">Prediction Horizon</span><span className="intel-value mono" style={{fontSize:'12px'}}>{topZones.length > 0 && topZones[0]?.predictedFor ? new Date(topZones[0]?.predictedFor).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : '...'}</span></div>
                 <div style={{marginTop:'14px'}}>
                   <div style={{fontSize:'11px', color:'var(--text-3)', textTransform:'uppercase', letterSpacing:'.05em', marginBottom:'8px'}}>Contributing Factors</div>
                   <div className="factor-tags">
-                    <span className="factor-tag"><span className="arrow-up">▲</span> Rainfall</span>
-                    <span className="factor-tag"><span className="arrow-up">▲</span> Humidity</span>
-                    <span className="factor-tag"><span className="arrow-up">▲</span> Recent Cases</span>
-                    <span className="factor-tag"><span className="arrow-down">▼</span> Temperature</span>
+                    {nationalRiskLevel === 'High' ? (
+                      <>
+                        <span className="factor-tag"><span className="arrow-up">▲</span> Rainfall</span>
+                        <span className="factor-tag"><span className="arrow-up">▲</span> Humidity</span>
+                        <span className="factor-tag"><span className="arrow-up">▲</span> Recent Cases</span>
+                        <span className="factor-tag"><span className="arrow-down">▼</span> Temperature</span>
+                      </>
+                    ) : nationalRiskLevel === 'Moderate' ? (
+                      <>
+                        <span className="factor-tag"><span className="arrow-up">▲</span> Rainfall</span>
+                        <span className="factor-tag"><span className="arrow-down">▼</span> Humidity</span>
+                        <span className="factor-tag"><span className="arrow-up">▲</span> Recent Cases</span>
+                        <span className="factor-tag"><span className="arrow-down">▼</span> Temperature</span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="factor-tag"><span className="arrow-down">▼</span> Rainfall</span>
+                        <span className="factor-tag"><span className="arrow-down">▼</span> Humidity</span>
+                        <span className="factor-tag"><span className="arrow-down">▼</span> Recent Cases</span>
+                        <span className="factor-tag"><span className="arrow-up">▲</span> Temperature</span>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>

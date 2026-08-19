@@ -65,18 +65,18 @@ export default function WeatherWidget({ district }) {
         alignItems: 'center',
         justifyContent: 'center',
         padding: '20px 28px',
-        borderRight: '1px solid var(--color-border-light)',
+        borderRight: '1px solid var(--border)',
         minWidth: '130px',
-        background: 'var(--color-bg-subtle)'
+        background: 'var(--surface-2)'
       }}>
         {loading
-          ? <div className="spinner" style={{ borderTopColor: 'var(--color-primary)' }} />
+          ? <div className="spinner" style={{ borderTopColor: 'var(--brand)' }} />
           : <>
-              <div style={{ color: 'var(--color-primary)' }}>
+              <div style={{ color: 'var(--brand)' }}>
                 <Icon name={icon} size={36} />
               </div>
-              <span style={{ fontSize: '28px', fontWeight: 800, color: 'var(--color-text-primary)', lineHeight: 1.2, marginTop: '4px' }}>{temp}</span>
-              <span style={{ fontSize: '11px', color: 'var(--color-text-secondary)', marginTop: '2px' }}>{desc}</span>
+              <span style={{ fontSize: '28px', fontWeight: 800, color: 'var(--text)', lineHeight: 1.2, marginTop: '4px' }}>{temp}</span>
+              <span style={{ fontSize: '11px', color: 'var(--text-2)', marginTop: '2px' }}>{desc}</span>
             </>
         }
       </div>
@@ -99,17 +99,17 @@ export default function WeatherWidget({ district }) {
             display: 'flex', flexDirection: 'column',
             alignItems: 'flex-start', justifyContent: 'center',
             padding: '14px 20px',
-            borderRight: '1px solid var(--color-border-light)',
+            borderRight: '1px solid var(--border)',
             flex: '1 0 auto',
             minWidth: '100px',
           }}>
             {loading
-              ? <div style={{ width: 40, height: 12, borderRadius: 6, background: 'var(--color-border)' }} />
+              ? <div style={{ width: 40, height: 12, borderRadius: 6, background: 'var(--border)' }} />
               : <>
-                  <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', color: 'var(--color-text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '4px' }}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', color: 'var(--text-3)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '4px' }}>
                     <Icon name={icName} size={14} /> {label}
                   </span>
-                  <span style={{ fontSize: '15px', fontWeight: 700, color: 'var(--color-text-primary)' }}>{value}</span>
+                  <span style={{ fontSize: '15px', fontWeight: 700, color: 'var(--text)' }}>{value}</span>
                 </>
             }
           </div>
@@ -121,15 +121,15 @@ export default function WeatherWidget({ district }) {
         display: 'flex', flexDirection: 'column', alignItems: 'flex-end',
         justifyContent: 'center', padding: '14px 20px', whiteSpace: 'nowrap',
       }}>
-        <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: 'var(--color-primary)', fontWeight: 700 }}>
+        <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: 'var(--brand)', fontWeight: 700 }}>
           <Icon name="map-pin" size={14} /> {district}
         </span>
         {updatedAt && (
-          <span style={{ fontSize: '10px', color: 'var(--color-text-secondary)', marginTop: '4px' }}>
+          <span style={{ fontSize: '10px', color: 'var(--text-2)', marginTop: '4px' }}>
             Updated {updatedAt}
           </span>
         )}
-        <span style={{ fontSize: '10px', color: 'var(--color-text-muted)', marginTop: '2px' }}>OpenWeatherMap</span>
+        <span style={{ fontSize: '10px', color: 'var(--text-3)', marginTop: '2px' }}>OpenWeatherMap</span>
       </div>
     </div>
   );
