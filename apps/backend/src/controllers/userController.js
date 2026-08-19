@@ -71,11 +71,30 @@ export const getZoneTrend = async (req, res) => {
       ? req.query.period
       : 'monthly';
 
+    const MOH_ZONE_ALIASES = {
+      'Bibila': 'Bibile',
+      'Monaragala': 'Moneragala',
+      'Bope-Poddala': 'Bope(poddala)',
+      'PS Matara': 'Mc matara'
+    };
+    const searchZone = MOH_ZONE_ALIASES[mohZone] || mohZone;
+
     // Find the latest historical case for this zone/district to anchor the "now" date
-    const latestCase = await DengueCase.findOne({
+    let latestCase = await DengueCase.findOne({
       district,
-      ...(mohZone ? { mohZone } : {}),
+      ...(mohZone ? { mohZone: { $regex: new RegExp(searchZone.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i') } } : {}),
     }).sort({ date: -1 }).select('date');
+    
+    // Fallback 1: District's latest case
+    if (!latestCase) {
+      latestCase = await DengueCase.findOne({ district }).sort({ date: -1 }).select('date');
+    }
+    
+    // Fallback 2: Global latest case
+    if (!latestCase) {
+      latestCase = await DengueCase.findOne().sort({ date: -1 }).select('date');
+    }
+
     const now = latestCase ? new Date(latestCase.date) : new Date();
 
     /* ── Date window ── */
@@ -95,7 +114,12 @@ export const getZoneTrend = async (req, res) => {
     const matchStage = {
       district,
       date: { $gte: since },
-      ...(mohZone ? { $or: [{ mohZone }, { mohZone: { $exists: false } }] } : {}),
+      ...(mohZone ? { 
+        $or: [
+          { mohZone: { $regex: new RegExp(searchZone.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i') } }, 
+          { mohZone: { $exists: false } }
+        ] 
+      } : {}),
     };
 
     /* ── Aggregation pipeline per period ── */
@@ -222,56 +246,48 @@ export const getZoneTrend = async (req, res) => {
 
     const futurePredictions = allFuturePredictions;
 
-    const predictedTrendMap = {};
-    if (futurePredictions.length > 0) {
-      const lastPoint = filledData.length > 0 ? filledData[filledData.length - 1] : null;
-      if (lastPoint) {
-        predictedTrendMap[lastPoint.key] = {
-          key: lastPoint.key,
-          label: lastPoint.label,
-          cases: null,
-          predictedCases: lastPoint.cases,
-          count: 1
-        };
-      }
+    if (futurePredictions.length > 0 && filledData.length > 0) {
+      // Connect the prediction line to the last historical point
+      filledData[filledData.length - 1].predictedCases = filledData[filledData.length - 1].cases;
+    }
 
+    if (futurePredictions.length > 0) {
       for (const pred of futurePredictions) {
-        // Shift prediction date to logically follow the latest historical data
-        const shiftedDate = new Date(now);
-        shiftedDate.setDate(shiftedDate.getDate() + 7);
+        let targetDate = pred.predictedFor ? new Date(pred.predictedFor) : new Date(now);
+        
+        // Ensure the prediction date is strictly in the future
+        if (targetDate <= now) {
+          targetDate = new Date(now);
+          targetDate.setDate(targetDate.getDate() + 7);
+        }
 
         let key, label;
         if (period === 'weekly') {
-          key = isoWeekKey(shiftedDate);
-          label = isoWeekLabel(shiftedDate);
+          key = isoWeekKey(targetDate);
+          label = isoWeekLabel(targetDate);
         } else if (period === 'monthly') {
-          key = `${shiftedDate.getFullYear()}-${String(shiftedDate.getMonth() + 1).padStart(2, '0')}`;
-          label = shiftedDate.toLocaleString('en-US', { month: 'short', year: 'numeric' });
+          key = `${targetDate.getFullYear()}-${String(targetDate.getMonth() + 1).padStart(2, '0')}`;
+          label = targetDate.toLocaleString('en-US', { month: 'short', year: 'numeric' });
         } else {
-          key = shiftedDate.toISOString().slice(0, 10);
-          label = shiftedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+          key = targetDate.toISOString().slice(0, 10);
+          label = targetDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
         }
         
-        if (!predictedTrendMap[key]) {
-          predictedTrendMap[key] = { key, label, cases: null, predictedCases: 0, count: 0, riskLevel: pred.riskLevel };
+        let existing = filledData.find(d => d.key === key);
+        if (!existing) {
+          existing = { key, label, cases: null, predictedCases: 0, riskLevel: pred.riskLevel };
+          filledData.push(existing);
         }
-        predictedTrendMap[key].predictedCases += (pred.predictedCases || 0);
-        predictedTrendMap[key].count += 1;
-        // update to the highest risk level
-        if (pred.riskLevel === 'high' || (pred.riskLevel === 'moderate' && predictedTrendMap[key].riskLevel !== 'high')) {
-          predictedTrendMap[key].riskLevel = pred.riskLevel;
+        
+        existing.predictedCases = (existing.predictedCases || 0) + (pred.predictedCases || 0);
+        
+        if (pred.riskLevel === 'high' || (pred.riskLevel === 'moderate' && existing.riskLevel !== 'high')) {
+          existing.riskLevel = pred.riskLevel;
         }
       }
     }
     
-    // For weekly/daily we didn't do sums usually, but this generic approach works.
-    const predictedTrend = Object.values(predictedTrendMap).map(pt => ({
-      key: pt.key,
-      label: pt.label,
-      cases: pt.cases,
-      predictedCases: pt.predictedCases,
-      riskLevel: pt.riskLevel
-    }));
+    const predictedTrend = []; // Send empty since we merged everything into filledData
 
     res.json({
       success: true,

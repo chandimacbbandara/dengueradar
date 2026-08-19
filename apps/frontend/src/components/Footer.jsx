@@ -1,56 +1,51 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import LanguageSwitcher from './LanguageSwitcher.jsx';
 
 export default function Footer() {
   const { t } = useTranslation();
 
   return (
-    <footer className="footer">
-      <div className="footer-inner">
-        <div className="footer-top">
-          <div>
-            <div className="footer-logo" style={{ display: 'flex', alignItems: 'center' }}>
-              <img src="/logo.png" alt="Logo" style={{ height: '32px', marginRight: '8px' }} />
-              Dengue<span>Radar</span>
+    <footer>
+      <div className="wrap footer-inner">
+        <div>
+          <Link to="/" className="brand">
+            <svg className="brand-mark" viewBox="0 0 40 40" fill="none">
+              <circle cx="20" cy="20" r="19" stroke="var(--brand)" strokeWidth="1.4" opacity="0.35"/>
+              <circle cx="20" cy="20" r="13" stroke="var(--brand)" strokeWidth="1.4" opacity="0.55"/>
+              <circle cx="20" cy="20" r="3.4" fill="var(--brand)"/>
+              <path d="M20 20 L20 4" stroke="var(--brand)" strokeWidth="1.6" strokeLinecap="round"/>
+              <path d="M20 20 L31 11" stroke="var(--brand)" strokeWidth="1.6" strokeLinecap="round" opacity="0.6"/>
+            </svg>
+            <div>
+              <div className="brand-name">DengueRadar</div>
+              <div className="brand-sub">Sri Lanka · Live</div>
             </div>
-            <p className="footer-tagline" style={{color: '#94A3B8'}}>
-              {t('footer.tagline')}
-            </p>
+          </Link>
+          <div className="l" style={{marginTop: '14px', maxWidth: '280px'}}>
+            {t('footer.tagline')}
           </div>
-          <div className="footer-col">
-            <h4>{t('footer.quickLinks')}</h4>
-            <ul>
-              <li><a href="#home">{t('nav.home')}</a></li>
-              <li><a href="#map">{t('nav.riskMap')}</a></li>
-              <li><Link to="/login">{t('nav.login')}</Link></li>
-            </ul>
-          </div>
-          <div className="footer-col">
-            <h4>Resources</h4>
-            <ul>
-              <li><a href="#">Prevention Guide</a></li>
-              <li><Link to="/signup/moh-officer">MOH Portal</Link></li>
-              <li><a href="#">API Documentation</a></li>
-            </ul>
-          </div>
-          <div className="footer-col">
-            <h4>{t('footer.contact')}</h4>
-            <ul>
-              <li><a href="mailto:support@dengueradar.lk">support@dengueradar.lk</a></li>
-              <li><a href="#">Emergency: 1999</a></li>
-            </ul>
+          <div className="l" style={{marginTop: '8px', opacity: 0.7}}>
+            &copy; {new Date().getFullYear()} DengueRadar Sri Lanka. All rights reserved.
           </div>
         </div>
-        <div className="footer-bottom">
-          <p>&copy; {new Date().getFullYear()} DengueRadar Sri Lanka. {t('footer.rights')}</p>
-          <div className="flex gap-4 items-center">
-            <LanguageSwitcher />
-            <span style={{color: 'rgba(255,255,255,0.2)'}}>|</span>
-            <a href="#">Privacy Policy</a>
-            <a href="#">Terms of Service</a>
-          </div>
+        <div className="footer-links" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <div style={{fontWeight: 600, color: 'var(--text)', marginBottom: '4px'}}>Quick Links</div>
+          <Link to="/">Overview</Link>
+          <a href="#map">Risk Map</a>
+          <Link to="/login">Login</Link>
+        </div>
+        <div className="footer-links" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <div style={{fontWeight: 600, color: 'var(--text)', marginBottom: '4px'}}>Resources</div>
+          <a href="#">Prevention Guide</a>
+          <Link to="/signup/moh-officer">MOH Portal</Link>
+          <a href="#">API Documentation</a>
+        </div>
+        <div className="footer-links" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <div style={{fontWeight: 600, color: 'var(--text)', marginBottom: '4px'}}>Legal</div>
+          <a href="#">Privacy Policy</a>
+          <a href="#">Terms of Service</a>
+          <a href="mailto:support@dengueradar.lk">Contact Support</a>
         </div>
       </div>
     </footer>

@@ -35,7 +35,7 @@ export default function TrendChart({ data }) {
   const renderData = chartData.length > 0 ? chartData : defaultData;
 
   return (
-    <div style={{ width: '100%', height: '400px' }}>
+    <div style={{ width: '100%', height: '100%' }}>
       <ResponsiveContainer>
         <AreaChart data={renderData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
           <defs>

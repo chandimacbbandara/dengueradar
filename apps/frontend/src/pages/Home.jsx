@@ -1,58 +1,15 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
 import Navbar from '../components/Navbar.jsx';
 import Footer from '../components/Footer.jsx';
-import LiveStatsStrip from '../components/LiveStatsStrip.jsx';
 import SharedMapCard from '../components/SharedMapCard.jsx';
 import TrendChart from '../components/TrendChart.jsx';
-import LiveTicker from '../components/LiveTicker.jsx';
-import Icon from '../components/Icon.jsx';
 import { publicAPI } from '../services/api.js';
-
-function TopRiskCards({ topZones }) {
-  if (!topZones || topZones.length === 0) return null;
-
-  return (
-    <section className="section" style={{ paddingTop: '20px', paddingBottom: '40px' }}>
-      <div className="container">
-        <h3 style={{ color: 'var(--color-text-primary)', fontSize: '20px', fontWeight: 600, marginBottom: '24px' }}>
-          Top High-Risk Zones Right Now
-        </h3>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px' }}>
-          {topZones.map((zone, idx) => (
-            <div key={idx} className="card" style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: '18px', fontWeight: 700, color: 'var(--color-text-primary)' }}>{zone.mohZone}</span>
-                <span style={{ padding: '4px 8px', borderRadius: '4px', background: 'var(--color-risk-high-bg)', color: 'var(--color-risk-high)', fontSize: '12px', fontWeight: 700 }}>
-                  HIGH RISK
-                </span>
-              </div>
-              <div style={{ fontSize: '14px', color: 'var(--color-text-muted)' }}>{zone.district} District</div>
-              
-              <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid var(--color-border-light)', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                <div>
-                  <div style={{ fontSize: '11px', color: 'var(--color-text-secondary)', textTransform: 'uppercase', letterSpacing: '1px' }}>AI Risk Score</div>
-                  <div style={{ fontSize: '24px', fontWeight: 700, color: 'var(--color-text-primary)' }}>{Math.round(zone.riskScore)}<span style={{fontSize:'14px', color:'var(--color-text-muted)'}}>/100</span></div>
-                </div>
-                <div>
-                  <div style={{ fontSize: '11px', color: 'var(--color-text-secondary)', textTransform: 'uppercase', letterSpacing: '1px' }}>Forecast</div>
-                  <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--color-primary)' }}>Escalating</div>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
 
 export default function Home() {
   const [riskData, setRiskData] = useState([]);
   const [trendData, setTrendData] = useState(null);
   const [topZones, setTopZones] = useState([]);
-  const { t } = useTranslation();
 
   useEffect(() => {
     publicAPI.getTopZones()
@@ -69,129 +26,241 @@ export default function Home() {
   }, []);
 
   return (
-    <div style={{ background: 'var(--color-bg)', color: 'var(--color-text-primary)' }}>
+    <>
       <Navbar />
-      <LiveTicker riskData={riskData} />
-      
-      {/* Hero Section */}
-      <section id="home" className="hero">
-        <div className="hero-inner" style={{ marginBottom: '40px' }}>
-          <div className="hero-content">
-            <div className="hero-tag animate-fadeInUp">
-              <span className="dot dot-high animate-pulse" style={{ marginRight: '8px' }}></span> Live AI Monitoring Active
-            </div>
-            <h1 className="hero-title animate-fadeInUp" style={{animationDelay: '0.1s'}} dangerouslySetInnerHTML={{ __html: t('hero.title') }}></h1>
-            <p className="hero-subtitle animate-fadeInUp" style={{animationDelay: '0.2s'}}>
-              {t('hero.subtitle')}
-            </p>
-            <div className="hero-actions animate-fadeInUp" style={{animationDelay: '0.3s'}}>
-              <a href="#map" className="btn btn-primary btn-lg">{t('hero.cta')} &rarr;</a>
-              <Link to="/signup/general" className="btn btn-outline btn-lg">{t('hero.ctaSecondary')}</Link>
-            </div>
-          </div>
-          <div className="hero-graphic animate-fadeIn">
-            <div style={{ width: '100%', maxWidth: '460px' }}>
-              <SharedMapCard riskData={riskData} title={t('map.title')} />
-            </div>
-          </div>
-        </div>
 
-        {/* Stats Strip Integrated directly into Hero bottom */}
-        <div className="animate-fadeInUp" style={{animationDelay: '0.4s'}}>
-          <LiveStatsStrip />
+      <section className="hero" id="home">
+        <div className="wrap">
+          <div className="eyebrow"><span className="pulse"></span> SYSTEM ONLINE</div>
+          <h1 className="display">Dengue Intelligence Center</h1>
+          <p className="sub">Real-time dengue risk monitoring and AI-powered early warning for Sri Lanka — built on live case reports, weather telemetry, and district-level forecasting.</p>
+          <div className="status-row">
+            <div className="status-chip"><span className="dot"></span> Live Data <b>&nbsp;Updated just now</b></div>
+            <div className="status-chip">Prediction Model <b>&nbsp;v2.3 · Updated 6h ago</b></div>
+            <div className="status-chip">Weather Feed <b>&nbsp;Connected</b></div>
+            <div className="status-chip">Coverage <b>&nbsp;25 / 25 Districts</b></div>
+          </div>
         </div>
       </section>
 
-      {/* Dynamic Top High-Risk Zones */}
-      <TopRiskCards topZones={topZones} />
-
-      {/* Map Section */}
-      <section id="map" className="map-section section">
-        <div className="container">
-          <div className="text-center mb-8">
-            <h2 className="section-label">Live Monitoring</h2>
-            <h3 className="section-title">Live District Risk Map</h3>
-            <p className="section-subtitle" style={{margin:'0 auto'}}>
-              Our AI models analyze weather data, historical cases, and population density to predict dengue outbreaks across Sri Lanka.
-            </p>
+      <section className="section">
+        <div className="wrap">
+          <div className="kpi-grid">
+            <div className="kpi"><div className="spectrum"></div>
+              <div className="kpi-top">
+                <div className="kpi-icon">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 22s-8-5.5-8-12a8 8 0 0116 0c0 6.5-8 12-8 12z"/></svg>
+                </div>
+                <div className="kpi-trend up">▲ 4.2%</div>
+              </div>
+              <div className="kpi-value">1,284</div>
+              <div className="kpi-label">Current Dengue Cases</div>
+              <svg className="spark" viewBox="0 0 100 28" preserveAspectRatio="none"><polyline points="0,20 15,18 30,15 45,17 60,10 75,12 90,4 100,6" fill="none" stroke="var(--risk-high)" strokeWidth="2"/></svg>
+              <div className="kpi-updated">UPDATED 2 MIN AGO</div>
+            </div>
+            
+            <div className="kpi"><div className="spectrum"></div>
+              <div className="kpi-top">
+                <div className="kpi-icon">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+                </div>
+                <div className="kpi-trend up">▲ 2 districts</div>
+              </div>
+              <div className="kpi-value">{topZones.length || 6}</div>
+              <div className="kpi-label">High-Risk Districts</div>
+              <svg className="spark" viewBox="0 0 100 28" preserveAspectRatio="none"><polyline points="0,22 20,20 40,14 60,16 80,8 100,6" fill="none" stroke="var(--risk-crit)" strokeWidth="2"/></svg>
+              <div className="kpi-updated">UPDATED 6 MIN AGO</div>
+            </div>
+            
+            <div className="kpi"><div className="spectrum"></div>
+              <div className="kpi-top">
+                <div className="kpi-icon">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+                </div>
+                <div className="kpi-trend flat">— stable</div>
+              </div>
+              <div className="kpi-value">MODERATE</div>
+              <div className="kpi-label">National Risk Level</div>
+              <svg className="spark" viewBox="0 0 100 28" preserveAspectRatio="none"><polyline points="0,14 20,15 40,13 60,14 80,15 100,14" fill="none" stroke="var(--risk-mod)" strokeWidth="2"/></svg>
+              <div className="kpi-updated">UPDATED 6 MIN AGO</div>
+            </div>
+            
+            <div className="kpi"><div className="spectrum"></div>
+              <div className="kpi-top">
+                <div className="kpi-icon">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                </div>
+                <div className="kpi-trend up">▲ next 14d</div>
+              </div>
+              <div className="kpi-value">HIGH</div>
+              <div className="kpi-label">AI Predicted Risk</div>
+              <svg className="spark" viewBox="0 0 100 28" preserveAspectRatio="none"><polyline points="0,20 20,17 40,18 60,10 80,9 100,3" fill="none" stroke="var(--risk-high)" strokeWidth="2"/></svg>
+              <div className="kpi-updated">MODEL RUN 6H AGO</div>
+            </div>
+            
+            <div className="kpi"><div className="spectrum"></div>
+              <div className="kpi-top">
+                <div className="kpi-icon">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 16.2A4.5 4.5 0 0017.5 8h-1.8A7 7 0 104 14.9"/><path d="M12 12v9M9 18l3 3 3-3"/></svg>
+                </div>
+                <div className="kpi-trend up">▲ rainfall</div>
+              </div>
+              <div className="kpi-value">ELEVATED</div>
+              <div className="kpi-label">Weather Risk Factor</div>
+              <svg className="spark" viewBox="0 0 100 28" preserveAspectRatio="none"><polyline points="0,24 20,20 40,22 60,10 80,14 100,6" fill="none" stroke="var(--risk-mod)" strokeWidth="2"/></svg>
+              <div className="kpi-updated">UPDATED 12 MIN AGO</div>
+            </div>
           </div>
-          <SharedMapCard riskData={riskData} title={t('map.title')} />
         </div>
       </section>
 
-      {/* Trend Section */}
-      <section id="trends" className="trend-section section">
-        <div className="container">
-          <div className="text-center mb-8">
-            <h2 className="section-label">Forecast</h2>
-            <h3 className="section-title">National Dengue Trend</h3>
-            <p className="section-subtitle" style={{margin:'0 auto'}}>
-              View historical case counts alongside our AI-predicted risk trends for the upcoming weeks.
-            </p>
+      <section className="section" id="map">
+        <div className="wrap">
+          <div className="main-grid">
+            <div className="panel">
+              <div className="panel-head">
+                <h3>National Dengue Risk Map</h3>
+                <div className="section-actions">
+                  <button className="btn">Fullscreen</button>
+                  <button className="btn primary">Refresh</button>
+                </div>
+              </div>
+              <div className="map-wrap" id="mapArea">
+                <div className="map-controls">
+                  <div className="glass-panel search-box">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.3-4.3"/></svg>
+                    <input placeholder="Search district…" />
+                  </div>
+                  <div className="filter-group">
+                    <div className="glass-panel">
+                      <select className="filter-select" style={{background:'none', border:'none', color:'var(--text-2)'}}>
+                        <option>All Risk Levels</option><option>Low</option><option>Moderate</option><option>High</option><option>Critical</option>
+                      </select>
+                    </div>
+                    <div className="glass-panel">
+                      <select className="filter-select" style={{background:'none', border:'none', color:'var(--text-2)'}}>
+                        <option>Prediction: 7 days</option><option>14 days</option><option>30 days</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Embed existing React map */}
+                <SharedMapCard riskData={riskData} title="" />
+
+                <div className="map-legend glass-panel" style={{flexDirection:'column', alignItems:'flex-start', padding:'12px 14px'}}>
+                  <div style={{fontSize:'10.5px', color:'var(--text-3)', textTransform:'uppercase', letterSpacing:'.05em', marginBottom:'6px'}}>Risk Legend</div>
+                  <div className="legend-row"><span className="legend-swatch" style={{background:'var(--risk-low)'}}></span> Low Risk</div>
+                  <div className="legend-row"><span className="legend-swatch" style={{background:'var(--risk-mod)'}}></span> Moderate Risk</div>
+                  <div className="legend-row"><span className="legend-swatch" style={{background:'var(--risk-high)'}}></span> High Risk</div>
+                  <div className="legend-row"><span className="legend-swatch" style={{background:'var(--risk-crit)'}}></span> Very High Risk</div>
+                </div>
+                <div className="map-corner-actions">
+                  <button className="icon-btn" title="Reset view" style={{background:'var(--glass)'}}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 12a9 9 0 109-9 9.75 9.75 0 00-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className="panel">
+              <div className="panel-head"><h3>AI Risk Intelligence</h3><span className="risk-badge moderate">Confidence 82%</span></div>
+              <div className="panel-body">
+                <div className="intel-row"><span className="intel-label">National Risk</span><span className="risk-badge moderate">Moderate</span></div>
+                <div className="intel-row"><span className="intel-label">Highest-Risk District</span><span className="intel-value">{topZones[0]?.district || 'Colombo'}</span></div>
+                <div className="intel-row"><span className="intel-label">Predicted Risk (14d)</span><span className="risk-badge high">High</span></div>
+                <div className="intel-row"><span className="intel-label">Prediction Horizon</span><span className="intel-value mono" style={{fontSize:'12px'}}>14 days</span></div>
+                <div style={{marginTop:'14px'}}>
+                  <div style={{fontSize:'11px', color:'var(--text-3)', textTransform:'uppercase', letterSpacing:'.05em', marginBottom:'8px'}}>Contributing Factors</div>
+                  <div className="factor-tags">
+                    <span className="factor-tag"><span className="arrow-up">▲</span> Rainfall</span>
+                    <span className="factor-tag"><span className="arrow-up">▲</span> Humidity</span>
+                    <span className="factor-tag"><span className="arrow-up">▲</span> Recent Cases</span>
+                    <span className="factor-tag"><span className="arrow-down">▼</span> Temperature</span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-          <div className="card p-6">
+        </div>
+      </section>
+
+      <section className="section" id="forecast">
+        <div className="wrap">
+          <div className="section-head">
+            <div><h2>Dengue Risk Forecast</h2><div className="desc">Historical cases vs. AI-forecasted risk — 14-day horizon</div></div>
+            <div className="section-actions"><button className="btn">Export</button></div>
+          </div>
+          <div className="panel"><div className="panel-body"><div className="chart-box">
             <TrendChart data={trendData} />
+          </div></div></div>
+        </div>
+      </section>
+
+      <section className="section" id="weather">
+        <div className="wrap">
+          <div className="two-col">
+            <div className="panel">
+              <div className="panel-head"><h3>Weather Intelligence</h3><span className="mono" style={{fontSize:'10.5px', color:'var(--text-3)'}}>UPDATED 12 MIN AGO</span></div>
+              <div className="panel-body">
+                <div className="weather-hero">
+                  <div><div className="weather-loc">Colombo</div><div className="weather-temp">28°C</div></div>
+                  <svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="var(--brand)" strokeWidth="1.6"><path d="M8 19a5 5 0 01-1-9.9A6 6 0 0118 8a4.5 4.5 0 011 8.9"/><path d="M8 19h9"/></svg>
+                </div>
+                <div className="weather-stats">
+                  <div className="weather-stat"><div className="v">82%</div><div className="l">Humidity</div></div>
+                  <div className="weather-stat"><div className="v">14mm</div><div className="l">Rainfall</div></div>
+                  <div className="weather-stat"><div className="v">11km/h</div><div className="l">Wind</div></div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="panel" id="alerts">
+              <div className="panel-head"><h3>Alert Center</h3><span className="risk-badge high">3 Active</span></div>
+              <div className="panel-body">
+                <div className="alert"><span className="alert-dot" style={{background:'var(--risk-crit)'}}></span>
+                  <div><div className="alert-title">High-risk district detected</div><div className="alert-meta">Colombo · 18 min ago</div><div className="alert-desc">Case density crossed the high-risk threshold this week.</div></div>
+                </div>
+                <div className="alert"><span className="alert-dot" style={{background:'var(--risk-high)'}}></span>
+                  <div><div className="alert-title">Risk increasing</div><div className="alert-meta">Gampaha · 1h ago</div><div className="alert-desc">Predicted risk moved from Moderate to High over 14 days.</div></div>
+                </div>
+                <div className="alert"><span className="alert-dot" style={{background:'var(--risk-mod)'}}></span>
+                  <div><div className="alert-title">Heavy rainfall conditions</div><div className="alert-meta">Kalutara · 3h ago</div><div className="alert-desc">Rainfall 40% above seasonal average, breeding risk elevated.</div></div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* How it works */}
-      <section id="how" className="how-section section">
-        <div className="container">
-          <div className="text-center">
-            <h2 className="section-label">Process</h2>
-            <h3 className="section-title">How DengueRadar Works</h3>
-          </div>
-          <div className="steps-grid">
-            <div className="step-card">
-              <div className="step-number">1</div>
-              <div className="step-icon" style={{ color: 'var(--color-primary)' }}><Icon name="cloud-rain" size={32} /></div>
-              <h4 className="step-title">Data Ingestion</h4>
-              <p className="step-desc">We pull real-time weather and clinical data for all 25 districts.</p>
+      <section className="section">
+        <div className="wrap">
+          <div className="two-col">
+            <div className="panel">
+              <div className="panel-head"><h3>What's Changing?</h3></div>
+              <div className="panel-body">
+                <div className="change-list">
+                  <div className="change-item"><span className="bullet">▲</span> Risk increased in 2 districts over the past week.</div>
+                  <div className="change-item"><span className="bullet">▲</span> Rainfall increased sharply in the Western province.</div>
+                  <div className="change-item"><span className="bullet">▼</span> National dengue cases decreased slightly week-over-week.</div>
+                  <div className="change-item"><span className="bullet">▲</span> Forecast indicates increasing risk over the next 14 days.</div>
+                </div>
+              </div>
             </div>
-            <div className="step-card">
-              <div className="step-number">2</div>
-              <div className="step-icon" style={{ color: 'var(--color-primary)' }}><Icon name="cpu" size={32} /></div>
-              <h4 className="step-title">AI Analysis</h4>
-              <p className="step-desc">Our XGBoost models process the data to detect hidden risk patterns.</p>
-            </div>
-            <div className="step-card">
-              <div className="step-number">3</div>
-              <div className="step-icon" style={{ color: 'var(--color-risk-moderate)' }}><Icon name="alert-triangle" size={32} /></div>
-              <h4 className="step-title">Early Warning</h4>
-              <p className="step-desc">If risk escalates, instant push alerts are triggered for MOH officers.</p>
-            </div>
-            <div className="step-card">
-              <div className="step-number">4</div>
-              <div className="step-icon" style={{ color: 'var(--color-risk-low)' }}><Icon name="shield" size={32} /></div>
-              <h4 className="step-title">Prevention</h4>
-              <p className="step-desc">Communities mobilize to destroy breeding sites before cases spike.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Who it's for */}
-      <section className="who-section section">
-        <div className="container">
-          <div className="who-cards">
-            <div className="who-card who-card-public card">
-              <div className="who-card-icon"><Icon name="users" size={48} /></div>
-              <h3>For Citizens</h3>
-              <p>Check your local risk daily and eliminate mosquito breeding sites if your zone enters the Watch or Alert phases.</p>
-              <Link to="/signup/general" className="btn btn-primary">Sign Up Free</Link>
-            </div>
-            <div className="who-card who-card-moh card" style={{ background: 'var(--color-primary)', color: 'white' }}>
-              <div className="who-card-icon"><Icon name="stethoscope" size={48} /></div>
-              <h3>For Health Officers</h3>
-              <p style={{ color: 'rgba(255,255,255,0.85)' }}>Deploy limited resources with surgical precision. Let the AI tell you exactly which wards need fogging next week.</p>
-              <Link to="/signup/moh-officer" className="btn" style={{ background: 'white', color: 'var(--color-primary)' }}>Register as Officer</Link>
+            <div className="panel">
+              <div className="panel-head"><h3>Data &amp; Model Status</h3></div>
+              <div className="panel-body">
+                <div className="intel-row"><span className="intel-label">Case Data Feed</span><span className="mono" style={{color:'var(--risk-low)', fontSize:'12px'}}>● Connected</span></div>
+                <div className="intel-row"><span className="intel-label">Weather API</span><span className="mono" style={{color:'var(--risk-low)', fontSize:'12px'}}>● Connected</span></div>
+                <div className="intel-row"><span className="intel-label">Prediction Model</span><span className="mono" style={{color:'var(--risk-low)', fontSize:'12px'}}>● v2.3 Active</span></div>
+                <div className="intel-row"><span className="intel-label">Last Full Sync</span><span className="intel-value mono" style={{fontSize:'12px'}}>08:14 AM</span></div>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
       <Footer />
-    </div>
+    </>
   );
 }

@@ -6,26 +6,13 @@ import { useThemeStore } from '../context/ThemeContext.jsx';
 import { authAPI } from '../services/api.js';
 import toast from 'react-hot-toast';
 import LanguageSwitcher from './LanguageSwitcher.jsx';
-import Icon from './Icon.jsx';
 
 export default function Navbar() {
-  const [scrolled, setScrolled] = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false);
-  
   const { isDark, toggleTheme } = useThemeStore();
-
   const { isAuthenticated, user, logout } = useAuthStore();
   const navigate = useNavigate();
   const location = useLocation();
-  const { t } = useTranslation();
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  const { t, i18n } = useTranslation();
 
   const handleLogout = async () => {
     try {
@@ -46,69 +33,70 @@ export default function Navbar() {
     return location.pathname === path ? 'active' : '';
   };
 
+  const getInitials = () => {
+    if (!user) return 'GU';
+    const name = user.firstName || user.officerName || 'User';
+    return name.substring(0, 2).toUpperCase();
+  };
+
+  const toggleLanguage = () => {
+    const nextLang = i18n.language === 'en' ? 'si' : (i18n.language === 'si' ? 'ta' : 'en');
+    i18n.changeLanguage(nextLang);
+  };
+
   return (
-    <nav className={`navbar ${scrolled ? 'scrolled' : ''}`}>
-      <div className="navbar-inner">
-        <Link to="/" className="nav-logo" style={{ display: 'flex', alignItems: 'center' }}>
-          <img src="/logo.png" alt="Logo" style={{ height: '32px', marginRight: '8px' }} />
-          Dengue<span>Radar</span>
-        </Link>
-
-        <button className="mobile-toggle" onClick={() => setMobileOpen(!mobileOpen)} aria-label="Toggle menu">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="3" y1="12" x2="21" y2="12"></line>
-            <line x1="3" y1="6" x2="21" y2="6"></line>
-            <line x1="3" y1="18" x2="21" y2="18"></line>
+    <header className="nav">
+      <div className="wrap nav-inner">
+        <Link to="/" className="brand">
+          <svg className="brand-mark" viewBox="0 0 40 40" fill="none">
+            <circle cx="20" cy="20" r="19" stroke="var(--brand)" strokeWidth="1.4" opacity="0.35"/>
+            <circle cx="20" cy="20" r="13" stroke="var(--brand)" strokeWidth="1.4" opacity="0.55"/>
+            <circle cx="20" cy="20" r="3.4" fill="var(--brand)"/>
+            <path d="M20 20 L20 4" stroke="var(--brand)" strokeWidth="1.6" strokeLinecap="round"/>
+            <path d="M20 20 L31 11" stroke="var(--brand)" strokeWidth="1.6" strokeLinecap="round" opacity="0.6"/>
           </svg>
-        </button>
-
-        <ul className={`nav-links ${mobileOpen ? 'open' : ''}`}>
-          <li><a href="/#home" className={isActive('/#home')} style={{color: isActive('/#home') ? 'var(--color-primary)' : ''}}>{t('nav.home')}</a></li>
-          <li><a href="/#map" className={isActive('/#map')} style={{color: isActive('/#map') ? 'var(--color-primary)' : ''}}>{t('nav.riskMap')}</a></li>
-          <li><a href="/#how">{t('nav.about')}</a></li>
-          {mobileOpen && (
-            <li style={{ marginTop: '16px', paddingBottom: '16px', borderBottom: '1px solid var(--color-border-light)' }}>
-              <LanguageSwitcher />
-            </li>
-          )}
-        </ul>
-
-        <div className="nav-actions">
-          <button 
-            onClick={toggleTheme}
-            style={{
-              background: 'none', border: 'none', color: 'var(--color-text-secondary)',
-              cursor: 'pointer', display: 'flex', alignItems: 'center', padding: '4px',
-              marginRight: '8px'
-            }}
-            aria-label="Toggle Dark Mode"
-          >
-            {isDark ? <Icon name="sun" size={20} /> : <Icon name="moon" size={20} />}
+          <div>
+            <div className="brand-name">DengueRadar</div>
+            <div className="brand-sub">Sri Lanka · Live</div>
+          </div>
+        </Link>
+        <nav className="links">
+          <Link to="/" className={location.pathname === '/' ? 'active' : ''}>Overview</Link>
+          <a href="#map">Risk Map</a>
+          <a href="#forecast">Predictions</a>
+          <a href="#trends">Trends</a>
+          <a href="#weather">Weather</a>
+          <a href="#alerts">Alerts</a>
+        </nav>
+        <div className="nav-right">
+          <div className="lang-pill" onClick={toggleLanguage}>
+            {i18n.language?.toUpperCase().substring(0,2) || 'EN'}
+          </div>
+          <button className="icon-btn" title="Notifications">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
           </button>
-          
-          {!mobileOpen && <LanguageSwitcher />}
-          <span style={{color: 'var(--color-border-light)', margin: '0 8px'}}>|</span>
-          
+          <button className="icon-btn" onClick={toggleTheme} title="Toggle theme">
+            {isDark ? (
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+            ) : (
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+            )}
+          </button>
           {isAuthenticated ? (
-            <>
-              <span style={{fontSize:'14px', fontWeight:600, marginRight:'8px', color: 'var(--color-text-primary)'}}>
-                {user?.firstName || user?.officerName}
-              </span>
-              <Link 
-                to={user?.role === 'admin' ? '/admin-dashboard' : (user?.role === 'moh_officer' ? '/moh-dashboard' : '/dashboard')} 
-                className="btn btn-sm btn-outline"
-              >
-                {t('nav.dashboard')}
+            <div style={{display: 'flex', alignItems: 'center', gap: '10px'}}>
+              <Link to={user?.role === 'admin' ? '/admin-dashboard' : user?.role === 'moh_officer' ? '/moh-dashboard' : '/dashboard'} className="avatar" title="Go to Dashboard" style={{textDecoration: 'none'}}>
+                {getInitials()}
               </Link>
-              <button onClick={handleLogout} className="btn btn-sm btn-ghost">{t('nav.logout')}</button>
-            </>
+              <button className="btn" style={{padding: '6px 12px', fontSize: '12px'}} onClick={handleLogout}>Logout</button>
+            </div>
           ) : (
-            <>
-              <Link to="/login" className="btn btn-ghost">{t('nav.login')}</Link>
-            </>
+            <div style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
+              <Link to="/login" className="btn" style={{padding: '6px 12px', fontSize: '12px', background: 'transparent', border: 'none'}}>Log In</Link>
+              <Link to="/signup/general" className="btn primary" style={{padding: '6px 12px', fontSize: '12px'}}>Sign Up</Link>
+            </div>
           )}
         </div>
       </div>
-    </nav>
+    </header>
   );
 }

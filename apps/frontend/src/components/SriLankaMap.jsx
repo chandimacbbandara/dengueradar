@@ -138,23 +138,6 @@ export default function SriLankaMap({ riskData, selectedDistrict }) {
           </>
         )}
       </MapContainer>
-      <div style={{
-        position: 'absolute', bottom: '20px', right: '20px', zIndex: 1000,
-        background: 'rgba(15, 23, 42, 0.9)', backdropFilter: 'blur(8px)',
-        border: '1px solid rgba(14, 165, 165, 0.3)',
-        color: '#f8fafc', padding: '12px', borderRadius: '8px', boxShadow: '0 4px 16px rgba(0,0,0,0.4)'
-      }}>
-        <div style={{fontSize:'12px', fontWeight:700, marginBottom:'8px'}}>RISK LEVEL</div>
-        <div style={{display:'flex', alignItems:'center', gap:'8px', marginBottom:'4px'}}>
-          <div style={{width:'12px', height:'12px', background:getRiskColor('high'), borderRadius:'2px'}}></div> High
-        </div>
-        <div style={{display:'flex', alignItems:'center', gap:'8px', marginBottom:'4px'}}>
-          <div style={{width:'12px', height:'12px', background:getRiskColor('moderate'), borderRadius:'2px'}}></div> Moderate
-        </div>
-        <div style={{display:'flex', alignItems:'center', gap:'8px'}}>
-          <div style={{width:'12px', height:'12px', background:getRiskColor('low'), borderRadius:'2px'}}></div> Low
-        </div>
-      </div>
     </div>
   );
 }
