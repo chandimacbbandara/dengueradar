@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar.jsx';
 import Footer from '../components/Footer.jsx';
-import SharedMapCard from '../components/SharedMapCard.jsx';
+import SriLankaMap from '../components/SriLankaMap.jsx';
 import TrendChart from '../components/TrendChart.jsx';
 import { publicAPI } from '../services/api.js';
 
@@ -99,7 +99,14 @@ export default function Home() {
             </div>
             <div className="map-card-body">
               <div className="map-stage" id="mapArea">
-                <SharedMapCard riskData={riskData} title="" />
+                <div style={{ height: '100%', width: '100%', position: 'absolute', inset: 0, zIndex: 1 }}>
+                  <SriLankaMap riskData={riskData} />
+                </div>
+                <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '12px', background: 'var(--surface-2)', borderTop: '1px solid var(--border)', display: 'flex', gap: '16px', justifyContent: 'center', zIndex: 10 }}>
+                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: '600' }}><span style={{ width: '10px', height: '10px', borderRadius: '50%', background: 'var(--risk-low)' }}></span> Low Risk</div>
+                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: '600' }}><span style={{ width: '0', height: '0', borderLeft: '5px solid transparent', borderRight: '5px solid transparent', borderBottom: '10px solid var(--risk-mod)' }}></span> Moderate Risk</div>
+                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: '600' }}><span style={{ width: '10px', height: '10px', background: 'var(--risk-high)' }}></span> High Risk</div>
+                </div>
               </div>
               <div className="map-side">
                 <div className="side-title">Top Risk MOH Areas</div>
@@ -176,7 +183,7 @@ export default function Home() {
             <div className="section-actions"><button className="btn btn-outline">Export Data</button></div>
           </div>
           <div className="card" style={{ padding: '24px' }}>
-            <div className="chart-box">
+            <div className="chart-box" style={{ height: '400px', width: '100%' }}>
               <TrendChart data={trendData} />
             </div>
           </div>
