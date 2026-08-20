@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dengue Information Assistant</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='chat.css') }}">
+</head>
+<body>
+  <main class="chat-shell">
+    <header>
+      <p class="eyebrow">Dengue Information System</p>
+      <h1>Dengue guidance assistant</h1>
+      <p>General education and explanations—not individual medical diagnosis.</p>
+    </header>
+
+    <section id="messages" class="messages" aria-live="polite" aria-label="Chat messages">
+      <div class="message assistant">
+        Hello. Ask me about dengue, prevention, symptoms, or a risk result supplied by the application.
+      </div>
+    </section>
+
+    <p id="loading" class="loading" hidden>Assistant is responding…</p>
+    <form id="chat-form" class="composer">
+      <label for="message" class="sr-only">Your dengue question</label>
+      <textarea id="message" maxlength="2000" rows="2"
+        placeholder="Ask a dengue-related question…" required></textarea>
+      <button type="submit">Send</button>
+    </form>
+  </main>
+  <script src="{{ url_for('static', filename='chat.js') }}" defer></script>
+</body>
+</html>

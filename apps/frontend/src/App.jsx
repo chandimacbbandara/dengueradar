@@ -13,6 +13,7 @@ import Profile from './pages/Profile.jsx';
 import HowItWorks from './pages/HowItWorks.jsx';
 import ErrorBoundary from './components/ErrorBoundary.jsx';
 import ThemeInit from './components/ThemeInit.jsx';
+import ChatWidget from './components/ChatWidget.jsx';
 
 export default function App() {
   return (
@@ -44,6 +45,7 @@ export default function App() {
             element={<ProtectedRoute><Profile /></ProtectedRoute>}
           />
         </Routes>
+        <ChatWidget />
       </BrowserRouter>
     </ErrorBoundary>
   );
