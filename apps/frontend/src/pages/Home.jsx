@@ -58,7 +58,7 @@ export default function Home() {
           </div>
           <div className="hero-visual">
             <div className="hv-head">
-              <span className="tag">Top Risk Districts</span>
+              <span className="tag">Top Risk MOH Areas</span>
               <span className="live-flag"><span className="dot-live"></span> LIVE</span>
             </div>
             {topZones.slice(0, 5).map((zone, i) => {
@@ -66,7 +66,7 @@ export default function Home() {
               const riskColorClass = risk === 'critical' ? 'crit' : risk === 'moderate' ? 'mod' : risk;
               return (
                 <div className="risk-row" key={i}>
-                  <span className="district">{zone.district}</span>
+                  <span className="district">{zone.mohZone} <span style={{fontSize: '11px', color: 'var(--text-3)', marginLeft: '4px'}}>({zone.district})</span></span>
                   <span className={`badge ${riskColorClass}`}>{risk.charAt(0).toUpperCase() + risk.slice(1)}</span>
                 </div>
               );
@@ -102,13 +102,13 @@ export default function Home() {
                 <SharedMapCard riskData={riskData} title="" />
               </div>
               <div className="map-side">
-                <div className="side-title">District Breakdown</div>
+                <div className="side-title">Top Risk MOH Areas</div>
                 {topZones.slice(0, 10).map((zone, i) => {
                   const risk = zone.riskLevel || 'low';
                   const riskColorClass = risk === 'critical' ? 'crit' : risk === 'moderate' ? 'mod' : risk;
                   return (
                     <div className="district-item" key={i}>
-                      <div className="name">{zone.district} <small>Score: {Math.round(zone.riskScore)} / 100</small></div>
+                      <div className="name">{zone.mohZone} <small>Score: {Math.round(zone.riskScore)} / 100</small></div>
                       <span className={`badge ${riskColorClass}`}>{risk.charAt(0).toUpperCase() + risk.slice(1)}</span>
                     </div>
                   );
