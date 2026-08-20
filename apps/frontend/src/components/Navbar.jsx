@@ -48,8 +48,8 @@ export default function Navbar() {
     <header className="nav">
       <div className="wrap nav-inner">
         <Link to="/" className="brand">
-          <div className="brand-mark" style={{ background: 'transparent', padding: 0 }}>
-            <img src="/cropped-logo.png" alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px' }} />
+          <div className="brand-mark" style={{ background: '#ffffff', padding: '4px', borderRadius: '8px' }}>
+            <img src="/cropped-logo.png" alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
           </div>
           <div>
             <div className="brand-name">DengueRadar</div>
