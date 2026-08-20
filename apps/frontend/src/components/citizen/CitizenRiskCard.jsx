@@ -1,16 +1,17 @@
 import Icon from '../Icon.jsx';
 import { useTranslation } from 'react-i18next';
 
-const riskConfig = {
-  low: { color: 'var(--risk-low)', bg: 'var(--risk-low-bg)', icon: 'shield', label: t('dashboard_components.risk_card.levels.low') },
-  moderate: { color: 'var(--risk-mod)', bg: 'var(--risk-mod-bg)', icon: 'alert-circle', label: t('dashboard_components.risk_card.levels.moderate') },
-  high: { color: 'var(--risk-high)', bg: 'var(--risk-high-bg)', icon: 'alert-triangle', label: t('dashboard_components.risk_card.levels.high') },
-  critical: { color: 'var(--risk-crit)', bg: 'var(--risk-crit-bg)', icon: 'alert-octagon', label: t('dashboard_components.risk_card.levels.critical') },
-  unknown: { color: 'var(--text-3)', bg: 'var(--surface-2)', icon: 'help-circle', label: t('dashboard_components.risk_card.levels.unknown') }
-};
-
 export default function CitizenRiskCard({ riskInfo, district, mohZone }) {
   const { t } = useTranslation();
+  
+  const riskConfig = {
+    low: { color: 'var(--risk-low)', bg: 'var(--risk-low-bg)', icon: 'shield', label: t('dashboard_components.risk_card.levels.low') },
+    moderate: { color: 'var(--risk-mod)', bg: 'var(--risk-mod-bg)', icon: 'alert-circle', label: t('dashboard_components.risk_card.levels.moderate') },
+    high: { color: 'var(--risk-high)', bg: 'var(--risk-high-bg)', icon: 'alert-triangle', label: t('dashboard_components.risk_card.levels.high') },
+    critical: { color: 'var(--risk-crit)', bg: 'var(--risk-crit-bg)', icon: 'alert-octagon', label: t('dashboard_components.risk_card.levels.critical') },
+    unknown: { color: 'var(--text-3)', bg: 'var(--surface-2)', icon: 'help-circle', label: t('dashboard_components.risk_card.levels.unknown') }
+  };
+
   const level = riskInfo?.riskLevel?.toLowerCase() || 'unknown';
   const config = riskConfig[level] || riskConfig.unknown;
 
