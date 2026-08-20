@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next';
+
 export default function WeeklySummaryCard({ riskInfo, trendData, weather }) {
   const { t } = useTranslation();
   
