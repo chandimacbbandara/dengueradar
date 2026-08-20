@@ -35,12 +35,8 @@
     "selectDistrict": "Select District"
   },
   "dashboard": {
-    "activeCases": "Active Cases",
-    "highRiskZones": "High-Risk Zones",
-    "alertsSent": "Alerts Sent This Week",
-    "exportCSV": "Export CSV",
-    "cooldown": "Alert Cooldown Active",
-    "sendAlert": "Send Alert"
+    "welcome": "Welcome back, {{name}}!",
+    "editProfile": "Edit Profile"
   },
   "auth": {
     "loginTitle": "Log in",
@@ -200,5 +196,24 @@
       "q3": "How often is the model updated?",
       "a3": "The model runs daily inferences based on the latest live weather data, while case data is synchronized weekly from the Ministry of Health."
     }
+  },
+  "profile": {
+    "title": "Account Settings",
+    "subtitle": "Manage your profile and notification preferences",
+    "personalInfo": "Personal Information",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "officerName": "Officer Name",
+    "whatsappNumber": "WhatsApp Number",
+    "districtRo": "District (Read-only)",
+    "mohZoneRo": "MOH Zone (Read-only)",
+    "saving": "Saving...",
+    "saveChanges": "Save Changes",
+    "accountDetails": "Account Details",
+    "email": "Email Address",
+    "role": "Account Role",
+    "memberSince": "Member Since",
+    "password": "Password",
+    "changePassword": "Change Password"
   }
 }

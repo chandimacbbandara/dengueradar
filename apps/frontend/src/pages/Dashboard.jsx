@@ -12,10 +12,12 @@ import CitizenAlerts from '../components/citizen/CitizenAlerts.jsx';
 import PreventionChecklist from '../components/citizen/PreventionChecklist.jsx';
 import RecommendedActions from '../components/citizen/RecommendedActions.jsx';
 import { useAuthStore } from '../context/AuthContext.jsx';
+import { useTranslation } from 'react-i18next';
 import { userAPI, publicAPI, weatherAPI } from '../services/api.js';
 
 export default function Dashboard() {
   const { user } = useAuthStore();
+  const { t } = useTranslation();
   
   const [data, setData] = useState({
     riskInfo: null,
@@ -62,10 +64,10 @@ export default function Dashboard() {
       <div className="dashboard-header" style={{ background: 'var(--surface-2)', padding: '32px 0', borderBottom: '1px solid var(--border)' }}>
         <div className="wrap" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
           <div>
-            <h1 style={{ fontSize: '24px', fontWeight: 700, color: 'var(--text)', marginBottom: '4px' }}>Welcome back, {user?.firstName}!</h1>
+            <h1 style={{ fontSize: '24px', fontWeight: 700, color: 'var(--text)', marginBottom: '4px' }}>{t('dashboard.welcome', { name: user?.firstName })}</h1>
             <p style={{ fontSize: '14px', color: 'var(--text-2)' }}>{user?.district} District • {user?.mohZone} MOH Zone</p>
           </div>
-          <Link to="/profile" className="btn btn-outline" style={{ padding: '8px 16px', fontSize: '13px' }}>Edit Profile</Link>
+          <Link to="/profile" className="btn btn-outline" style={{ padding: '8px 16px', fontSize: '13px' }}>{t('dashboard.editProfile')}</Link>
         </div>
       </div>
 
