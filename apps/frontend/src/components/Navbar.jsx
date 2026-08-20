@@ -49,7 +49,7 @@ export default function Navbar() {
       <div className="wrap nav-inner">
         <Link to="/" className="brand">
           <div className="brand-mark" style={{ background: 'transparent', padding: 0 }}>
-            <img src="/logo.jpeg" alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px' }} />
+            <img src="/cropped-logo.png" alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px' }} />
           </div>
           <div>
             <div className="brand-name">DengueRadar</div>
