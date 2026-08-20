@@ -3,7 +3,8 @@ import {
   Bug, Activity, Map, AlertTriangle, Shield, Settings, LogOut, ChevronRight, 
   Download, Eye, EyeOff, Search, AlertCircle, AlertOctagon, HelpCircle, 
   Sun, Cloud, CloudFog, Snowflake, CloudRain, CloudDrizzle, CloudLightning, 
-  Thermometer, Droplet, Wind, MapPin, Check, CheckCircle, Info, ChevronDown, ChevronUp, Bell 
+  Thermometer, Droplet, Wind, MapPin, Check, CheckCircle, Info, ChevronDown, ChevronUp, Bell,
+  Clock, ShieldCheck, Users, SearchX, ChevronLeft, Trash2, X
 } from 'lucide-react';
 
 const icons = {
@@ -39,7 +40,14 @@ const icons = {
   info: Info,
   'chevron-down': ChevronDown,
   'chevron-up': ChevronUp,
-  bell: Bell
+  bell: Bell,
+  clock: Clock,
+  'shield-check': ShieldCheck,
+  users: Users,
+  'search-x': SearchX,
+  'chevron-left': ChevronLeft,
+  'trash-2': Trash2,
+  x: X
 };
 
 export default function Icon({ name, size = 24, color = 'currentColor', className = '' }) {
