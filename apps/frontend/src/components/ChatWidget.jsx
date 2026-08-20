@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 
-const CHATBOT_URL = 'http://localhost:5050/api/chat';
+const CHATBOT_URL = import.meta.env.VITE_CHATBOT_URL || 'http://145.223.22.182:5050/api/chat';
 
 const WELCOME_MSG = {
   id: 'welcome',
