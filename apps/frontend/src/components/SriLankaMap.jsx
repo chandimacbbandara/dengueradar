@@ -57,6 +57,16 @@ function MapZoomEffect({ selectedDistrict, geoData }) {
   return null;
 }
 
+function InvalidateSizeEffect() {
+  const map = useMap();
+  useEffect(() => {
+    map.invalidateSize();
+    const t = setTimeout(() => map.invalidateSize(), 300);
+    return () => clearTimeout(t);
+  }, [map]);
+  return null;
+}
+
 export default function SriLankaMap({ riskData, selectedDistrict }) {
   const [geoData, setGeoData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -170,6 +180,7 @@ export default function SriLankaMap({ riskData, selectedDistrict }) {
             {selectedDistrict && <MapZoomEffect selectedDistrict={selectedDistrict} geoData={geoData} />}
           </>
         )}
+        <InvalidateSizeEffect />
       </MapContainer>
     </div>
   );
