@@ -13,9 +13,9 @@ import { userAPI } from '../services/api.js';
 
 /* ─── Constants ─────────────────────────────────────────────────── */
 const PERIODS = [
-  { key: 'daily',   label: t('dashboard_components.trend.daily'),   sub: '30 days' },
-  { key: 'weekly',  label: t('dashboard_components.trend.weekly'),  sub: '12 weeks' },
-  { key: 'monthly', label: t('dashboard_components.trend.monthly'), sub: '12 months' },
+  { key: 'daily',   labelKey: 'dashboard_components.trend.daily',   sub: '30 days' },
+  { key: 'weekly',  labelKey: 'dashboard_components.trend.weekly',  sub: '12 weeks' },
+  { key: 'monthly', labelKey: 'dashboard_components.trend.monthly', sub: '12 months' },
 ];
 
 const RISK_COLOR = { high: '#EF4444', moderate: '#F59E0B', low: '#10B981' };
@@ -223,7 +223,7 @@ export default function ZoneTrendChart({ district, mohZone }) {
             padding: '4px',
           }}>
             {PERIODS.map(p => (
-              <PeriodTab key={p.key} p={p} active={period === p.key} onClick={handlePeriod} />
+              <PeriodTab key={p.key} p={{...p, label: t(p.labelKey)}} active={period === p.key} onClick={handlePeriod} />
             ))}
           </div>
 
