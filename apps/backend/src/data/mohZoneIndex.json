@@ -1,0 +1,906 @@
+{
+  "1": {
+    "district": "Ampara",
+    "zoneName": "Akkaraipattu"
+  },
+  "2": {
+    "district": "Ampara",
+    "zoneName": "Ampara"
+  },
+  "3": {
+    "district": "Ampara",
+    "zoneName": "Damana"
+  },
+  "4": {
+    "district": "Ampara",
+    "zoneName": "Dehiattakandiya"
+  },
+  "5": {
+    "district": "Ampara",
+    "zoneName": "Kalmunai north ( td)"
+  },
+  "6": {
+    "district": "Ampara",
+    "zoneName": "Kalmunai south (md)"
+  },
+  "7": {
+    "district": "Ampara",
+    "zoneName": "Lahugala"
+  },
+  "8": {
+    "district": "Ampara",
+    "zoneName": "Mahaoya"
+  },
+  "9": {
+    "district": "Ampara",
+    "zoneName": "Padiyathalawa"
+  },
+  "10": {
+    "district": "Ampara",
+    "zoneName": "Samanthurai"
+  },
+  "11": {
+    "district": "Ampara",
+    "zoneName": "Thirukkovil"
+  },
+  "12": {
+    "district": "Ampara",
+    "zoneName": "Uhana"
+  },
+  "13": {
+    "district": "Anuradhapura",
+    "zoneName": "Galenbindunuwewa"
+  },
+  "14": {
+    "district": "Anuradhapura",
+    "zoneName": "Galnewa"
+  },
+  "15": {
+    "district": "Anuradhapura",
+    "zoneName": "Ipalogama"
+  },
+  "16": {
+    "district": "Anuradhapura",
+    "zoneName": "Kahatagasdigiliya"
+  },
+  "17": {
+    "district": "Anuradhapura",
+    "zoneName": "Kekirawa(palugaswewa)"
+  },
+  "18": {
+    "district": "Anuradhapura",
+    "zoneName": "Medawachchiya"
+  },
+  "19": {
+    "district": "Anuradhapura",
+    "zoneName": "Nochchiyagama"
+  },
+  "20": {
+    "district": "Anuradhapura",
+    "zoneName": "Padaviya"
+  },
+  "21": {
+    "district": "Anuradhapura",
+    "zoneName": "Palagala"
+  },
+  "22": {
+    "district": "Anuradhapura",
+    "zoneName": "Rajanganaya"
+  },
+  "23": {
+    "district": "Anuradhapura",
+    "zoneName": "Rambewa"
+  },
+  "24": {
+    "district": "Anuradhapura",
+    "zoneName": "Thalawa"
+  },
+  "25": {
+    "district": "Anuradhapura",
+    "zoneName": "Thambuttegama"
+  },
+  "26": {
+    "district": "Anuradhapura",
+    "zoneName": "Thirappane"
+  },
+  "27": {
+    "district": "Badulla",
+    "zoneName": "Badulla"
+  },
+  "28": {
+    "district": "Badulla",
+    "zoneName": "Bandarawela"
+  },
+  "29": {
+    "district": "Badulla",
+    "zoneName": "Ella"
+  },
+  "30": {
+    "district": "Badulla",
+    "zoneName": "Hali ela"
+  },
+  "31": {
+    "district": "Badulla",
+    "zoneName": "Haputale"
+  },
+  "32": {
+    "district": "Badulla",
+    "zoneName": "Kandaketiya"
+  },
+  "33": {
+    "district": "Badulla",
+    "zoneName": "Lunugala"
+  },
+  "34": {
+    "district": "Badulla",
+    "zoneName": "Mahiyanganaya"
+  },
+  "35": {
+    "district": "Badulla",
+    "zoneName": "Meegahakivula"
+  },
+  "36": {
+    "district": "Badulla",
+    "zoneName": "Passara"
+  },
+  "37": {
+    "district": "Badulla",
+    "zoneName": "Rideemaliyadda"
+  },
+  "38": {
+    "district": "Badulla",
+    "zoneName": "Uva paranagama"
+  },
+  "39": {
+    "district": "Badulla",
+    "zoneName": "Welimada"
+  },
+  "40": {
+    "district": "Batticaloa",
+    "zoneName": "Eravur"
+  },
+  "41": {
+    "district": "Colombo",
+    "zoneName": "Dehiwala"
+  },
+  "42": {
+    "district": "Colombo",
+    "zoneName": "Hanwella/avissawella"
+  },
+  "43": {
+    "district": "Colombo",
+    "zoneName": "Homagama"
+  },
+  "44": {
+    "district": "Colombo",
+    "zoneName": "Kaduwela"
+  },
+  "45": {
+    "district": "Colombo",
+    "zoneName": "Kolonnawa"
+  },
+  "46": {
+    "district": "Colombo",
+    "zoneName": "MC Colombo"
+  },
+  "47": {
+    "district": "Colombo",
+    "zoneName": "Maharagama"
+  },
+  "48": {
+    "district": "Colombo",
+    "zoneName": "Moratuwa"
+  },
+  "49": {
+    "district": "Colombo",
+    "zoneName": "Padukka"
+  },
+  "50": {
+    "district": "Galle",
+    "zoneName": "Akmeemana"
+  },
+  "51": {
+    "district": "Galle",
+    "zoneName": "Ambalangoda"
+  },
+  "52": {
+    "district": "Galle",
+    "zoneName": "Baddegama"
+  },
+  "53": {
+    "district": "Galle",
+    "zoneName": "Balapitiya"
+  },
+  "54": {
+    "district": "Galle",
+    "zoneName": "Bope(poddala)"
+  },
+  "55": {
+    "district": "Galle",
+    "zoneName": "Elpitiya"
+  },
+  "56": {
+    "district": "Galle",
+    "zoneName": "Habaraduwa"
+  },
+  "57": {
+    "district": "Galle",
+    "zoneName": "Hikkaduwa"
+  },
+  "58": {
+    "district": "Galle",
+    "zoneName": "Imaduwa"
+  },
+  "59": {
+    "district": "Galle",
+    "zoneName": "Karandeniya"
+  },
+  "60": {
+    "district": "Galle",
+    "zoneName": "MC Galle"
+  },
+  "61": {
+    "district": "Galle",
+    "zoneName": "Neluwa"
+  },
+  "62": {
+    "district": "Galle",
+    "zoneName": "Niyagama"
+  },
+  "63": {
+    "district": "Galle",
+    "zoneName": "Yakkalamulla"
+  },
+  "64": {
+    "district": "Gampaha",
+    "zoneName": "Attanagalla"
+  },
+  "65": {
+    "district": "Gampaha",
+    "zoneName": "Biyagama"
+  },
+  "66": {
+    "district": "Gampaha",
+    "zoneName": "Divulapitiya"
+  },
+  "67": {
+    "district": "Gampaha",
+    "zoneName": "Dompe"
+  },
+  "68": {
+    "district": "Gampaha",
+    "zoneName": "Gampaha"
+  },
+  "69": {
+    "district": "Gampaha",
+    "zoneName": "Ja-Ela"
+  },
+  "70": {
+    "district": "Gampaha",
+    "zoneName": "Katana"
+  },
+  "71": {
+    "district": "Gampaha",
+    "zoneName": "Kelaniya"
+  },
+  "72": {
+    "district": "Gampaha",
+    "zoneName": "MC Negombo"
+  },
+  "73": {
+    "district": "Gampaha",
+    "zoneName": "Mahara"
+  },
+  "74": {
+    "district": "Gampaha",
+    "zoneName": "Minuwangoda"
+  },
+  "75": {
+    "district": "Gampaha",
+    "zoneName": "Wattala"
+  },
+  "76": {
+    "district": "Hambantota",
+    "zoneName": "Angunakolapelessa"
+  },
+  "77": {
+    "district": "Hambantota",
+    "zoneName": "Beliatta"
+  },
+  "78": {
+    "district": "Hambantota",
+    "zoneName": "Hambantota"
+  },
+  "79": {
+    "district": "Hambantota",
+    "zoneName": "Katuwana"
+  },
+  "80": {
+    "district": "Hambantota",
+    "zoneName": "Lunugamvehera"
+  },
+  "81": {
+    "district": "Hambantota",
+    "zoneName": "Okewela"
+  },
+  "82": {
+    "district": "Hambantota",
+    "zoneName": "Sooriyawewa"
+  },
+  "83": {
+    "district": "Hambantota",
+    "zoneName": "Tangalle"
+  },
+  "84": {
+    "district": "Hambantota",
+    "zoneName": "Weeraketiya"
+  },
+  "85": {
+    "district": "Jaffna",
+    "zoneName": "Mc jaffna"
+  },
+  "86": {
+    "district": "Jaffna",
+    "zoneName": "Nallur"
+  },
+  "87": {
+    "district": "Kalutara",
+    "zoneName": "Agalawatta"
+  },
+  "88": {
+    "district": "Kalutara",
+    "zoneName": "Bandaragama"
+  },
+  "89": {
+    "district": "Kalutara",
+    "zoneName": "Beruwala (NIHS)"
+  },
+  "90": {
+    "district": "Kalutara",
+    "zoneName": "Bulathsinhala"
+  },
+  "91": {
+    "district": "Kalutara",
+    "zoneName": "Dodangoda"
+  },
+  "92": {
+    "district": "Kalutara",
+    "zoneName": "Horana"
+  },
+  "93": {
+    "district": "Kalutara",
+    "zoneName": "Ingiriya"
+  },
+  "94": {
+    "district": "Kalutara",
+    "zoneName": "Kalutara (NIHS)"
+  },
+  "95": {
+    "district": "Kalutara",
+    "zoneName": "Madurawala"
+  },
+  "96": {
+    "district": "Kalutara",
+    "zoneName": "Palindanuwara/baduraliya"
+  },
+  "97": {
+    "district": "Kalutara",
+    "zoneName": "Panadura"
+  },
+  "98": {
+    "district": "Kandy",
+    "zoneName": "Akurana"
+  },
+  "99": {
+    "district": "Kandy",
+    "zoneName": "Doluwa(hindagala project)"
+  },
+  "100": {
+    "district": "Kandy",
+    "zoneName": "Harispattuwa (Werellagama)"
+  },
+  "101": {
+    "district": "Kandy",
+    "zoneName": "Kundasale"
+  },
+  "102": {
+    "district": "Kandy",
+    "zoneName": "Medadumbara (Meda-Mahanuwara)"
+  },
+  "103": {
+    "district": "Kandy",
+    "zoneName": "Pasbage(nawalapitiya)"
+  },
+  "104": {
+    "district": "Kandy",
+    "zoneName": "Poojapitiya"
+  },
+  "105": {
+    "district": "Kandy",
+    "zoneName": "Udadumbara"
+  },
+  "106": {
+    "district": "Kandy",
+    "zoneName": "Udunuwara"
+  },
+  "107": {
+    "district": "Kandy",
+    "zoneName": "Yatinuwara"
+  },
+  "108": {
+    "district": "Kegalle",
+    "zoneName": "Bulathkohupitiya"
+  },
+  "109": {
+    "district": "Kegalle",
+    "zoneName": "Deraniyagala"
+  },
+  "110": {
+    "district": "Kegalle",
+    "zoneName": "Galigamuwa"
+  },
+  "111": {
+    "district": "Kegalle",
+    "zoneName": "Kegalle"
+  },
+  "112": {
+    "district": "Kegalle",
+    "zoneName": "Mawanella"
+  },
+  "113": {
+    "district": "Kegalle",
+    "zoneName": "Rambukkana"
+  },
+  "114": {
+    "district": "Kegalle",
+    "zoneName": "Ruwanwella"
+  },
+  "115": {
+    "district": "Kegalle",
+    "zoneName": "Warakapola"
+  },
+  "116": {
+    "district": "Kilinochchi",
+    "zoneName": "Poonakary"
+  },
+  "117": {
+    "district": "Kurunegala",
+    "zoneName": "Alawwa"
+  },
+  "118": {
+    "district": "Kurunegala",
+    "zoneName": "Ambanpola"
+  },
+  "119": {
+    "district": "Kurunegala",
+    "zoneName": "Bamunakotuwa"
+  },
+  "120": {
+    "district": "Kurunegala",
+    "zoneName": "Bingiriya"
+  },
+  "121": {
+    "district": "Kurunegala",
+    "zoneName": "Galgamuwa"
+  },
+  "122": {
+    "district": "Kurunegala",
+    "zoneName": "Ganewatta"
+  },
+  "123": {
+    "district": "Kurunegala",
+    "zoneName": "Giribawa"
+  },
+  "124": {
+    "district": "Kurunegala",
+    "zoneName": "Ibbagamuwa"
+  },
+  "125": {
+    "district": "Kurunegala",
+    "zoneName": "Kobeigane"
+  },
+  "126": {
+    "district": "Kurunegala",
+    "zoneName": "Kotavehera"
+  },
+  "127": {
+    "district": "Kurunegala",
+    "zoneName": "Kuliyapitiya"
+  },
+  "128": {
+    "district": "Kurunegala",
+    "zoneName": "Kuliyapitiya-east(katupotha)"
+  },
+  "129": {
+    "district": "Kurunegala",
+    "zoneName": "Kurunegala"
+  },
+  "130": {
+    "district": "Kurunegala",
+    "zoneName": "MC Kurunegala"
+  },
+  "131": {
+    "district": "Kurunegala",
+    "zoneName": "Mallawapitiya"
+  },
+  "132": {
+    "district": "Kurunegala",
+    "zoneName": "Mawathagama"
+  },
+  "133": {
+    "district": "Kurunegala",
+    "zoneName": "Narammala"
+  },
+  "134": {
+    "district": "Kurunegala",
+    "zoneName": "Nikaweratiya"
+  },
+  "135": {
+    "district": "Kurunegala",
+    "zoneName": "Panduwasnuwara"
+  },
+  "136": {
+    "district": "Kurunegala",
+    "zoneName": "Pannala"
+  },
+  "137": {
+    "district": "Kurunegala",
+    "zoneName": "Polgahawela"
+  },
+  "138": {
+    "district": "Kurunegala",
+    "zoneName": "Polpithigama"
+  },
+  "139": {
+    "district": "Kurunegala",
+    "zoneName": "Rideegama"
+  },
+  "140": {
+    "district": "Kurunegala",
+    "zoneName": "Udubaddawa"
+  },
+  "141": {
+    "district": "Kurunegala",
+    "zoneName": "Wariyapola"
+  },
+  "142": {
+    "district": "Kurunegala",
+    "zoneName": "Weerambugedara"
+  },
+  "143": {
+    "district": "Mannar",
+    "zoneName": "Madhu"
+  },
+  "144": {
+    "district": "Mannar",
+    "zoneName": "Mannar"
+  },
+  "145": {
+    "district": "Mannar",
+    "zoneName": "Musali"
+  },
+  "146": {
+    "district": "Matale",
+    "zoneName": "Ambanganga korale"
+  },
+  "147": {
+    "district": "Matale",
+    "zoneName": "Dambulla"
+  },
+  "148": {
+    "district": "Matale",
+    "zoneName": "Galewela"
+  },
+  "149": {
+    "district": "Matale",
+    "zoneName": "Laggala(pallegama)"
+  },
+  "150": {
+    "district": "Matale",
+    "zoneName": "MC Dambulla"
+  },
+  "151": {
+    "district": "Matale",
+    "zoneName": "Matale"
+  },
+  "152": {
+    "district": "Matale",
+    "zoneName": "Mc matale"
+  },
+  "153": {
+    "district": "Matale",
+    "zoneName": "Naula"
+  },
+  "154": {
+    "district": "Matale",
+    "zoneName": "Pallepola"
+  },
+  "155": {
+    "district": "Matale",
+    "zoneName": "Rattota"
+  },
+  "156": {
+    "district": "Matale",
+    "zoneName": "Ukuwela"
+  },
+  "157": {
+    "district": "Matale",
+    "zoneName": "Wilgamuwa"
+  },
+  "158": {
+    "district": "Matale",
+    "zoneName": "Yatawatta"
+  },
+  "159": {
+    "district": "Matara",
+    "zoneName": "Akuressa"
+  },
+  "160": {
+    "district": "Matara",
+    "zoneName": "Devinuwara"
+  },
+  "161": {
+    "district": "Matara",
+    "zoneName": "Hakmana"
+  },
+  "162": {
+    "district": "Matara",
+    "zoneName": "Kamburupitiya"
+  },
+  "163": {
+    "district": "Matara",
+    "zoneName": "Kirinda(puhulwella)"
+  },
+  "164": {
+    "district": "Matara",
+    "zoneName": "Kotapola"
+  },
+  "165": {
+    "district": "Matara",
+    "zoneName": "Mc matara"
+  },
+  "166": {
+    "district": "Matara",
+    "zoneName": "Mulatiyana"
+  },
+  "167": {
+    "district": "Matara",
+    "zoneName": "Pasgoda"
+  },
+  "168": {
+    "district": "Matara",
+    "zoneName": "Thihagoda"
+  },
+  "169": {
+    "district": "Matara",
+    "zoneName": "Weligama"
+  },
+  "170": {
+    "district": "Matara",
+    "zoneName": "Welipitiya"
+  },
+  "171": {
+    "district": "Moneragala",
+    "zoneName": "Badalkumbura"
+  },
+  "172": {
+    "district": "Moneragala",
+    "zoneName": "Bibile"
+  },
+  "173": {
+    "district": "Moneragala",
+    "zoneName": "Buttala"
+  },
+  "174": {
+    "district": "Moneragala",
+    "zoneName": "Madulla"
+  },
+  "175": {
+    "district": "Moneragala",
+    "zoneName": "Medagama"
+  },
+  "176": {
+    "district": "Moneragala",
+    "zoneName": "Moneragala"
+  },
+  "177": {
+    "district": "Moneragala",
+    "zoneName": "Sevanagala"
+  },
+  "178": {
+    "district": "Moneragala",
+    "zoneName": "Siyambalanduwa"
+  },
+  "179": {
+    "district": "Moneragala",
+    "zoneName": "Wellawaya"
+  },
+  "180": {
+    "district": "Mullaitivu",
+    "zoneName": "Puthukudiyiruppu"
+  },
+  "181": {
+    "district": "Mullaitivu",
+    "zoneName": "Thunukkai(mallavi)"
+  },
+  "182": {
+    "district": "Nuwara Eliya",
+    "zoneName": "Ambagamuwa (Ginigathhena)"
+  },
+  "183": {
+    "district": "Nuwara Eliya",
+    "zoneName": "Hanguranketha (Rikillagaskada)"
+  },
+  "184": {
+    "district": "Nuwara Eliya",
+    "zoneName": "MC Nuwara Eliya"
+  },
+  "185": {
+    "district": "Nuwara Eliya",
+    "zoneName": "Nuwara Eliya"
+  },
+  "186": {
+    "district": "Nuwara Eliya",
+    "zoneName": "Walapane"
+  },
+  "187": {
+    "district": "Polonnaruwa",
+    "zoneName": "Dimbulagala"
+  },
+  "188": {
+    "district": "Polonnaruwa",
+    "zoneName": "Elahera"
+  },
+  "189": {
+    "district": "Polonnaruwa",
+    "zoneName": "Hingurakgoda"
+  },
+  "190": {
+    "district": "Polonnaruwa",
+    "zoneName": "Lankapura"
+  },
+  "191": {
+    "district": "Polonnaruwa",
+    "zoneName": "Medirigiriya"
+  },
+  "192": {
+    "district": "Polonnaruwa",
+    "zoneName": "Thamankaduwa"
+  },
+  "193": {
+    "district": "Polonnaruwa",
+    "zoneName": "Welikanda"
+  },
+  "194": {
+    "district": "Puttalam",
+    "zoneName": "Anamaduwa"
+  },
+  "195": {
+    "district": "Puttalam",
+    "zoneName": "Arachchikattuwa"
+  },
+  "196": {
+    "district": "Puttalam",
+    "zoneName": "Chilaw"
+  },
+  "197": {
+    "district": "Puttalam",
+    "zoneName": "Dankotuwa"
+  },
+  "198": {
+    "district": "Puttalam",
+    "zoneName": "Kalpitiya"
+  },
+  "199": {
+    "district": "Puttalam",
+    "zoneName": "Karuwalagaswewa"
+  },
+  "200": {
+    "district": "Puttalam",
+    "zoneName": "Mahawewa"
+  },
+  "201": {
+    "district": "Puttalam",
+    "zoneName": "Nattandiya"
+  },
+  "202": {
+    "district": "Puttalam",
+    "zoneName": "Pallama"
+  },
+  "203": {
+    "district": "Puttalam",
+    "zoneName": "Puttalam"
+  },
+  "204": {
+    "district": "Puttalam",
+    "zoneName": "Wennappuwa"
+  },
+  "205": {
+    "district": "Ratnapura",
+    "zoneName": "Ayagama"
+  },
+  "206": {
+    "district": "Ratnapura",
+    "zoneName": "Balangoda"
+  },
+  "207": {
+    "district": "Ratnapura",
+    "zoneName": "Eheliyagoda"
+  },
+  "208": {
+    "district": "Ratnapura",
+    "zoneName": "Elapatha"
+  },
+  "209": {
+    "district": "Ratnapura",
+    "zoneName": "Embilipitiya"
+  },
+  "210": {
+    "district": "Ratnapura",
+    "zoneName": "Godakawela"
+  },
+  "211": {
+    "district": "Ratnapura",
+    "zoneName": "Imbulpe"
+  },
+  "212": {
+    "district": "Ratnapura",
+    "zoneName": "Kalawana"
+  },
+  "213": {
+    "district": "Ratnapura",
+    "zoneName": "Kiriella"
+  },
+  "214": {
+    "district": "Ratnapura",
+    "zoneName": "Kolonna"
+  },
+  "215": {
+    "district": "Ratnapura",
+    "zoneName": "MC Ratnapura"
+  },
+  "216": {
+    "district": "Ratnapura",
+    "zoneName": "Nivithigala"
+  },
+  "217": {
+    "district": "Ratnapura",
+    "zoneName": "PS Ratnapura"
+  },
+  "218": {
+    "district": "Ratnapura",
+    "zoneName": "Pelmadulla"
+  },
+  "219": {
+    "district": "Ratnapura",
+    "zoneName": "Weligepola"
+  },
+  "220": {
+    "district": "Trincomalee",
+    "zoneName": "Gomarankadawala"
+  },
+  "221": {
+    "district": "Trincomalee",
+    "zoneName": "Kinniya"
+  },
+  "222": {
+    "district": "Trincomalee",
+    "zoneName": "Trincomale(naval base)"
+  },
+  "223": {
+    "district": "Trincomalee",
+    "zoneName": "Trincomalee"
+  },
+  "224": {
+    "district": "Vavuniya",
+    "zoneName": "Vavuniya"
+  },
+  "225": {
+    "district": "Vavuniya",
+    "zoneName": "Vavuniya north"
+  },
+  "226": {
+    "district": "Vavuniya",
+    "zoneName": "Vavuniya south"
+  }
+}

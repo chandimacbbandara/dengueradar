@@ -18,6 +18,7 @@ import userRoutes from './routes/user.js';
 import mohRoutes from './routes/moh.js';
 import weatherRoutes from './routes/weather.js';
 import adminRoutes from './routes/admin.js';
+import chatbotRoutes from './routes/chatbot.js';
 import { startWeatherJob } from './jobs/weatherJob.js';
 import { startWeeklyAlertJob } from './jobs/weeklyAlertJob.js';
 
@@ -50,6 +51,7 @@ app.use('/api/user', userRoutes);
 app.use('/api/moh', mohRoutes);
 app.use('/api/weather', weatherRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/chatbot', chatbotRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => res.json({ success: true, message: 'DengueRadar API running' }));
