@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import Icon from '../Icon.jsx';
 
 const defaultTasks = [
@@ -11,6 +12,7 @@ const defaultTasks = [
 ];
 
 export default function PreventionChecklist() {
+  const { t } = useTranslation();
   const [checked, setChecked] = useState([]);
 
   useEffect(() => {
@@ -35,7 +37,7 @@ export default function PreventionChecklist() {
 
   return (
     <div className="card" style={{ padding: '24px', height: '100%' }}>
-      <h3 style={{ fontSize: '14px', textTransform: 'uppercase', color: 'var(--text-3)', fontWeight: 700, letterSpacing: '0.5px', marginBottom: '16px' }}>Protect Your Home</h3>
+      <h3 style={{ fontSize: '14px', textTransform: 'uppercase', color: 'var(--text-3)', fontWeight: 700, letterSpacing: '0.5px', marginBottom: '16px' }}>{t('dashboard_components.checklist.title')}</h3>
       
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px', fontSize: '14px', fontWeight: 600 }}>
         <span style={{ color: 'var(--text-2)' }}>Prevention Checklist</span>

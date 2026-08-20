@@ -1,6 +1,8 @@
 import Icon from '../Icon.jsx';
+import { useTranslation } from 'react-i18next';
 
 export default function RecommendedActions({ riskLevel }) {
+  const { t } = useTranslation();
   const level = riskLevel?.toLowerCase() || 'low';
   
   let recs = [];
@@ -36,7 +38,7 @@ export default function RecommendedActions({ riskLevel }) {
 
   return (
     <div className="card" style={{ padding: '24px', height: '100%', background: 'var(--surface-2)' }}>
-      <h3 style={{ fontSize: '14px', textTransform: 'uppercase', color: 'var(--text-3)', fontWeight: 700, letterSpacing: '0.5px', marginBottom: '16px' }}>What You Should Do Now</h3>
+      <h3 style={{ fontSize: '14px', textTransform: 'uppercase', color: 'var(--text-3)', fontWeight: 700, letterSpacing: '0.5px', marginBottom: '16px' }}>{t('dashboard_components.actions.title')}</h3>
       
       <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
         {recs.map((r, i) => (

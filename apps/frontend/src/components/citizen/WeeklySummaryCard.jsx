@@ -1,4 +1,5 @@
 export default function WeeklySummaryCard({ riskInfo, trendData, weather }) {
+  const { t } = useTranslation();
   
   const getTrendIcon = () => {
     if (!trendData || trendData.length < 2) return { icon: '→', text: 'Stable', color: 'var(--risk-mod)' };
@@ -30,7 +31,7 @@ export default function WeeklySummaryCard({ riskInfo, trendData, weather }) {
 
   return (
     <div className="card" style={{ padding: '24px', height: '100%' }}>
-      <h3 style={{ fontSize: '14px', textTransform: 'uppercase', color: 'var(--text-3)', fontWeight: 700, letterSpacing: '0.5px', marginBottom: '16px' }}>This Week in Your Area</h3>
+      <h3 style={{ fontSize: '14px', textTransform: 'uppercase', color: 'var(--text-3)', fontWeight: 700, letterSpacing: '0.5px', marginBottom: '16px' }}>{t('dashboard_components.summary_card.title')}</h3>
       
       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '20px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}>
@@ -42,7 +43,7 @@ export default function WeeklySummaryCard({ riskInfo, trendData, weather }) {
           <strong style={{ color: trend.color }}>{trend.icon} {trend.text}</strong>
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}>
-          <span style={{ color: 'var(--text-2)' }}>Rainfall</span>
+          <span style={{ color: 'var(--text-2)' }}>{t('dashboard_components.summary_card.rain')}</span>
           <strong style={{ color: 'var(--text)' }}>{getRainStatus()}</strong>
         </div>
       </div>

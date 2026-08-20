@@ -215,5 +215,95 @@
     "memberSince": "Member Since",
     "password": "Password",
     "changePassword": "Change Password"
+  },
+  "dashboard_components": {
+    "risk_card": {
+      "title": "Your Area Risk",
+      "updated": "Risk status updated",
+      "recently": "Recently",
+      "description": "Based on recent environmental conditions and historical data, the AI model has classified this zone as {{level}}.",
+      "levels": {
+        "low": "Low Risk",
+        "moderate": "Moderate Risk",
+        "high": "High Risk",
+        "critical": "Critical Risk",
+        "unknown": "Data Unavailable"
+      }
+    },
+    "factors_card": {
+      "title": "Key Risk Factors",
+      "subtitle": "Understanding why the AI assigned this risk level to your area.",
+      "outbreak": "Recent Outbreak Activity",
+      "outbreak_high": "High case density in surrounding neighborhoods.",
+      "outbreak_low": "Minimal recent cases reported locally.",
+      "rain": "Precipitation Impact",
+      "rain_high": "Heavy rainfall has created ideal breeding conditions.",
+      "rain_low": "Rainfall levels are low to moderate.",
+      "temp": "Temperature & Humidity",
+      "temp_high": "Conditions are highly favorable for mosquito lifecycle.",
+      "temp_low": "Current conditions are not ideal for mosquitoes.",
+      "why": "Why is my area at risk?"
+    },
+    "local_map": {
+      "title": "Risk Around You",
+      "subtitle": "Explore the current dengue risk levels in {{district}} and surrounding districts."
+    },
+    "summary_card": {
+      "title": "This Week in Your Area",
+      "subtitle": "What's happening right now",
+      "temp": "Temperature",
+      "rain": "Rainfall",
+      "predicted": "Total predicted cases for this week",
+      "nodata": "Data not available",
+      "prediction": "AI Prediction",
+      "environment": "Environmental Data"
+    },
+    "alerts": {
+      "title": "Recent Alerts",
+      "empty": "No recent alerts for your area.",
+      "increased": "Risk Increased",
+      "alert": "Dengue Alert",
+      "changed": "Risk level in your zone changed to {{level}}.",
+      "show_less": "Show Less",
+      "view_all": "View all {{count}} alerts"
+    },
+    "actions": {
+      "title": "What You Should Do Now",
+      "subtitle": "Immediate actions recommended based on current risk level."
+    },
+    "checklist": {
+      "title": "Protect Your Home",
+      "subtitle": "Weekly 10-minute chores to keep your family safe."
+    },
+    "trend": {
+      "title": "Your Area Dengue Risk Trend",
+      "subtitle": "Monitor how dengue risk in your area has changed over time.",
+      "daily": "Daily",
+      "weekly": "Weekly",
+      "monthly": "Monthly",
+      "predicted": "Predicted",
+      "historical": "Historical",
+      "increasing": "↑ Risk is increasing compared with the previous period.",
+      "decreasing": "↓ Risk is decreasing compared with the previous period.",
+      "stable": "→ Risk has remained relatively stable.",
+      "source": "Data scoped to {{zone}} · Source: EPID Unit records"
+    },
+    "weather": {
+      "loading": "Weather data loading...",
+      "clear": "Clear sky",
+      "cloudy": "Cloudy",
+      "foggy": "Foggy / Haze",
+      "snow": "Snow",
+      "rain": "Rain",
+      "drizzle": "Drizzle",
+      "thunder": "Thunderstorm",
+      "unknown": "Unknown",
+      "feels": "Feels like",
+      "humidity": "Humidity",
+      "wind": "Wind",
+      "rainfall": "Rainfall",
+      "updated": "Updated {{time}}",
+      "norain": "No rain"
+    }
   }
 }

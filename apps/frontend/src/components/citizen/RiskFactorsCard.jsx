@@ -1,6 +1,8 @@
 import Icon from '../Icon.jsx';
+import { useTranslation } from 'react-i18next';
 
 export default function RiskFactorsCard({ riskInfo, weather }) {
+  const { t } = useTranslation();
   const getLevel = (val, thresholds) => {
     if (val == null) return { text: 'Unknown', color: 'var(--text-3)' };
     if (val >= thresholds[1]) return { text: 'HIGH', color: 'var(--risk-high)' };

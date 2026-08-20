@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   ResponsiveContainer,
   AreaChart,
@@ -12,9 +13,9 @@ import { userAPI } from '../services/api.js';
 
 /* ─── Constants ─────────────────────────────────────────────────── */
 const PERIODS = [
-  { key: 'daily',   label: 'Daily',   sub: '30 days' },
-  { key: 'weekly',  label: 'Weekly',  sub: '12 weeks' },
-  { key: 'monthly', label: 'Monthly', sub: '12 months' },
+  { key: 'daily',   label: t('dashboard_components.trend.daily'),   sub: '30 days' },
+  { key: 'weekly',  label: t('dashboard_components.trend.weekly'),  sub: '12 weeks' },
+  { key: 'monthly', label: t('dashboard_components.trend.monthly'), sub: '12 months' },
 ];
 
 const RISK_COLOR = { high: '#EF4444', moderate: '#F59E0B', low: '#10B981' };
@@ -116,6 +117,7 @@ function PeriodTab({ p, active, onClick }) {
 
 /* ─── Main component ────────────────────────────────────────────── */
 export default function ZoneTrendChart({ district, mohZone }) {
+  const { t } = useTranslation();
   const [period, setPeriod]       = useState('monthly');
   const [trendData, setTrendData] = useState(null);
   const [loading, setLoading]     = useState(true);
@@ -202,13 +204,13 @@ export default function ZoneTrendChart({ district, mohZone }) {
               animation: 'pulse 2s ease infinite', display: 'inline-block',
             }} />
             <span style={{ fontSize: '11px', fontWeight: 700, color: '#0EA5A5', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-              Your Area Dengue Risk Trend
+              {t('dashboard_components.trend.title')}
             </span>
           </div>
           <h3 style={{ fontSize: '18px', fontWeight: 800, color: '#F1F5F9', margin: 0 }}>
             📍 {zone || '—'}
           </h3>
-          <p style={{ fontSize: '12px', color: '#64748B', marginTop: '2px' }}>Monitor how dengue risk in your area has changed over time.</p>
+          <p style={{ fontSize: '12px', color: '#64748B', marginTop: '2px' }}>{t('dashboard_components.trend.subtitle')}</p>
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
@@ -343,10 +345,10 @@ export default function ZoneTrendChart({ district, mohZone }) {
       {/* Footer */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '14px' }}>
         <p style={{ fontSize: '13px', color: 'var(--text)', fontWeight: 500 }}>
-          {delta > 2 ? '↑ Risk is increasing compared with the previous period.' : delta < -2 ? '↓ Risk is decreasing compared with the previous period.' : '→ Risk has remained relatively stable.'}
+          {delta > 2 ? t('dashboard_components.trend.increasing') : delta < -2 ? t('dashboard_components.trend.decreasing') : t('dashboard_components.trend.stable')}
         </p>
         <p style={{ fontSize: '11px', color: '#1e3a5f', textAlign: 'right' }}>
-          Data scoped to {zone} · Source: EPID Unit records
+          {t('dashboard_components.trend.source', { zone })}
         </p>
       </div>
     </div>
