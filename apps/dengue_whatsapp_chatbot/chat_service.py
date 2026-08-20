@@ -17,18 +17,22 @@ TIMEOUT = 8
 
 # ── Zone/area keyword extractor ────────────────────────────────────────────────
 
-# Common Colombo zones to recognize quickly
-KNOWN_ZONES = [
-    "homagama", "dehiwala", "kaduwela", "colombo", "ratmalana", "moratuwa",
-    "nugegoda", "kotte", "kesbewa", "maharagama", "avissawella", "hanwella",
-    "gampaha", "negombo", "kalutara", "kandy", "matara", "galle", "jaffna",
-    "batticaloa", "ampara", "trincomalee", "kurunegala", "anuradhapura",
-    "polonnaruwa", "badulla", "ratnapura", "kegalle", "nuwara", "eliya",
-    "hambantota", "monaragala", "vavuniya", "mannar", "kilinochchi",
-    "mullaitivu", "puttalam",
-]
+import json
+import os
+
+ZONES_PATH = os.path.join(os.path.dirname(__file__), "..", "backend", "src", "data", "mohZoneIndex.json")
+try:
+    with open(ZONES_PATH, "r") as f:
+        zones_data = json.load(f)
+    KNOWN_ZONES = [v["zoneName"].lower() for v in zones_data.values()]
+    KNOWN_ZONES.extend(["colombo", "kandy", "galle", "gampaha", "kalutara", "matara", "kurunegala"])
+except Exception as e:
+    logger.error("Failed to load MOH zones: %s", e)
+    KNOWN_ZONES = ["homagama", "colombo"] # fallback
 
 MOH_CODE_PATTERN = re.compile(r'\b(\d{1,3})\b')
+# Sort by length descending to match longest phrases first (e.g., "Kalmunai north" before "Kalmunai")
+KNOWN_ZONES = sorted(list(set(KNOWN_ZONES)), key=len, reverse=True)
 ZONE_PATTERN = re.compile(
     r'\b(' + '|'.join(re.escape(z) for z in KNOWN_ZONES) + r')\b',
     re.IGNORECASE,
@@ -73,61 +77,7 @@ def _risk_emoji(level: str) -> str:
     return {"high": "🔴", "moderate": "🟠", "low": "🟢"}.get((level or "").lower(), "⚪")
 
 
-def _prevention_tips() -> str:
-    return (
-        "🛡️ *Dengue Prevention Tips*\n\n"
-        "• Empty, scrub or cover water containers every week\n"
-        "• Check buckets, flower pots, gutters, drains & tyres\n"
-        "• Use mosquito repellent as directed\n"
-        "• Wear clothing that covers arms and legs\n"
-        "• Use window screens or mosquito nets\n\n"
-        "Aedes mosquitoes bite during the day — be alert morning and evening."
-    )
-
-
-def _symptom_info() -> str:
-    return (
-        "🤒 *Dengue Symptoms*\n\n"
-        "Common signs (appear 4–10 days after a bite):\n"
-        "• Sudden high fever (39–40°C)\n"
-        "• Severe headache & pain behind the eyes\n"
-        "• Muscle and joint pain\n"
-        "• Nausea, vomiting, skin rash\n\n"
-        "⚠️ *Seek urgent medical care if you notice:*\n"
-        "• Severe abdominal pain\n"
-        "• Persistent vomiting\n"
-        "• Unusual bleeding (gums, nose, skin)\n"
-        "• Extreme fatigue or restlessness\n\n"
-        "This is general education — not a medical diagnosis. Consult a doctor."
-    )
-
-
-def _about_system() -> str:
-    return (
-        "ℹ️ *About DengueRadar*\n\n"
-        "DengueRadar uses a 3-model ML ensemble:\n"
-        "⚡ LightGBM + XGBoost + CatBoost\n\n"
-        "It analyses historical case data, weather patterns, and\n"
-        "population statistics to predict dengue risk one week ahead\n"
-        "for each of the 226 MOH zones across Sri Lanka.\n\n"
-        "To check risk for your area, type:\n"
-        "  *risk in Homagama*  or  *MOH 50*"
-    )
-
-
-def _whatsapp_info() -> str:
-    import os
-    from config import BACKEND_URL # just to ensure imports are fine
-    
-    # We load it from os.getenv directly since config.py might not have it exposed yet
-    wa_link = os.getenv("WHATSAPP_LINK", "https://wa.me/14157386102")
-    return (
-        "📱 *Connect on WhatsApp*\n\n"
-        "You can chat with the DengueRadar AI directly on WhatsApp!\n\n"
-        f"Click here to connect: {wa_link}\n\n"
-        "_(Note: Since this is a Sandbox, you may need to send a specific 'Join' message first. Check your Vonage dashboard for the exact phrase.)_"
-    )
-
+# ── Fallback formatter ─────────────────────────────────────────────────────────
 
 def _prediction_response(data: dict) -> str:
     zone = data.get("moh_zone", "Unknown")
@@ -136,121 +86,42 @@ def _prediction_response(data: dict) -> str:
     risk = (data.get("risk_level") or "unknown").lower()
     emoji = _risk_emoji(risk)
     area = f"{zone} ({district})" if district and district != "Unknown" else zone
-    status = data.get("data_status", "")
-    status_note = f"\n\n📌 _{status}_" if status else ""
-
-    advice = {
-        "high": (
-            "⚠️ HIGH risk area. Take extra precautions:\n"
-            "• Eliminate all standing water immediately\n"
-            "• Use repellent and protective clothing\n"
-            "• Monitor for fever — see a doctor promptly if symptoms appear"
-        ),
-        "moderate": (
-            "⚠️ MODERATE risk. Stay vigilant:\n"
-            "• Check your home for stagnant water weekly\n"
-            "• Use mosquito repellent when outdoors"
-        ),
-        "low": (
-            "✅ LOW risk currently. Keep it that way:\n"
-            "• Maintain regular water container checks\n"
-            "• Continue basic mosquito prevention"
-        ),
-    }.get(risk, "Follow standard dengue prevention guidelines.")
 
     return (
         f"📍 *{area}*\n\n"
         f"{emoji} *Risk Level: {risk.upper()}*\n"
         f"🦟 Predicted Cases (next week): *{cases}*\n\n"
-        f"{advice}"
-        f"{status_note}\n\n"
-        f"⚡ _Powered by DengueRadar AI · LightGBM + XGBoost + CatBoost_"
+        f"⚡ _Powered by DengueRadar AI_"
     )
-
-
-def _help_message() -> str:
-    return (
-        "🦟 *DengueRadar AI Assistant*\n\n"
-        "I can help you with:\n\n"
-        "📍 *Area Risk* — ask about a specific zone:\n"
-        "  • \"What is the risk in Homagama?\"\n"
-        "  • \"MOH 50 risk\"\n"
-        "  • \"Dengue forecast Colombo\"\n\n"
-        "🤒 *Symptoms* — type: symptoms\n"
-        "🛡️ *Prevention* — type: prevention\n"
-        "📱 *WhatsApp* — type: whatsapp\n"
-        "ℹ️ *About the system* — type: about\n"
-    )
-
-
-# ── Intent classifier ──────────────────────────────────────────────────────────
-
-def _classify(message: str) -> str:
-    m = message.lower()
-    if any(w in m for w in ["whatsapp", "link", "connect", "phone", "mobile"]):
-        return "whatsapp_link"
-    if any(w in m for w in ["symptom", "fever", "sign", "headache", "rash", "pain", "sick"]):
-        return "symptoms"
-    if any(w in m for w in ["prevent", "protect", "avoid", "repellent", "mosquito", "breeding", "bite"]):
-        return "prevention"
-    if any(w in m for w in ["about", "system", "how does", "how it work", "model", "ai", "ml"]):
-        return "about"
-    if any(w in m for w in ["help", "what can", "what do", "command", "option"]):
-        return "help"
-    if any(w in m for w in ["risk", "forecast", "predict", "case", "danger", "level", "safe", "moh", "area", "zone", "district"]):
-        return "prediction"
-    if any(w in m for w in ["hi", "hello", "hey", "start", "hola"]):
-        return "greeting"
-    return "prediction"  # default: try to look up prediction
 
 
 # ── Public entry point ─────────────────────────────────────────────────────────
 
 def chat_response(message: str) -> str:
-    """Return a response string for a user message, grounded in ML predictions."""
-    intent = _classify(message)
-
-    if intent == "greeting":
-        return (
-            "👋 Hello! I'm the DengueRadar AI Assistant.\n\n"
-            "Ask me about dengue risk in your area, symptoms, or prevention tips.\n\n"
-            "Try: *\"What is the risk in Homagama?\"*"
-        )
-
-    if intent == "symptoms":
-        return _symptom_info()
-
-    if intent == "prevention":
-        return _prevention_tips()
-        
-    if intent == "whatsapp_link":
-        return _whatsapp_info()
-
-    if intent == "about":
-        return _about_system()
-
-    if intent == "help":
-        return _help_message()
-
-    # intent == "prediction" — try to find a location
+    """Return a response string for a user message."""
+    # 1. Try to extract a location to fetch risk data
     identifier, label = _extract_location(message)
-
+    
+    data = None
     if identifier:
         data = _fetch_prediction(identifier)
+
+    # 2. Retrieve knowledge base context for all queries
+    from rag_service import retrieve_knowledge
+    from llm_service import ask_dengue_assistant
+    
+    context = retrieve_knowledge(message)
+    
+    # 3. Ask the RAG assistant to handle the response entirely
+    try:
+        return ask_dengue_assistant(message, knowledge_context=context, risk_context=data)
+    except Exception as e:
+        logger.error("[ChatService] Failed to get LLM response: %s", e)
+        
+        # If the LLM is down but we successfully fetched prediction data, fallback to basic rule-based formatting
         if data:
             return _prediction_response(data)
-        return (
-            f"⚠️ Could not fetch prediction for *{label}*.\n\n"
-            "The backend service may be unavailable. "
-            "Please ensure the DengueRadar backend is running on port 5000."
-        )
+            
+        return "I'm sorry, I'm having trouble connecting to the AI assistant right now. Please try again later."
 
-    # No location detected — ask for clarification
-    return (
-        "🦟 I can check dengue risk for any MOH zone in Sri Lanka!\n\n"
-        "Please tell me the area name or MOH code, for example:\n"
-        "  • *\"What is the risk in Homagama?\"*\n"
-        "  • *\"MOH 50\"*\n"
-        "  • *\"Dengue forecast Colombo\"*\n\n"
-        "Or ask about *symptoms*, *prevention*, or type *help*."
-    )
+

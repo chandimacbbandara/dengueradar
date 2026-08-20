@@ -4,3 +4,5 @@ python-dotenv>=1.0,<2.0
 requests>=2.32,<3.0
 # No separate LLM SDK is required; llm_service.py uses requests so provider
 # integration stays isolated from the Flask and Vonage code.
+scikit-learn>=1.0,<2.0
+numpy>=1.20,<2.0
