@@ -96,7 +96,8 @@ body {
 .mono { font-family: 'JetBrains Mono', monospace; }
 a { color: inherit; text-decoration: none; }
 .wrap { max-width: 1240px; margin: 0 auto; padding: 0 32px; }
-@media (max-width: 720px) { .wrap { padding: 0 18px; } }
+.wrap-wide { max-width: 1600px; margin: 0 auto; padding: 0 32px; }
+@media (max-width: 720px) { .wrap, .wrap-wide { padding: 0 18px; } }
 
 /* Typography */
 h1, h2, h3, .display {
