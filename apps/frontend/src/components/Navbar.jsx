@@ -48,11 +48,8 @@ export default function Navbar() {
     <header className="nav">
       <div className="wrap nav-inner">
         <Link to="/" className="brand">
-          <div className="brand-mark">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-              <path d="M12 2C12 2 5 10 5 15a7 7 0 0014 0c0-5-7-13-7-13z" fill="white" opacity="0.95"/>
-              <circle cx="12" cy="15" r="2.4" fill="#0B1220"/>
-            </svg>
+          <div className="brand-mark" style={{ background: 'transparent', padding: 0 }}>
+            <img src="/logo.jpeg" alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px' }} />
           </div>
           <div>
             <div className="brand-name">DengueRadar</div>
