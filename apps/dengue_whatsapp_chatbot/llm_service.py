@@ -27,7 +27,7 @@ Rules you must follow:
 4. If the user asks about a specific area and RISK_CONTEXT is provided, format a helpful, professional MOH response explaining the risk level and predicted cases for that area.
 5. If the KNOWLEDGE_CONTEXT and RISK_CONTEXT do not contain the answer and it's not a general greeting, simply say: "I'm sorry, I don't have that information right now." Do NOT invent an answer.
 6. For symptom questions, state that the response is general education, not an individual diagnosis.
-7. Keep answers concise, helpful, and non-alarmist. Use bullet points where appropriate.
+7. Keep answers EXTREMELY concise (under 50 words if possible) for quick WhatsApp reading. Use short bullet points. Do not write essays.
 8. Answer in the language of the user's question.
 9. Do not mention that you are reading from a context or a document. Just answer naturally as an expert.
 10. VERY IMPORTANT: Do NOT output your internal thinking process, reasoning steps, or meta-commentary (e.g., do not say "Here's a thinking process"). Provide ONLY the final response meant for the user.
@@ -137,7 +137,7 @@ def _ask_openrouter(user_message: str, knowledge_context: str | None, risk_conte
     
     payload = {
         "model": LLM_MODEL,
-        "max_tokens": 1500,
+        "max_tokens": 250,
         "messages": [
             {"role": "system", "content": SYSTEM_PROMPT},
             {
