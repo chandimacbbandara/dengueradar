@@ -5,8 +5,26 @@ const CHATBOT_URL = 'http://localhost:5050/api/chat';
 const WELCOME_MSG = {
   id: 'welcome',
   role: 'bot',
-  text: '🦟 Hello! I\'m the DengueRadar AI Assistant.\n\nAsk me about dengue symptoms, prevention, or risk levels in your area.',
+  text: '🦟 Hello! I\'m the **DengueRadar AI Assistant**.\n\nAsk me about dengue risk in your area, symptoms, or prevention tips.\n\nTry: *"risk in Homagama"*',
 };
+
+/** Render *bold* and newlines from the bot response */
+function FormatText({ text }) {
+  const parts = text.split(/(\*\*[^*]+\*\*|\*[^*]+\*)/g);
+  return (
+    <span>
+      {parts.map((part, i) => {
+        if (part.startsWith('**') && part.endsWith('**'))
+          return <strong key={i}>{part.slice(2, -2)}</strong>;
+        if (part.startsWith('*') && part.endsWith('*'))
+          return <em key={i} style={{ color: 'inherit', opacity: 0.85 }}>{part.slice(1, -1)}</em>;
+        return part.split('\n').map((line, j, arr) => (
+          <span key={`${i}-${j}`}>{line}{j < arr.length - 1 && <br />}</span>
+        ));
+      })}
+    </span>
+  );
+}
 
 function BotIcon() {
   return (
@@ -208,10 +226,10 @@ export default function ChatWidget() {
                     : 'var(--surface-2)',
                   color: msg.role === 'user' ? '#fff' : 'var(--text)',
                   fontSize: '13px', lineHeight: '1.5',
-                  whiteSpace: 'pre-wrap', wordBreak: 'break-word',
+                  wordBreak: 'break-word',
                   boxShadow: msg.role === 'user' ? '0 2px 12px rgba(13,148,136,0.3)' : 'none',
                 }}>
-                  {msg.text}
+                  <FormatText text={msg.text} />
                 </div>
               </div>
             ))}
