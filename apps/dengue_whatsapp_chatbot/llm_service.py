@@ -28,6 +28,7 @@ Rules you must follow:
 5. Keep answers concise, helpful, and non-alarmist. Use bullet points where appropriate.
 6. Answer in the language of the user's question.
 7. Do not mention that you are reading from a context or a document. Just answer naturally as an expert.
+8. VERY IMPORTANT: Do NOT output your internal thinking process, reasoning steps, or meta-commentary (e.g., do not say "Here's a thinking process"). Provide ONLY the final response meant for the user.
 """
 
 ALLOWED_RISK_LEVELS = {"LOW", "MODERATE", "HIGH"}
@@ -134,7 +135,7 @@ def _ask_openrouter(user_message: str, knowledge_context: str | None, risk_conte
     
     payload = {
         "model": LLM_MODEL,
-        "max_tokens": 350,
+        "max_tokens": 1500,
         "messages": [
             {"role": "system", "content": SYSTEM_PROMPT},
             {
