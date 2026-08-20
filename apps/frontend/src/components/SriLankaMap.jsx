@@ -46,7 +46,12 @@ function MapZoomEffect({ selectedDistrict, geoData }) {
         const layer = L.geoJSON(feature);
         const bounds = layer.getBounds();
         if (bounds && bounds.isValid()) {
-          map.flyToBounds(bounds, { padding: [20, 20], duration: 1.5 });
+          if (!map._initialZoomDone) {
+            map.fitBounds(bounds, { padding: [20, 20], animate: false });
+            map._initialZoomDone = true;
+          } else {
+            map.flyToBounds(bounds, { padding: [20, 20], duration: 1.5 });
+          }
         }
       }
     } catch (err) {
@@ -60,12 +65,20 @@ function MapZoomEffect({ selectedDistrict, geoData }) {
 function InvalidateSizeEffect() {
   const map = useMap();
   useEffect(() => {
-    map.invalidateSize();
-    const t = setTimeout(() => map.invalidateSize(), 300);
-    return () => clearTimeout(t);
+    const trigger = () => {
+      map.invalidateSize();
+      window.dispatchEvent(new Event('resize'));
+    };
+    trigger();
+    const t1 = setTimeout(trigger, 100);
+    const t2 = setTimeout(trigger, 500);
+    const t3 = setTimeout(trigger, 1000);
+    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
   }, [map]);
   return null;
 }
+
+const mapRenderer = L.svg({ padding: 1.5 });
 
 export default function SriLankaMap({ riskData, selectedDistrict }) {
   const [geoData, setGeoData] = useState(null);
@@ -162,6 +175,7 @@ export default function SriLankaMap({ riskData, selectedDistrict }) {
         zoom={7} 
         style={{ height: '100%', width: '100%', borderRadius: 'inherit' }}
         zoomControl={false}
+        renderer={mapRenderer}
       >
         <TileLayer
           url={isDark 

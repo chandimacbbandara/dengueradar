@@ -57,10 +57,13 @@ function CryptoTooltip({ active, payload, label }) {
 
 /* ─── Skeleton ──────────────────────────────────────────────────── */
 function Skeleton() {
+  const isDark = document.body.getAttribute('data-theme') === 'dark';
   return (
     <div style={{
       height: 420, borderRadius: '20px',
-      background: 'linear-gradient(90deg, #0d1f3c 25%, #0f2d4a 50%, #0d1f3c 75%)',
+      background: isDark 
+        ? 'linear-gradient(90deg, #0d1f3c 25%, #0f2d4a 50%, #0d1f3c 75%)' 
+        : 'linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%)',
       backgroundSize: '200% 100%', animation: 'shimmer 1.5s infinite',
     }} />
   );
