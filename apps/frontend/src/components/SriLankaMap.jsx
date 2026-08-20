@@ -110,15 +110,18 @@ export default function SriLankaMap({ riskData, selectedDistrict }) {
       const geoName = feature?.properties?.name || feature?.properties?.NAME_1 || feature?.properties?.ADM2_EN || 'District';
       const districtData = safeRiskData.find(d => normalizeStr(d?.district) === normalizeStr(geoName));
       
-      let popupContent = `<strong>${geoName}</strong><br/>`;
+      let popupContent = `<div class="custom-popup">
+        <div class="popup-title">${geoName}</div>`;
       if (districtData) {
-        const scoreVal = districtData.riskScore != null ? Math.round(districtData.riskScore) : '—';
-        const levelStr = (districtData.riskLevel || 'low').toUpperCase();
-        popupContent += `Risk Score: ${scoreVal}<br/>
-        Level: <span class="risk-badge ${(districtData.riskLevel || 'low').toLowerCase()}">${levelStr}</span>`;
+        const scoreVal = districtData.riskScore != null ? Number(districtData.riskScore).toFixed(1) : '—';
+        const levelClass = (districtData.riskLevel || 'low').toLowerCase();
+        const badgeClass = levelClass === 'critical' ? 'crit' : levelClass === 'moderate' ? 'mod' : levelClass;
+        popupContent += `<div class="popup-row"><span>Risk Score:</span> <strong>${scoreVal}</strong></div>
+        <div class="popup-row"><span>Level:</span> <span class="badge ${badgeClass}">${levelClass.charAt(0).toUpperCase() + levelClass.slice(1)}</span></div>`;
       } else {
-        popupContent += `Data unavailable`;
+        popupContent += `<div class="popup-row">Data unavailable</div>`;
       }
+      popupContent += `</div>`;
       
       layer.bindPopup(popupContent);
       layer.on({

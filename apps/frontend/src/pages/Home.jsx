@@ -115,7 +115,7 @@ export default function Home() {
                   const riskColorClass = risk === 'critical' ? 'crit' : risk === 'moderate' ? 'mod' : risk;
                   return (
                     <div className="district-item" key={i}>
-                      <div className="name">{zone.mohZone} <small>Score: {Math.round(zone.riskScore)} / 100</small></div>
+                      <div className="name">{zone.mohZone} <small>Score: {Number(zone.riskScore).toFixed(1)} / 100</small></div>
                       <span className={`badge ${riskColorClass}`}>{risk.charAt(0).toUpperCase() + risk.slice(1)}</span>
                     </div>
                   );
