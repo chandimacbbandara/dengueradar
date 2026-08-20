@@ -82,13 +82,15 @@ class RAGService:
                     relevant_chunks.append(self.chunks[idx])
                     
             if not relevant_chunks:
-                return ""
+                # Fallback: if the query didn't match any specific keywords (e.g., conversational "what should I do"),
+                # provide the entire small knowledge base so the LLM has full context to answer from.
+                return "\n\n".join(self.chunks)
                 
             return "\n\n---\n\n".join(relevant_chunks)
             
         except Exception as e:
             logger.error("[RAGService] Error retrieving context: %s", e)
-            return ""
+            return "\n\n".join(self.chunks)
 
 # Singleton instance
 rag_retriever = RAGService()
