@@ -106,7 +106,7 @@ export default function MohDashboard() {
         
         {/* Sleek Hero Header */}
         <div style={{ background: 'var(--surface)', borderBottom: '1px solid var(--border)', padding: '24px 0' }}>
-          <div className="wrap" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div className="wrap-wide" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px' }}>
                 <span className="dot dot-high" style={{ animation: 'pulse 2s infinite', background: 'var(--brand)', boxShadow: '0 0 12px var(--brand)' }}></span>
@@ -122,7 +122,7 @@ export default function MohDashboard() {
         </div>
 
         {/* Main Grid: Sidebar + Content */}
-        <div className="wrap" style={{ display: 'grid', gridTemplateColumns: '280px 1fr', gap: '24px', padding: '32px 28px', alignItems: 'start' }}>
+        <div className="wrap-wide" style={{ display: 'grid', gridTemplateColumns: '280px 1fr', gap: '24px', padding: '32px 28px', alignItems: 'start' }}>
           
           {/* LEFT SIDEBAR: Control Panel */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', position: 'sticky', top: '92px' }}>

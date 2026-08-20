@@ -46,7 +46,12 @@ function MapZoomEffect({ selectedDistrict, geoData }) {
         const layer = L.geoJSON(feature);
         const bounds = layer.getBounds();
         if (bounds && bounds.isValid()) {
-          map.flyToBounds(bounds, { padding: [20, 20], duration: 1.5 });
+          if (!map._initialZoomDone) {
+            map.fitBounds(bounds, { padding: [20, 20], animate: false });
+            map._initialZoomDone = true;
+          } else {
+            map.flyToBounds(bounds, { padding: [20, 20], duration: 1.5 });
+          }
         }
       }
     } catch (err) {
@@ -56,6 +61,24 @@ function MapZoomEffect({ selectedDistrict, geoData }) {
   
   return null;
 }
+
+function InvalidateSizeEffect() {
+  const map = useMap();
+  useEffect(() => {
+    const trigger = () => {
+      map.invalidateSize();
+      window.dispatchEvent(new Event('resize'));
+    };
+    trigger();
+    const t1 = setTimeout(trigger, 100);
+    const t2 = setTimeout(trigger, 500);
+    const t3 = setTimeout(trigger, 1000);
+    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
+  }, [map]);
+  return null;
+}
+
+const mapRenderer = L.svg({ padding: 1.5 });
 
 export default function SriLankaMap({ riskData, selectedDistrict }) {
   const [geoData, setGeoData] = useState(null);
@@ -110,15 +133,18 @@ export default function SriLankaMap({ riskData, selectedDistrict }) {
       const geoName = feature?.properties?.name || feature?.properties?.NAME_1 || feature?.properties?.ADM2_EN || 'District';
       const districtData = safeRiskData.find(d => normalizeStr(d?.district) === normalizeStr(geoName));
       
-      let popupContent = `<strong>${geoName}</strong><br/>`;
+      let popupContent = `<div class="custom-popup">
+        <div class="popup-title">${geoName}</div>`;
       if (districtData) {
-        const scoreVal = districtData.riskScore != null ? Math.round(districtData.riskScore) : '—';
-        const levelStr = (districtData.riskLevel || 'low').toUpperCase();
-        popupContent += `Risk Score: ${scoreVal}<br/>
-        Level: <span class="risk-badge ${(districtData.riskLevel || 'low').toLowerCase()}">${levelStr}</span>`;
+        const scoreVal = districtData.riskScore != null ? Number(districtData.riskScore).toFixed(1) : '—';
+        const levelClass = (districtData.riskLevel || 'low').toLowerCase();
+        const badgeClass = levelClass === 'critical' ? 'crit' : levelClass === 'moderate' ? 'mod' : levelClass;
+        popupContent += `<div class="popup-row"><span>Risk Score:</span> <strong>${scoreVal}</strong></div>
+        <div class="popup-row"><span>Level:</span> <span class="badge ${badgeClass}">${levelClass.charAt(0).toUpperCase() + levelClass.slice(1)}</span></div>`;
       } else {
-        popupContent += `Data unavailable`;
+        popupContent += `<div class="popup-row">Data unavailable</div>`;
       }
+      popupContent += `</div>`;
       
       layer.bindPopup(popupContent);
       layer.on({
@@ -149,6 +175,7 @@ export default function SriLankaMap({ riskData, selectedDistrict }) {
         zoom={7} 
         style={{ height: '100%', width: '100%', borderRadius: 'inherit' }}
         zoomControl={false}
+        renderer={mapRenderer}
       >
         <TileLayer
           url={isDark 
@@ -167,6 +194,7 @@ export default function SriLankaMap({ riskData, selectedDistrict }) {
             {selectedDistrict && <MapZoomEffect selectedDistrict={selectedDistrict} geoData={geoData} />}
           </>
         )}
+        <InvalidateSizeEffect />
       </MapContainer>
     </div>
   );

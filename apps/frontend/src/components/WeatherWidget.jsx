@@ -1,18 +1,19 @@
 import { useState, useEffect } from 'react';
 import { weatherAPI } from '../services/api.js';
 import Icon from './Icon.jsx';
+import { useTranslation } from 'react-i18next';
 
 /* OpenWeather weather_code → icon + description */
-function describeWeather(code) {
-  if (!code) return { icon: 'thermometer', desc: 'Weather data loading...' };
-  if (code === 800)             return { icon: 'sun',  desc: 'Clear sky' };
-  if (code > 800)               return { icon: 'cloud',  desc: 'Cloudy' };
-  if (code >= 700)              return { icon: 'cloud-fog', desc: 'Foggy / Haze' };
-  if (code >= 600)              return { icon: 'snowflake',  desc: 'Snow' };
-  if (code >= 500)              return { icon: 'cloud-rain', desc: 'Rain' };
-  if (code >= 300)              return { icon: 'cloud-drizzle', desc: 'Drizzle' };
-  if (code >= 200)              return { icon: 'cloud-lightning',  desc: 'Thunderstorm' };
-  return { icon: 'thermometer', desc: 'Unknown' };
+function describeWeather(code, t) {
+  if (!code) return { icon: 'thermometer', desc: t('dashboard_components.weather.loading') };
+  if (code === 800)             return { icon: 'sun',  desc: t('dashboard_components.weather.clear') };
+  if (code > 800)               return { icon: 'cloud',  desc: t('dashboard_components.weather.cloudy') };
+  if (code >= 700)              return { icon: 'cloud-fog', desc: t('dashboard_components.weather.foggy') };
+  if (code >= 600)              return { icon: 'snowflake',  desc: t('dashboard_components.weather.snow') };
+  if (code >= 500)              return { icon: 'cloud-rain', desc: t('dashboard_components.weather.rain') };
+  if (code >= 300)              return { icon: 'cloud-drizzle', desc: t('dashboard_components.weather.drizzle') };
+  if (code >= 200)              return { icon: 'cloud-lightning',  desc: t('dashboard_components.weather.thunder') };
+  return { icon: 'thermometer', desc: t('dashboard_components.weather.unknown') };
 }
 
 function compassDir(deg) {
@@ -21,29 +22,35 @@ function compassDir(deg) {
   return dirs[Math.round(deg / 45) % 8];
 }
 
-export default function WeatherWidget({ district }) {
-  const [weather, setWeather] = useState(null);
-  const [loading, setLoading] = useState(true);
+export default function WeatherWidget({ district, weatherData, loading: externalLoading }) {
+  const { t } = useTranslation();
+  const [weather, setWeather] = useState(weatherData || null);
+  const [loading, setLoading] = useState(externalLoading !== undefined ? externalLoading : true);
 
   useEffect(() => {
+    if (weatherData !== undefined) {
+      setWeather(weatherData);
+      setLoading(externalLoading);
+      return;
+    }
     if (!district) return;
     weatherAPI.getDistrict(district)
       .then(res => setWeather(res.data.data))
       .catch(() => setWeather(null))   // silently fail — API key may not be active yet
       .finally(() => setLoading(false));
-  }, [district]);
+  }, [district, weatherData, externalLoading]);
 
   /* Not yet active or failed silently → render nothing rather than an ugly error */
   if (!loading && !weather) return null;
 
-  const { icon, desc } = describeWeather(weather?.weather_code);
+  const { icon, desc } = describeWeather(weather?.weather_code, t);
   const temp       = weather?.temperature_mean != null ? `${Math.round(weather.temperature_mean)}°C` : '—';
   const feelsLike  = weather?.apparent_temperature != null ? `${Math.round(weather.apparent_temperature)}°C` : '—';
   const humidity   = weather?.humidity != null ? `${weather.humidity}%` : '—';
   const wind       = weather?.wind_speed != null
     ? `${weather.wind_speed.toFixed(1)} m/s ${compassDir(weather.wind_direction)}`
     : '—';
-  const rainfall   = weather?.rainfall > 0 ? `${weather.rainfall.toFixed(1)} mm` : 'No rain';
+  const rainfall   = weather?.rainfall > 0 ? `${weather.rainfall.toFixed(1)} mm` : t('dashboard_components.weather.norain');
   const updatedAt  = weather?.fetched_at
     ? new Date(weather.fetched_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
     : null;
@@ -90,10 +97,10 @@ export default function WeatherWidget({ district }) {
         flexWrap: 'wrap',
       }}>
         {[
-          { icName: 'thermometer', label: 'Feels like', value: feelsLike },
-          { icName: 'droplet', label: 'Humidity',   value: humidity },
-          { icName: 'wind', label: 'Wind',        value: wind },
-          { icName: 'cloud-rain', label: 'Rainfall',   value: rainfall },
+          { icName: 'thermometer', label: t('dashboard_components.weather.feels'), value: feelsLike },
+          { icName: 'droplet', label: t('dashboard_components.weather.humidity'),   value: humidity },
+          { icName: 'wind', label: t('dashboard_components.weather.wind'),        value: wind },
+          { icName: 'cloud-rain', label: t('dashboard_components.weather.rainfall'),   value: rainfall },
         ].map(({ icName, label, value }) => (
           <div key={label} style={{
             display: 'flex', flexDirection: 'column',

@@ -3,6 +3,7 @@ import { Toaster } from 'react-hot-toast';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
 import Home from './pages/Home.jsx';
 import Login from './pages/Login.jsx';
+import ForgotPassword from './pages/ForgotPassword.jsx';
 import SignupGeneral from './pages/SignupGeneral.jsx';
 import SignupMohOfficer from './pages/SignupMohOfficer.jsx';
 import Dashboard from './pages/Dashboard.jsx';
@@ -23,6 +24,7 @@ export default function App() {
           <Route path="/" element={<Home />} />
           <Route path="/how-it-works" element={<HowItWorks />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/signup/general" element={<SignupGeneral />} />
           <Route path="/signup/moh-officer" element={<SignupMohOfficer />} />
           <Route

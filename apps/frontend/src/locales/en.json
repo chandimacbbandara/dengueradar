@@ -35,24 +35,275 @@
     "selectDistrict": "Select District"
   },
   "dashboard": {
-    "activeCases": "Active Cases",
-    "highRiskZones": "High-Risk Zones",
-    "alertsSent": "Alerts Sent This Week",
-    "exportCSV": "Export CSV",
-    "cooldown": "Alert Cooldown Active",
-    "sendAlert": "Send Alert"
+    "welcome": "Welcome back, {{name}}!",
+    "editProfile": "Edit Profile"
   },
   "auth": {
-    "loginTitle": "Welcome Back",
-    "loginSubtitle": "Enter your credentials to access your account.",
+    "loginTitle": "Log in",
+    "loginSubtitle": "Enter your details to access your account.",
     "email": "Email Address",
     "password": "Password",
-    "loginBtn": "Sign In"
+    "loginBtn": "Sign In",
+    "leftTitle": "Welcome Back",
+    "leftDesc": "Access your personalized dashboard to monitor local dengue risks and manage your alert preferences.",
+    "leftPoint1": "Real-time risk map",
+    "leftPoint2": "Instant WhatsApp alerts",
+    "leftPoint3": "Accurate AI predictions",
+    "forgotPass": "Forgot Password?",
+    "noAccount": "Don't have an account?",
+    "createOne": "Create one",
+    "signupTitle": "Create Account",
+    "signupSubtitle": "Join DengueRadar for real-time alerts.",
+    "name": "Full Name",
+    "phone": "Phone Number",
+    "district": "Select District",
+    "passwordConfirm": "Confirm Password",
+    "signupBtn": "Create Account",
+    "haveAccount": "Already have an account?",
+    "loginHere": "Log in",
+    "forgotTitle": "Reset Password",
+    "forgotSubtitle": "Enter your email to receive a password reset link.",
+    "sendLinkBtn": "Send Reset Link",
+    "backToLogin": "Back to Login",
+    "registerMohTitle": "MOH Registration",
+    "registerMohSubtitle": "Apply for an official Health Officer account.",
+    "mohZone": "MOH Zone",
+    "registerMohBtn": "Submit Application"
   },
   "footer": {
     "tagline": "Protecting communities through data-driven early warnings.",
     "quickLinks": "Quick Links",
     "contact": "Contact Us",
     "rights": "All rights reserved."
+  },
+  "home": {
+    "hero": {
+      "eyebrow": "AI-Powered Public Health Intelligence",
+      "titlePart1": "Predicting dengue outbreaks ",
+      "titlePart2": "before they happen.",
+      "lead": "DengueRadar combines live weather data, historical case records, and machine learning (LSTM & XGBoost) to forecast district-level dengue risk across Sri Lanka up to two weeks in advance.",
+      "viewMap": "View Live Risk Map",
+      "howItWorks": "How It Works",
+      "districtsMonitored": "Districts Monitored",
+      "forecastHorizon": "Forecast Horizon",
+      "liveWeather": "Live Weather Ingestion"
+    },
+    "topRisk": {
+      "title": "Top Risk MOH Areas",
+      "live": "LIVE",
+      "score": "Score",
+      "loading": "Loading intelligence data..."
+    },
+    "mapSection": {
+      "kicker": "Command Center",
+      "title": "Live Dengue Status Map",
+      "desc": "Real-time district-level risk levels sourced from the AI prediction engine.",
+      "updatedNow": "LIVE · UPDATED JUST NOW",
+      "cardTitle": "Sri Lanka — District Risk Overview",
+      "filters": "Filters",
+      "export": "Export",
+      "lowRisk": "Low Risk",
+      "moderateRisk": "Moderate Risk",
+      "highRisk": "High Risk"
+    },
+    "stats": {
+      "activeCases": "Active Dengue Cases (Est)",
+      "newCases": "New Cases (Last 24h)",
+      "criticalZones": "Critical MOH Zones",
+      "modelAccuracy": "Model Accuracy (Last 30d)"
+    },
+    "ticker": {
+      "label": "LATEST INTELLIGENCE",
+      "msg1": "AI prediction model updated for all 25 districts",
+      "msg2": "ALERT: Colombo district rainfall exceeded 200mm threshold, breeding risk elevated",
+      "msg3": "UPDATE: Ministry of Health reports 12% decrease in national case load this week",
+      "msg4": "Gampaha: Predicted risk moved from Moderate to High for the next 14 days"
+    },
+    "forecast": {
+      "title": "Dengue Risk Forecast",
+      "desc": "Historical cases vs. AI-forecasted risk — 7-day horizon.",
+      "export": "Export Data"
+    },
+    "weather": {
+      "title": "Weather Intelligence",
+      "updated": "UPDATED 12 MIN AGO",
+      "colombo": "Colombo",
+      "humidity": "Humidity",
+      "rainfall": "Rainfall",
+      "wind": "Wind"
+    },
+    "alerts": {
+      "title": "Alert Center",
+      "active": "Active",
+      "alert1Title": "High-risk district detected",
+      "alert1Time": "Colombo · 18 min ago",
+      "alert1Desc": "Case density crossed the high-risk threshold this week.",
+      "alert2Title": "Risk increasing",
+      "alert2Time": "Gampaha · 1h ago",
+      "alert2Desc": "Predicted risk moved from Moderate to High over 14 days.",
+      "alert3Title": "Heavy rainfall conditions",
+      "alert3Time": "Kalutara · 3h ago",
+      "alert3Desc": "Rainfall 40% above seasonal average, breeding risk elevated."
+    },
+    "changes": {
+      "title": "What's Changing?",
+      "point1": "Risk increased in 2 districts over the past week.",
+      "point2": "Rainfall increased sharply in the Western province.",
+      "point3": "National dengue cases decreased slightly week-over-week.",
+      "point4": "Forecast indicates increasing risk over the next 14 days."
+    },
+    "status": {
+      "title": "Data & Model Status",
+      "feed": "Case Data Feed",
+      "connected": "Connected",
+      "api": "Weather API",
+      "model": "Prediction Model",
+      "active": "v2.3 Active",
+      "sync": "Last Full Sync"
+    }
+  },
+  "howItWorks": {
+    "hero": {
+      "title": "How DengueRadar Works",
+      "subtitle": "We analyze thousands of data points daily to predict dengue outbreaks before they occur. Here's a look under the hood."
+    },
+    "dataInput": {
+      "title": "The Data Pipeline",
+      "desc": "Our model's intelligence stems from diverse, high-quality data sources integrated in real-time.",
+      "card1Title": "Historical Cases",
+      "card1Desc": "Cases from the last 1-5 weeks, 2-6 months ago, and exactly one year ago to capture strong seasonality.",
+      "card2Title": "Rolling Stats & Growth",
+      "card2Desc": "Mean, peak, variability, week-over-week growth, and 8-week linear trends indicating momentum.",
+      "card3Title": "Weather Interactions",
+      "card3Desc": "Temperature, humidity, rainfall lags (since mosquitoes breed 2-4 weeks after rain), and heat indices.",
+      "card4Title": "District Context",
+      "card4Desc": "Total district cases and the neighbourhood's percentile rank within the district (are you the epicenter?)."
+    },
+    "modelAuth": {
+      "title": "How does the AI decide?",
+      "desc1": "We don't use one AI. We use ",
+      "desc2": "multiple different AIs that vote together",
+      "desc3": ", plus a meta-learner that learns how to combine their votes (stacking ensemble).",
+      "chartTitle": "Test Accuracy (2025-2026 Held-out Data)",
+      "chartFooter": "Tested on 16,035 (MOH, week) pairs. The 76.8% is honest, production-grade accuracy on unseen data."
+    },
+    "faq": {
+      "title": "Frequently Asked Questions",
+      "q1": "Is this replacing traditional surveillance?",
+      "a1": "No. DengueRadar is an early-warning tool designed to augment traditional surveillance. It helps health workers allocate limited resources preemptively.",
+      "q2": "How far into the future can you predict?",
+      "a2": "Our model generates forecasts for a 14-day horizon. However, accuracy is highest for the immediate 7-day window.",
+      "q3": "How often is the model updated?",
+      "a3": "The model runs daily inferences based on the latest live weather data, while case data is synchronized weekly from the Ministry of Health."
+    }
+  },
+  "profile": {
+    "title": "Account Settings",
+    "subtitle": "Manage your profile and notification preferences",
+    "personalInfo": "Personal Information",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "officerName": "Officer Name",
+    "whatsappNumber": "WhatsApp Number",
+    "districtRo": "District (Read-only)",
+    "mohZoneRo": "MOH Zone (Read-only)",
+    "saving": "Saving...",
+    "saveChanges": "Save Changes",
+    "accountDetails": "Account Details",
+    "email": "Email Address",
+    "role": "Account Role",
+    "memberSince": "Member Since",
+    "password": "Password",
+    "changePassword": "Change Password"
+  },
+  "dashboard_components": {
+    "risk_card": {
+      "title": "Your Area Risk",
+      "updated": "Risk status updated",
+      "recently": "Recently",
+      "description": "Based on recent environmental conditions and historical data, the AI model has classified this zone as {{level}}.",
+      "levels": {
+        "low": "Low Risk",
+        "moderate": "Moderate Risk",
+        "high": "High Risk",
+        "critical": "Critical Risk",
+        "unknown": "Data Unavailable"
+      }
+    },
+    "factors_card": {
+      "title": "Key Risk Factors",
+      "subtitle": "Understanding why the AI assigned this risk level to your area.",
+      "outbreak": "Recent Outbreak Activity",
+      "outbreak_high": "High case density in surrounding neighborhoods.",
+      "outbreak_low": "Minimal recent cases reported locally.",
+      "rain": "Precipitation Impact",
+      "rain_high": "Heavy rainfall has created ideal breeding conditions.",
+      "rain_low": "Rainfall levels are low to moderate.",
+      "temp": "Temperature & Humidity",
+      "temp_high": "Conditions are highly favorable for mosquito lifecycle.",
+      "temp_low": "Current conditions are not ideal for mosquitoes.",
+      "why": "Why is my area at risk?"
+    },
+    "local_map": {
+      "title": "Risk Around You",
+      "subtitle": "Explore the current dengue risk levels in {{district}} and surrounding districts."
+    },
+    "summary_card": {
+      "title": "This Week in Your Area",
+      "subtitle": "What's happening right now",
+      "temp": "Temperature",
+      "rain": "Rainfall",
+      "predicted": "Total predicted cases for this week",
+      "nodata": "Data not available",
+      "prediction": "AI Prediction",
+      "environment": "Environmental Data"
+    },
+    "alerts": {
+      "title": "Recent Alerts",
+      "empty": "No recent alerts for your area.",
+      "increased": "Risk Increased",
+      "alert": "Dengue Alert",
+      "changed": "Risk level in your zone changed to {{level}}.",
+      "show_less": "Show Less",
+      "view_all": "View all {{count}} alerts"
+    },
+    "actions": {
+      "title": "What You Should Do Now",
+      "subtitle": "Immediate actions recommended based on current risk level."
+    },
+    "checklist": {
+      "title": "Protect Your Home",
+      "subtitle": "Weekly 10-minute chores to keep your family safe."
+    },
+    "trend": {
+      "title": "Your Area Dengue Risk Trend",
+      "subtitle": "Monitor how dengue risk in your area has changed over time.",
+      "daily": "Daily",
+      "weekly": "Weekly",
+      "monthly": "Monthly",
+      "predicted": "Predicted",
+      "historical": "Historical",
+      "increasing": "↑ Risk is increasing compared with the previous period.",
+      "decreasing": "↓ Risk is decreasing compared with the previous period.",
+      "stable": "→ Risk has remained relatively stable.",
+      "source": "Data scoped to {{zone}} · Source: EPID Unit records"
+    },
+    "weather": {
+      "loading": "Weather data loading...",
+      "clear": "Clear sky",
+      "cloudy": "Cloudy",
+      "foggy": "Foggy / Haze",
+      "snow": "Snow",
+      "rain": "Rain",
+      "drizzle": "Drizzle",
+      "thunder": "Thunderstorm",
+      "unknown": "Unknown",
+      "feels": "Feels like",
+      "humidity": "Humidity",
+      "wind": "Wind",
+      "rainfall": "Rainfall",
+      "updated": "Updated {{time}}",
+      "norain": "No rain"
+    }
   }
 }

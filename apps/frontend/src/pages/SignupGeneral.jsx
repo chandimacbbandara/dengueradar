@@ -1,10 +1,12 @@
 import { useState, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
 import { authAPI } from '../services/api.js';
 import toast from 'react-hot-toast';
 import DistrictZoneSelect from '../components/DistrictZoneSelect.jsx';
 import PasswordStrength from '../components/PasswordStrength.jsx';
 import Icon from '../components/Icon.jsx';
+import Navbar from '../components/Navbar.jsx';
 
 /* ─── 6-box OTP input ───────────────────────────────────────────── */
 function OtpInput({ value, onChange }) {
@@ -45,8 +47,7 @@ function OtpInput({ value, onChange }) {
           onChange={() => {}}
           onFocus={e => e.target.select()}
           style={{
-            width: '52px', height: '64px',
-            textAlign: 'center',
+            width: '52px', height: '64px', textAlign: 'center',
             fontSize: '26px', fontWeight: 800,
             border: `2px solid ${d && d !== ' ' ? 'var(--brand)' : 'var(--border)'}`,
             borderRadius: '12px',
@@ -55,7 +56,6 @@ function OtpInput({ value, onChange }) {
             outline: 'none',
             transition: 'all 0.15s ease',
             boxShadow: d && d !== ' ' ? '0 0 0 3px rgba(14,165,165,0.15)' : 'none',
-            caretColor: 'var(--brand)',
           }}
         />
       ))}
@@ -65,35 +65,40 @@ function OtpInput({ value, onChange }) {
 
 /* ─── Main component ────────────────────────────────────────────── */
 export default function SignupGeneral() {
+  const { t } = useTranslation();
   const [step, setStep]     = useState('form');   // 'form' | 'otp'
   const [formData, setFormData] = useState({
     firstName: '', lastName: '', email: '', whatsappNumber: '', password: '', confirmPassword: ''
   });
   const [district, setDistrict] = useState('');
   const [mohZone,  setMohZone]  = useState('');
+  
   const [otp,      setOtp]      = useState('');
   const [errors,   setErrors]   = useState({});
   const [loading,  setLoading]  = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
+
   const navigate = useNavigate();
 
   const validate = () => {
     const e = {};
-    if (!formData.firstName)                        e.firstName        = 'Required';
-    if (!formData.email.includes('@'))              e.email            = 'Invalid email';
-    if (!formData.whatsappNumber)                   e.whatsappNumber   = 'Required';
-    if (formData.password.length < 8)               e.password         = 'At least 8 characters';
+    if (!formData.firstName)                          e.firstName      = 'Required';
+    if (!formData.lastName)                           e.lastName       = 'Required';
+    if (!formData.email.includes('@'))                e.email          = 'Invalid email';
+    if (!formData.whatsappNumber)                     e.whatsappNumber = 'Required';
+    if (formData.password.length < 8)                 e.password       = 'At least 8 characters';
     if (formData.password !== formData.confirmPassword) e.confirmPassword = 'Passwords do not match';
-    if (!district)                                  e.district         = 'Required';
-    if (!mohZone)                                   e.mohZone          = 'Required';
+    if (!district)                                    e.district       = 'Required';
+    if (!mohZone)                                     e.mohZone        = 'Required';
+
     setErrors(e);
     return Object.keys(e).length === 0;
   };
 
-  /* Step 1: send OTP */
   const handleSendOtp = async (e) => {
     e.preventDefault();
     if (!validate()) return;
+
     setLoading(true);
     try {
       await authAPI.sendOtp({ email: formData.email, name: formData.firstName });
@@ -101,18 +106,20 @@ export default function SignupGeneral() {
       toast.success(`Verification code sent to ${formData.email}`);
       startCooldown();
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to send OTP');
+      toast.error(err.response?.data?.message || 'Failed to send verification code');
     } finally {
       setLoading(false);
     }
   };
 
-  /* Resend cooldown (60 s) */
   const startCooldown = () => {
     setResendCooldown(60);
     const id = setInterval(() => {
       setResendCooldown(prev => {
-        if (prev <= 1) { clearInterval(id); return 0; }
+        if (prev <= 1) {
+          clearInterval(id);
+          return 0;
+        }
         return prev - 1;
       });
     }, 1000);
@@ -127,13 +134,12 @@ export default function SignupGeneral() {
       setOtp('');
       startCooldown();
     } catch (err) {
-      toast.error('Failed to resend');
+      toast.error('Failed to resend code');
     } finally {
       setLoading(false);
     }
   };
 
-  /* Step 2: verify OTP then register */
   const handleVerifyAndRegister = async (e) => {
     e.preventDefault();
     const trimmedOtp = otp.replace(/\s/g, '');
@@ -141,21 +147,27 @@ export default function SignupGeneral() {
       toast.error('Please enter all 6 digits');
       return;
     }
+
     setLoading(true);
     try {
-      // Verify OTP
       await authAPI.verifyOtp({ email: formData.email, otp: trimmedOtp });
-
-      // Complete registration
-      await authAPI.signupGeneral({
-        ...formData,
+      const payload = {
+        name: formData.firstName + ' ' + formData.lastName,
+        email: formData.email,
+        password: formData.password,
         whatsappNumber: '+94' + formData.whatsappNumber.replace(/^0+/, ''),
         district,
         mohZone,
-      });
-
-      toast.success(' Account created! You can now log in.', { duration: 5000 });
+        role: 'general'
+      };
+      const res = await authAPI.signupGeneral(payload);
+      const { token } = res.data;
+      
+      // We don't auto-login here since auth logic depends on useAuthStore login function which isn't used here.
+      // Easiest is to redirect to login.
+      toast.success('Account created successfully!');
       navigate('/login');
+
     } catch (err) {
       toast.error(err.response?.data?.message || 'Verification failed');
     } finally {
@@ -166,27 +178,25 @@ export default function SignupGeneral() {
   /* ── OTP step UI ── */
   if (step === 'otp') {
     return (
+      <>
+      <Navbar />
       <div className="auth-layout">
         <div className="auth-panel-left">
-          <Link to="/" className="text-2xl font-extrabold mb-12 flex items-center gap-2" style={{ color: 'var(--brand)' }}>
-             <Icon name="activity" /> Dengue<span>Radar</span>
-          </Link>
-          <h1 className="text-4xl font-extrabold mb-4">Check your inbox</h1>
-          <p className="text-lg mb-8 max-w-md" style={{ color: 'rgba(255,255,255,0.85)' }}>
+
+          <h1 style={{ fontSize: '36px', fontWeight: 800, marginBottom: '16px', lineHeight: 1.2 }}>Check your inbox</h1>
+          <p style={{ fontSize: '18px', marginBottom: '32px', maxWidth: '400px', color: 'var(--text-2)' }}>
             We sent a 6-digit verification code to protect your account.
-            It expires in 10 minutes.
           </p>
-          <ul className="flex flex-col gap-4">
-            <li className="flex items-center gap-3"><Icon name="shield" size={20} /> Check spam/junk if you don't see it</li>
-            <li className="flex items-center gap-3"><Icon name="alert" size={20} /> Code is valid for 10 minutes</li>
-            <li className="flex items-center gap-3"><Icon name="activity" size={20} /> Never share your code with anyone</li>
+          <ul style={{ display: 'flex', flexDirection: 'column', gap: '16px', listStyle: 'none', padding: 0 }}>
+            <li style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><Icon name="shield" size={20} color="var(--teal)" /> Check spam/junk if you don't see it</li>
+            <li style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><Icon name="alert-triangle" size={20} color="var(--teal)" /> Code valid for 10 minutes</li>
+            <li style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><Icon name="activity" size={20} color="var(--teal)" /> Never share your code with anyone</li>
           </ul>
         </div>
 
         <div className="auth-panel-right">
           <div style={{maxWidth:'440px', width:'100%', margin:'0 auto'}}>
 
-            {/* Animated envelope */}
             <div style={{textAlign:'center', marginBottom:'8px'}}>
               <div style={{
                 width:'80px', height:'80px', borderRadius:'50%',
@@ -203,11 +213,12 @@ export default function SignupGeneral() {
 
             <form onSubmit={handleVerifyAndRegister}>
               <OtpInput value={otp} onChange={setOtp} />
-
+              
               <button
                 id="verify-otp-btn"
                 type="submit"
-                className="btn btn-primary w-full justify-center"
+                className="btn btn-primary"
+                style={{ width: '100%', justifyContent: 'center' }}
                 disabled={loading || otp.replace(/\s/g,'').length < 6}
               >
                 {loading ? 'Verifying...' : 'Verify & Create Account'}
@@ -223,7 +234,8 @@ export default function SignupGeneral() {
                 style={{
                   marginTop:'8px', background:'none', border:'none',
                   color: resendCooldown > 0 ? 'var(--text-3)' : 'var(--brand)',
-                  fontWeight: 600, fontSize:'14px', cursor: resendCooldown > 0 ? 'default' : 'pointer',
+                  fontWeight:600, fontSize:'14px',
+                  cursor: resendCooldown > 0 ? 'default' : 'pointer',
                 }}
               >
                 {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : 'Resend code'}
@@ -242,88 +254,90 @@ export default function SignupGeneral() {
           </div>
         </div>
       </div>
+      </>
     );
   }
 
   /* ── Registration form step ── */
   return (
-    <div className="auth-layout">
+    <>
+      <Navbar />
+      <div className="auth-layout">
       <div className="auth-panel-left">
-        <Link to="/" className="text-2xl font-extrabold mb-12 flex items-center gap-2" style={{ color: 'var(--brand)' }}>
-           <Icon name="activity" /> Dengue<span>Radar</span>
-        </Link>
-        <h1 className="text-4xl font-extrabold mb-4">Join DengueRadar</h1>
-        <p className="text-lg mb-8 max-w-md" style={{ color: 'rgba(255,255,255,0.85)' }}>Stay ahead of dengue outbreaks and protect your family with real-time risk alerts.</p>
-        <ul className="flex flex-col gap-4">
-          <li className="flex items-center gap-3"><Icon name="shield" size={20} /> Localized risk updates</li>
-          <li className="flex items-center gap-3"><Icon name="alert" size={20} /> WhatsApp push alerts</li>
-          <li className="flex items-center gap-3"><Icon name="activity" size={20} /> Community protection tools</li>
+        <h1 style={{ fontSize: '36px', fontWeight: 800, marginBottom: '16px', lineHeight: 1.2 }}>{t('auth.leftTitle')}</h1>
+        <p style={{ fontSize: '18px', marginBottom: '32px', maxWidth: '400px', color: 'var(--text-2)' }}>
+          {t('auth.leftDesc')}
+        </p>
+        <ul style={{ display: 'flex', flexDirection: 'column', gap: '16px', listStyle: 'none', padding: 0 }}>
+          <li style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><Icon name="shield" size={20} color="var(--teal)" /> {t('auth.leftPoint1')}</li>
+          <li style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><Icon name="alert-triangle" size={20} color="var(--teal)" /> {t('auth.leftPoint2')}</li>
+          <li style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><Icon name="activity" size={20} color="var(--teal)" /> {t('auth.leftPoint3')}</li>
         </ul>
       </div>
 
       <div className="auth-panel-right">
         <div style={{maxWidth:'480px', width:'100%', margin:'0 auto'}}>
-          <h2 className="auth-form-title">Create Account</h2>
-          <p className="auth-form-subtitle">Register to receive dengue risk alerts for your area.</p>
+          <h2 className="auth-form-title">{t("auth.signupTitle")}</h2>
+          <p className="auth-form-subtitle">{t("auth.signupSubtitle")}</p>
 
-          <form onSubmit={handleSendOtp} className="flex flex-col gap-4">
-            <div className="grid-2 gap-4">
+          <form onSubmit={handleSendOtp} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
               <div className="form-group" style={{marginBottom:0}}>
-                <label className="form-label">First Name</label>
+                <label className="form-label">{t("auth.name")} (First)</label>
                 <input type="text" className={`form-input ${errors.firstName?'error':''}`} value={formData.firstName} onChange={e=>setFormData({...formData,firstName:e.target.value})} />
                 {errors.firstName && <span className="form-error">{errors.firstName}</span>}
               </div>
               <div className="form-group" style={{marginBottom:0}}>
                 <label className="form-label">Last Name</label>
-                <input type="text" className="form-input" value={formData.lastName} onChange={e=>setFormData({...formData,lastName:e.target.value})} />
+                <input type="text" className={`form-input ${errors.lastName?'error':''}`} value={formData.lastName} onChange={e=>setFormData({...formData,lastName:e.target.value})} />
+                {errors.lastName && <span className="form-error">{errors.lastName}</span>}
               </div>
             </div>
 
             <div className="form-group" style={{marginBottom:0}}>
-              <label className="form-label">Email Address</label>
+              <label className="form-label">{t("auth.email")}</label>
               <input type="email" className={`form-input ${errors.email?'error':''}`} value={formData.email} onChange={e=>setFormData({...formData,email:e.target.value})} />
               {errors.email && <span className="form-error">{errors.email}</span>}
             </div>
 
             <div className="form-group" style={{marginBottom:0}}>
-              <label className="form-label">WhatsApp Number</label>
+              <label className="form-label">{t("auth.phone")} (WhatsApp)</label>
               <div style={{display:'flex'}}>
                 <span style={{padding:'12px',background:'var(--surface-2)',border:'1.5px solid var(--border)',borderRight:'none',borderRadius:'var(--radius-md) 0 0 var(--radius-md)'}}>+94</span>
-                <input type="text" className={`form-input ${errors.whatsappNumber?'error':''}`} style={{borderRadius:'0 var(--radius-md) var(--radius-md) 0'}} placeholder="771234567" value={formData.whatsappNumber} onChange={e=>setFormData({...formData,whatsappNumber:e.target.value})} />
+                <input type="text" className={`form-input ${errors.whatsappNumber?'error':''}`} style={{borderRadius:'0 var(--radius-md) var(--radius-md) 0',width:'100%'}} placeholder="771234567" value={formData.whatsappNumber} onChange={e=>setFormData({...formData,whatsappNumber:e.target.value})} />
               </div>
+              <span style={{fontSize:'12px', color:'var(--text-3)', marginTop:'4px'}}>Used for severe risk alerts only.</span>
               {errors.whatsappNumber && <span className="form-error">{errors.whatsappNumber}</span>}
             </div>
 
             <DistrictZoneSelect district={district} setDistrict={setDistrict} mohZone={mohZone} setMohZone={setMohZone} errors={errors} />
 
-            <div className="grid-2 gap-4">
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
               <div className="form-group" style={{marginBottom:0}}>
-                <label className="form-label">Password</label>
+                <label className="form-label">{t("auth.password")}</label>
                 <input type="password" className={`form-input ${errors.password?'error':''}`} value={formData.password} onChange={e=>setFormData({...formData,password:e.target.value})} />
                 <PasswordStrength password={formData.password} />
                 {errors.password && <span className="form-error">{errors.password}</span>}
               </div>
               <div className="form-group" style={{marginBottom:0}}>
-                <label className="form-label">Confirm Password</label>
+                <label className="form-label">{t("auth.passwordConfirm")}</label>
                 <input type="password" className={`form-input ${errors.confirmPassword?'error':''}`} value={formData.confirmPassword} onChange={e=>setFormData({...formData,confirmPassword:e.target.value})} />
                 {errors.confirmPassword && <span className="form-error">{errors.confirmPassword}</span>}
               </div>
             </div>
 
-            <label className="flex items-center gap-2 text-sm mt-2 cursor-pointer">
-              <input type="checkbox" required /> I agree to the Terms of Service and Privacy Policy
-            </label>
-
-            <button id="signup-submit-btn" type="submit" className="btn btn-primary w-full justify-center mt-4" disabled={loading}>
+            <button id="general-signup-btn" type="submit" className="btn btn-primary" style={{ width: '100%', justifyContent: 'center', marginTop:'8px' }} disabled={loading}>
               {loading ? 'Sending Code...' : 'Continue — Verify Email →'}
             </button>
           </form>
 
-          <div className="mt-8 text-center text-sm text-muted">
-            Already have an account? <Link to="/login" className="text-primary font-semibold">Log in</Link>
+          <div style={{ marginTop: '32px', textAlign: 'center', fontSize: '14px', color: 'var(--text-3)' }}>
+            {t('auth.haveAccount')} <Link to="/login" style={{ color: 'var(--teal)', fontWeight: 600, textDecoration: 'none' }}>{t('auth.loginHere')}</Link>
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 }

@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   ResponsiveContainer,
   AreaChart,
@@ -12,9 +13,9 @@ import { userAPI } from '../services/api.js';
 
 /* ─── Constants ─────────────────────────────────────────────────── */
 const PERIODS = [
-  { key: 'daily',   label: 'Daily',   sub: '30 days' },
-  { key: 'weekly',  label: 'Weekly',  sub: '12 weeks' },
-  { key: 'monthly', label: 'Monthly', sub: '12 months' },
+  { key: 'daily',   labelKey: 'dashboard_components.trend.daily',   sub: '30 days' },
+  { key: 'weekly',  labelKey: 'dashboard_components.trend.weekly',  sub: '12 weeks' },
+  { key: 'monthly', labelKey: 'dashboard_components.trend.monthly', sub: '12 months' },
 ];
 
 const RISK_COLOR = { high: '#EF4444', moderate: '#F59E0B', low: '#10B981' };
@@ -56,10 +57,13 @@ function CryptoTooltip({ active, payload, label }) {
 
 /* ─── Skeleton ──────────────────────────────────────────────────── */
 function Skeleton() {
+  const isDark = document.body.getAttribute('data-theme') === 'dark';
   return (
     <div style={{
       height: 420, borderRadius: '20px',
-      background: 'linear-gradient(90deg, #0d1f3c 25%, #0f2d4a 50%, #0d1f3c 75%)',
+      background: isDark 
+        ? 'linear-gradient(90deg, #0d1f3c 25%, #0f2d4a 50%, #0d1f3c 75%)' 
+        : 'linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%)',
       backgroundSize: '200% 100%', animation: 'shimmer 1.5s infinite',
     }} />
   );
@@ -116,6 +120,7 @@ function PeriodTab({ p, active, onClick }) {
 
 /* ─── Main component ────────────────────────────────────────────── */
 export default function ZoneTrendChart({ district, mohZone }) {
+  const { t } = useTranslation();
   const [period, setPeriod]       = useState('monthly');
   const [trendData, setTrendData] = useState(null);
   const [loading, setLoading]     = useState(true);
@@ -202,13 +207,13 @@ export default function ZoneTrendChart({ district, mohZone }) {
               animation: 'pulse 2s ease infinite', display: 'inline-block',
             }} />
             <span style={{ fontSize: '11px', fontWeight: 700, color: '#0EA5A5', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-              Dengue Case Trend
+              {t('dashboard_components.trend.title')}
             </span>
           </div>
           <h3 style={{ fontSize: '18px', fontWeight: 800, color: '#F1F5F9', margin: 0 }}>
             📍 {zone || '—'}
           </h3>
-          <p style={{ fontSize: '12px', color: '#64748B', marginTop: '2px' }}>{district} District</p>
+          <p style={{ fontSize: '12px', color: '#64748B', marginTop: '2px' }}>{t('dashboard_components.trend.subtitle')}</p>
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
@@ -221,7 +226,7 @@ export default function ZoneTrendChart({ district, mohZone }) {
             padding: '4px',
           }}>
             {PERIODS.map(p => (
-              <PeriodTab key={p.key} p={p} active={period === p.key} onClick={handlePeriod} />
+              <PeriodTab key={p.key} p={{...p, label: t(p.labelKey)}} active={period === p.key} onClick={handlePeriod} />
             ))}
           </div>
 
@@ -341,9 +346,14 @@ export default function ZoneTrendChart({ district, mohZone }) {
       </div>
 
       {/* Footer */}
-      <p style={{ fontSize: '11px', color: '#1e3a5f', marginTop: '14px', textAlign: 'right' }}>
-        Data scoped to {zone} · Source: EPID Unit records
-      </p>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '14px' }}>
+        <p style={{ fontSize: '13px', color: 'var(--text)', fontWeight: 500 }}>
+          {delta > 2 ? t('dashboard_components.trend.increasing') : delta < -2 ? t('dashboard_components.trend.decreasing') : t('dashboard_components.trend.stable')}
+        </p>
+        <p style={{ fontSize: '11px', color: '#1e3a5f', textAlign: 'right' }}>
+          {t('dashboard_components.trend.source', { zone })}
+        </p>
+      </div>
     </div>
   );
 }
