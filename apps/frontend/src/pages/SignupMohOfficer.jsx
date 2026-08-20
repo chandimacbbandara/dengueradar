@@ -1,10 +1,12 @@
 import { useState, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
 import { authAPI } from '../services/api.js';
 import toast from 'react-hot-toast';
 import DistrictZoneSelect from '../components/DistrictZoneSelect.jsx';
 import PasswordStrength from '../components/PasswordStrength.jsx';
 import Icon from '../components/Icon.jsx';
+import Navbar from '../components/Navbar.jsx';
 
 /* ─── 6-box OTP input (shared pattern) ─────────────────────────── */
 function OtpInput({ value, onChange }) {
@@ -62,6 +64,7 @@ function OtpInput({ value, onChange }) {
 }
 
 export default function SignupMohOfficer() {
+  const { t } = useTranslation();
   const [step, setStep]       = useState('form');
   const [formData, setFormData] = useState({
     officerName: '', email: '', whatsappNumber: '', password: '', confirmPassword: '', employeeId: ''
@@ -153,11 +156,11 @@ export default function SignupMohOfficer() {
   /* ── OTP step ── */
   if (step === 'otp') {
     return (
+      <>
+      <Navbar />
       <div className="auth-layout">
         <div className="auth-panel-left">
-          <Link to="/" style={{ fontSize: '24px', fontWeight: 800, marginBottom: '48px', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--teal)', textDecoration: 'none' }}>
-             <Icon name="activity" /> Dengue<span style={{ color: 'var(--text)' }}>Radar</span>
-          </Link>
+          
           <h1 style={{ fontSize: '36px', fontWeight: 800, marginBottom: '16px', lineHeight: 1.2 }}>Check your inbox</h1>
           <p style={{ fontSize: '18px', marginBottom: '32px', maxWidth: '400px', color: 'var(--text-2)' }}>
             Your official email must be verified before your MOH officer application is submitted.
@@ -228,33 +231,35 @@ export default function SignupMohOfficer() {
           </div>
         </div>
       </div>
+      </>
     );
   }
 
   /* ── Registration form step ── */
   return (
-    <div className="auth-layout">
+    <>
+      <Navbar />
+      <div className="auth-layout">
       <div className="auth-panel-left">
-        <Link to="/" style={{ fontSize: '24px', fontWeight: 800, marginBottom: '48px', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--teal)', textDecoration: 'none' }}>
-           <Icon name="activity" /> Dengue<span style={{ color: 'var(--text)' }}>Radar</span>
-        </Link>
-        <h1 style={{ fontSize: '36px', fontWeight: 800, marginBottom: '16px', lineHeight: 1.2 }}>For MOH Officers</h1>
-        <p style={{ fontSize: '18px', marginBottom: '32px', maxWidth: '400px', color: 'var(--text-2)' }}>Access specialized tools to monitor risks, manage resources, and coordinate public health responses.</p>
+        <h1 style={{ fontSize: '36px', fontWeight: 800, marginBottom: '16px', lineHeight: 1.2 }}>{t('auth.leftTitle')}</h1>
+        <p style={{ fontSize: '18px', marginBottom: '32px', maxWidth: '400px', color: 'var(--text-2)' }}>
+          {t('auth.leftDesc')}
+        </p>
         <ul style={{ display: 'flex', flexDirection: 'column', gap: '16px', listStyle: 'none', padding: 0 }}>
-          <li style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><Icon name="shield" size={20} color="var(--teal)" /> Detailed risk reports</li>
-          <li style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><Icon name="alert-triangle" size={20} color="var(--teal)" /> Zone-level trend analysis</li>
-          <li style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><Icon name="activity" size={20} color="var(--teal)" /> Community outreach tools</li>
+          <li style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><Icon name="shield" size={20} color="var(--teal)" /> {t('auth.leftPoint1')}</li>
+          <li style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><Icon name="alert-triangle" size={20} color="var(--teal)" /> {t('auth.leftPoint2')}</li>
+          <li style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><Icon name="activity" size={20} color="var(--teal)" /> {t('auth.leftPoint3')}</li>
         </ul>
       </div>
 
       <div className="auth-panel-right">
         <div style={{maxWidth:'480px', width:'100%', margin:'0 auto'}}>
-          <h2 className="auth-form-title">MOH Registration</h2>
-          <p className="auth-form-subtitle">Register for official MOH access to DengueRadar.</p>
+          <h2 className="auth-form-title">{t("auth.registerMohTitle")}</h2>
+          <p className="auth-form-subtitle">{t("auth.registerMohSubtitle")}</p>
 
           <form onSubmit={handleSendOtp} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <div className="form-group" style={{marginBottom:0}}>
-              <label className="form-label">Officer Name</label>
+              <label className="form-label">{t("auth.name")} (Officer Name)</label>
               <input type="text" className={`form-input ${errors.officerName?'error':''}`} value={formData.officerName} onChange={e=>setFormData({...formData,officerName:e.target.value})} />
               {errors.officerName && <span className="form-error">{errors.officerName}</span>}
             </div>
@@ -267,7 +272,7 @@ export default function SignupMohOfficer() {
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
               <div className="form-group" style={{marginBottom:0}}>
-                <label className="form-label">WhatsApp Number</label>
+                <label className="form-label">{t("auth.phone")} (WhatsApp)</label>
                 <div style={{display:'flex'}}>
                   <span style={{padding:'12px',background:'var(--surface-2)',border:'1.5px solid var(--border)',borderRight:'none',borderRadius:'var(--radius-md) 0 0 var(--radius-md)'}}>+94</span>
                   <input type="text" className={`form-input ${errors.whatsappNumber?'error':''}`} style={{borderRadius:'0 var(--radius-md) var(--radius-md) 0',width:'100%'}} placeholder="771234567" value={formData.whatsappNumber} onChange={e=>setFormData({...formData,whatsappNumber:e.target.value})} />
@@ -284,13 +289,13 @@ export default function SignupMohOfficer() {
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
               <div className="form-group" style={{marginBottom:0}}>
-                <label className="form-label">Password</label>
+                <label className="form-label">{t("auth.password")}</label>
                 <input type="password" className={`form-input ${errors.password?'error':''}`} value={formData.password} onChange={e=>setFormData({...formData,password:e.target.value})} />
                 <PasswordStrength password={formData.password} />
                 {errors.password && <span className="form-error">{errors.password}</span>}
               </div>
               <div className="form-group" style={{marginBottom:0}}>
-                <label className="form-label">Confirm Password</label>
+                <label className="form-label">{t("auth.passwordConfirm")}</label>
                 <input type="password" className={`form-input ${errors.confirmPassword?'error':''}`} value={formData.confirmPassword} onChange={e=>setFormData({...formData,confirmPassword:e.target.value})} />
                 {errors.confirmPassword && <span className="form-error">{errors.confirmPassword}</span>}
               </div>
@@ -306,10 +311,11 @@ export default function SignupMohOfficer() {
           </form>
 
           <div style={{ marginTop: '32px', textAlign: 'center', fontSize: '14px', color: 'var(--text-3)' }}>
-            Already have an account? <Link to="/login" style={{ color: 'var(--teal)', fontWeight: 600, textDecoration: 'none' }}>Log in</Link>
+            {t('auth.haveAccount')} <Link to="/login" style={{ color: 'var(--teal)', fontWeight: 600, textDecoration: 'none' }}>{t('auth.loginHere')}</Link>
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 }
