@@ -19,6 +19,10 @@
       (free M0 tier is enough)
   ✅  OpenWeatherMap account     →  https://openweathermap.org/api
       (free plan, "Current Weather Data" API)
+  ✅  Vonage API Account         →  https://developer.vonage.com
+      (for the WhatsApp Sandbox)
+  ✅  OpenRouter AI Account      →  https://openrouter.ai
+      (free tier for LLM predictions)
 
 
 ═══════════════════════════════════════════════════════════════════
@@ -145,6 +149,38 @@
 
 
 ═══════════════════════════════════════════════════════════════════
+  STEP 5 — AI WhatsApp Chatbot Setup (Optional)
+═══════════════════════════════════════════════════════════════════
+
+  5-A.  Go to the chatbot folder
+        ──────────────────────────
+        cd apps/dengue_whatsapp_chatbot
+
+  5-B.  Set up Python Virtual Environment
+        ─────────────────────────────────
+        python3 -m venv venv
+        source venv/bin/activate
+        pip install -r requirements.txt
+
+  5-C.  Configure the Environment
+        ─────────────────────────
+        cp .env.example .env
+        
+        Open  apps/dengue_whatsapp_chatbot/.env  and add:
+        • VONAGE_API_KEY & VONAGE_API_SECRET
+        • WHATSAPP_LINK (your Sandbox link)
+        • LLM_API_KEY (from OpenRouter)
+        • LLM_MODEL=openrouter/free
+
+  5-D.  Start the Chatbot Server
+        ────────────────────────
+        python3 app.py
+        
+        The chatbot will run on port 5050 and process incoming
+        messages from the React frontend widget and Vonage sandbox.
+
+
+═══════════════════════════════════════════════════════════════════
   AVAILABLE npm SCRIPTS — Backend  (apps/backend)
 ═══════════════════════════════════════════════════════════════════
 
@@ -231,7 +267,12 @@
   │   │       ├── pages/           Full page components
   │   │       └── services/        API call helpers
   │   │
-  │   └── ml-service/              (ML inference service — coming soon)
+  │   ├── ml-service/              (ML inference service — coming soon)
+  │   │
+  │   └── dengue_whatsapp_chatbot/ Python Flask WhatsApp Bot + LLM RAG
+  │       ├── data/                RAG knowledge base
+  │       ├── app.py               Flask Webhook Server
+  │       └── chat_service.py      Prediction retrieval & LLM pipeline
   │
   ├── ml-pipeline/
   │   └── data/raw/                Raw EPID Unit CSV dataset
