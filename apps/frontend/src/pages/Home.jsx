@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import Navbar from '../components/Navbar.jsx';
 import Footer from '../components/Footer.jsx';
 import SriLankaMap from '../components/SriLankaMap.jsx';
@@ -7,6 +8,7 @@ import TrendChart from '../components/TrendChart.jsx';
 import { publicAPI } from '../services/api.js';
 
 export default function Home() {
+  const { t } = useTranslation();
   const [riskData, setRiskData] = useState([]);
   const [trendData, setTrendData] = useState(null);
   const [topZones, setTopZones] = useState([]);
@@ -43,23 +45,23 @@ export default function Home() {
       <section className="hero" id="home">
         <div className="wrap hero-grid">
           <div>
-            <div className="eyebrow"><span className="dot-live"></span> AI-Powered Public Health Intelligence</div>
-            <h1 className="display">Predicting dengue outbreaks <span>before they happen.</span></h1>
-            <p className="lead">DengueRadar combines live weather data, historical case records, and machine learning (LSTM &amp; XGBoost) to forecast district-level dengue risk across Sri Lanka up to two weeks in advance.</p>
+            <div className="eyebrow"><span className="dot-live"></span> {t('home.hero.eyebrow')}</div>
+            <h1 className="display">{t('home.hero.titlePart1')}<span>{t('home.hero.titlePart2')}</span></h1>
+            <p className="lead">{t('home.hero.lead')}</p>
             <div className="hero-ctas">
-              <a href="#map" className="btn btn-primary" style={{padding:'13px 22px', fontSize:'14.5px'}}>View Live Risk Map</a>
-              <Link to="/how-it-works" className="btn btn-ghost" style={{padding:'13px 22px', fontSize:'14.5px'}}>How It Works</Link>
+              <a href="#map" className="btn btn-primary" style={{padding:'13px 22px', fontSize:'14.5px'}}>{t('home.hero.viewMap')}</a>
+              <Link to="/how-it-works" className="btn btn-ghost" style={{padding:'13px 22px', fontSize:'14.5px'}}>{t('home.hero.howItWorks')}</Link>
             </div>
             <div className="hero-stats">
-              <div className="hero-stat"><b>25</b><span>Districts Monitored</span></div>
-              <div className="hero-stat"><b>14-day</b><span>Forecast Horizon</span></div>
-              <div className="hero-stat"><b>24/7</b><span>Live Weather Ingestion</span></div>
+              <div className="hero-stat"><b>25</b><span>{t('home.hero.districtsMonitored')}</span></div>
+              <div className="hero-stat"><b>7-day</b><span>{t('home.hero.forecastHorizon')}</span></div>
+              <div className="hero-stat"><b>24/7</b><span>{t('home.hero.liveWeather')}</span></div>
             </div>
           </div>
           <div className="hero-visual">
             <div className="hv-head">
-              <span className="tag">Top Risk MOH Areas</span>
-              <span className="live-flag"><span className="dot-live"></span> LIVE</span>
+              <span className="tag">{t('home.topRisk.title')}</span>
+              <span className="live-flag"><span className="dot-live"></span> {t('home.topRisk.live')}</span>
             </div>
             {topZones.slice(0, 5).map((zone, i) => {
               const risk = zone.riskLevel || 'low';
@@ -72,7 +74,7 @@ export default function Home() {
               );
             })}
             {topZones.length === 0 && (
-              <div style={{ color: 'var(--text-3)', fontSize: '13px', padding: '20px 0', textAlign: 'center' }}>Loading intelligence data...</div>
+              <div style={{ color: 'var(--text-3)', fontSize: '13px', padding: '20px 0', textAlign: 'center' }}>{t('home.topRisk.loading')}</div>
             )}
           </div>
         </div>
@@ -82,19 +84,19 @@ export default function Home() {
         <div className="wrap">
           <div className="section-head">
             <div>
-              <span className="kicker">Command Center</span>
-              <h2>Live Dengue Status Map</h2>
-              <p>Real-time district-level risk levels sourced from the AI prediction engine.</p>
+              <span className="kicker">{t('home.mapSection.kicker')}</span>
+              <h2>{t('home.mapSection.title')}</h2>
+              <p>{t('home.mapSection.desc')}</p>
             </div>
-            <span className="live-flag"><span className="dot-live"></span> LIVE · UPDATED JUST NOW</span>
+            <span className="live-flag"><span className="dot-live"></span> {t('home.mapSection.updatedNow')}</span>
           </div>
 
           <div className="map-card">
             <div className="map-card-head">
-              <h3><span className="live-flag" style={{background:'var(--teal-dim)', color:'var(--teal)'}}><span className="dot-live" style={{background:'var(--teal)'}}></span></span>Sri Lanka — District Risk Overview</h3>
+              <h3><span className="live-flag" style={{background:'var(--teal-dim)', color:'var(--teal)'}}><span className="dot-live" style={{background:'var(--teal)'}}></span></span>{t('home.mapSection.cardTitle')}</h3>
               <div style={{display:'flex', gap:'8px'}}>
-                <button className="btn btn-ghost" style={{borderColor:'var(--border)', color:'var(--text-2)', padding:'8px 12px', fontSize:'12.5px'}}>Filters</button>
-                <button className="btn btn-ghost" style={{borderColor:'var(--border)', color:'var(--text-2)', padding:'8px 12px', fontSize:'12.5px'}}>Export</button>
+                <button className="btn btn-ghost" style={{borderColor:'var(--border)', color:'var(--text-2)', padding:'8px 12px', fontSize:'12.5px'}}>{t('home.mapSection.filters')}</button>
+                <button className="btn btn-ghost" style={{borderColor:'var(--border)', color:'var(--text-2)', padding:'8px 12px', fontSize:'12.5px'}}>{t('home.mapSection.export')}</button>
               </div>
             </div>
             <div className="map-card-body">
@@ -103,9 +105,9 @@ export default function Home() {
                   <SriLankaMap riskData={riskData} />
                 </div>
                 <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '12px', background: 'var(--surface-2)', borderTop: '1px solid var(--border)', display: 'flex', gap: '16px', justifyContent: 'center', zIndex: 10 }}>
-                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: '600' }}><span style={{ width: '10px', height: '10px', borderRadius: '50%', background: 'var(--risk-low)' }}></span> Low Risk</div>
-                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: '600' }}><span style={{ width: '0', height: '0', borderLeft: '5px solid transparent', borderRight: '5px solid transparent', borderBottom: '10px solid var(--risk-mod)' }}></span> Moderate Risk</div>
-                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: '600' }}><span style={{ width: '10px', height: '10px', background: 'var(--risk-high)' }}></span> High Risk</div>
+                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: '600' }}><span style={{ width: '10px', height: '10px', borderRadius: '50%', background: 'var(--risk-low)' }}></span> {t('home.mapSection.lowRisk')}</div>
+                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: '600' }}><span style={{ width: '0', height: '0', borderLeft: '5px solid transparent', borderRight: '5px solid transparent', borderBottom: '10px solid var(--risk-mod)' }}></span> {t('home.mapSection.moderateRisk')}</div>
+                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: '600' }}><span style={{ width: '10px', height: '10px', background: 'var(--risk-high)' }}></span> {t('home.mapSection.highRisk')}</div>
                 </div>
               </div>
               <div className="map-side">
@@ -115,7 +117,7 @@ export default function Home() {
                   const riskColorClass = risk === 'critical' ? 'crit' : risk === 'moderate' ? 'mod' : risk;
                   return (
                     <div className="district-item" key={i}>
-                      <div className="name">{zone.mohZone} <small>Score: {Number(zone.riskScore).toFixed(1)} / 100</small></div>
+                      <div className="name">{zone.mohZone} <small>{t('home.topRisk.score')}: {Number(zone.riskScore).toFixed(1)}</small></div>
                       <span className={`badge ${riskColorClass}`}>{risk.charAt(0).toUpperCase() + risk.slice(1)}</span>
                     </div>
                   );
@@ -131,7 +133,7 @@ export default function Home() {
                 <span className="trend down">▼ 12%</span>
               </div>
               <div className="stat-val">2,405</div>
-              <div className="stat-label">Active Dengue Cases (Est)</div>
+              <div className="stat-label">{t('home.stats.activeCases')}</div>
             </div>
             <div className="stat-card">
               <div className="stat-top">
@@ -139,7 +141,7 @@ export default function Home() {
                 <span className="trend up">▲ 4%</span>
               </div>
               <div className="stat-val">342</div>
-              <div className="stat-label">New Cases (Last 24h)</div>
+              <div className="stat-label">{t('home.stats.newCases')}</div>
             </div>
             <div className="stat-card">
               <div className="stat-top">
@@ -147,7 +149,7 @@ export default function Home() {
                 <span className="trend flat">— 0%</span>
               </div>
               <div className="stat-val">8</div>
-              <div className="stat-label">Critical MOH Zones</div>
+              <div className="stat-label">{t('home.stats.criticalZones')}</div>
             </div>
             <div className="stat-card">
               <div className="stat-top">
@@ -155,19 +157,19 @@ export default function Home() {
                 <span className="trend flat">—</span>
               </div>
               <div className="stat-val">99.8%</div>
-              <div className="stat-label">Model Accuracy (Last 30d)</div>
+              <div className="stat-label">{t('home.stats.modelAccuracy')}</div>
             </div>
           </div>
           
           <div className="ticker" style={{ marginTop: '24px' }}>
-            <div className="ticker-label">LATEST INTELLIGENCE</div>
+            <div className="ticker-label">{t('home.ticker.label')}</div>
             <div className="ticker-track">
-              <span><b>{new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</b> AI prediction model updated for all 25 districts</span>
-              <span><b>ALERT:</b> Colombo district rainfall exceeded 200mm threshold, breeding risk elevated</span>
-              <span><b>UPDATE:</b> Ministry of Health reports 12% decrease in national case load this week</span>
-              <span><b>Gampaha:</b> Predicted risk moved from Moderate to High for the next 14 days</span>
-              <span><b>{new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</b> AI prediction model updated for all 25 districts</span>
-              <span><b>ALERT:</b> Colombo district rainfall exceeded 200mm threshold, breeding risk elevated</span>
+              <span><b>{new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</b> {t('home.ticker.msg1')}</span>
+              <span><b>ALERT:</b> {t('home.ticker.msg2')}</span>
+              <span><b>UPDATE:</b> {t('home.ticker.msg3')}</span>
+              <span><b>Gampaha:</b> {t('home.ticker.msg4')}</span>
+              <span><b>{new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</b> {t('home.ticker.msg1')}</span>
+              <span><b>ALERT:</b> {t('home.ticker.msg2')}</span>
             </div>
           </div>
         </div>
@@ -177,10 +179,10 @@ export default function Home() {
         <div className="wrap">
           <div className="section-head">
             <div>
-              <h2>Dengue Risk Forecast</h2>
-              <p>Historical cases vs. AI-forecasted risk — 14-day horizon.</p>
+              <h2>{t('home.forecast.title')}</h2>
+              <p>{t('home.forecast.desc')}</p>
             </div>
-            <div className="section-actions"><button className="btn btn-outline">Export Data</button></div>
+            <div className="section-actions"><button className="btn btn-outline">{t('home.forecast.export')}</button></div>
           </div>
           <div className="card" style={{ padding: '24px' }}>
             <div className="chart-box" style={{ height: '400px', width: '100%' }}>
@@ -195,39 +197,39 @@ export default function Home() {
           <div className="hero-grid" style={{ gap: '24px' }}>
             <div className="card" style={{ display: 'flex', flexDirection: 'column' }}>
               <div className="map-card-head">
-                <h3 style={{fontSize:'16px', fontWeight:700}}>Weather Intelligence</h3>
-                <span className="mono" style={{fontSize:'11px', color:'var(--text-3)'}}>UPDATED 12 MIN AGO</span>
+                <h3 style={{fontSize:'16px', fontWeight:700}}>{t('home.weather.title')}</h3>
+                <span className="mono" style={{fontSize:'11px', color:'var(--text-3)'}}>{t('home.weather.updated')}</span>
               </div>
               <div style={{ padding: '24px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
                   <div>
-                    <div style={{fontSize:'14px', color:'var(--text-2)', marginBottom:'4px'}}>Colombo</div>
+                    <div style={{fontSize:'14px', color:'var(--text-2)', marginBottom:'4px'}}>{t('home.weather.colombo')}</div>
                     <div style={{ fontFamily: 'Inter', fontWeight: 800, fontSize: '48px', lineHeight: 1, letterSpacing: '-.02em', color:'var(--teal)' }}>28°C</div>
                   </div>
                   <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" strokeWidth="1.2"><path d="M8 19a5 5 0 01-1-9.9A6 6 0 0118 8a4.5 4.5 0 011 8.9"/><path d="M8 19h9"/></svg>
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
-                  <div style={{ background: 'var(--surface-2)', borderRadius: 'var(--r-md)', padding: '12px', textAlign: 'center' }}><div style={{ fontSize:'18px', fontWeight:700, color: 'var(--text)' }}>82%</div><div style={{ fontSize:'11.5px', color:'var(--text-3)', fontWeight:600, marginTop:'4px' }}>Humidity</div></div>
-                  <div style={{ background: 'var(--surface-2)', borderRadius: 'var(--r-md)', padding: '12px', textAlign: 'center' }}><div style={{ fontSize:'18px', fontWeight:700, color: 'var(--text)' }}>14mm</div><div style={{ fontSize:'11.5px', color:'var(--text-3)', fontWeight:600, marginTop:'4px' }}>Rainfall</div></div>
-                  <div style={{ background: 'var(--surface-2)', borderRadius: 'var(--r-md)', padding: '12px', textAlign: 'center' }}><div style={{ fontSize:'18px', fontWeight:700, color: 'var(--text)' }}>11km/h</div><div style={{ fontSize:'11.5px', color:'var(--text-3)', fontWeight:600, marginTop:'4px' }}>Wind</div></div>
+                  <div style={{ background: 'var(--surface-2)', borderRadius: 'var(--r-md)', padding: '12px', textAlign: 'center' }}><div style={{ fontSize:'18px', fontWeight:700, color: 'var(--text)' }}>82%</div><div style={{ fontSize:'11.5px', color:'var(--text-3)', fontWeight:600, marginTop:'4px' }}>{t('home.weather.humidity')}</div></div>
+                  <div style={{ background: 'var(--surface-2)', borderRadius: 'var(--r-md)', padding: '12px', textAlign: 'center' }}><div style={{ fontSize:'18px', fontWeight:700, color: 'var(--text)' }}>14mm</div><div style={{ fontSize:'11.5px', color:'var(--text-3)', fontWeight:600, marginTop:'4px' }}>{t('home.weather.rainfall')}</div></div>
+                  <div style={{ background: 'var(--surface-2)', borderRadius: 'var(--r-md)', padding: '12px', textAlign: 'center' }}><div style={{ fontSize:'18px', fontWeight:700, color: 'var(--text)' }}>11km/h</div><div style={{ fontSize:'11.5px', color:'var(--text-3)', fontWeight:600, marginTop:'4px' }}>{t('home.weather.wind')}</div></div>
                 </div>
               </div>
             </div>
             
             <div className="card" id="alerts" style={{ display: 'flex', flexDirection: 'column' }}>
               <div className="map-card-head">
-                <h3 style={{fontSize:'16px', fontWeight:700}}>Alert Center</h3>
-                <span className="badge high">3 Active</span>
+                <h3 style={{fontSize:'16px', fontWeight:700}}>{t('home.alerts.title')}</h3>
+                <span className="badge high">3 {t('home.alerts.active')}</span>
               </div>
               <div style={{ padding: '0 24px 24px' }}>
                 <div className="alert" style={{borderBottom:'1px solid var(--border)', padding:'16px 0', borderRadius:0}}><span className="dot-live" style={{background:'var(--risk-crit)', marginTop:'5px', flexShrink:0}}></span>
-                  <div><div style={{fontSize:'14px', fontWeight:600}}>High-risk district detected</div><div style={{fontSize:'12px', color:'var(--text-3)', marginTop:'2px'}} className="mono">Colombo · 18 min ago</div><div style={{fontSize:'13px', color:'var(--text-2)', marginTop:'4px'}}>Case density crossed the high-risk threshold this week.</div></div>
+                  <div><div style={{fontSize:'14px', fontWeight:600}}>{t('home.alerts.alert1Title')}</div><div style={{fontSize:'12px', color:'var(--text-3)', marginTop:'2px'}} className="mono">{t('home.alerts.alert1Time')}</div><div style={{fontSize:'13px', color:'var(--text-2)', marginTop:'4px'}}>{t('home.alerts.alert1Desc')}</div></div>
                 </div>
                 <div className="alert" style={{borderBottom:'1px solid var(--border)', padding:'16px 0', borderRadius:0}}><span className="dot-live" style={{background:'var(--risk-high)', marginTop:'5px', flexShrink:0}}></span>
-                  <div><div style={{fontSize:'14px', fontWeight:600}}>Risk increasing</div><div style={{fontSize:'12px', color:'var(--text-3)', marginTop:'2px'}} className="mono">Gampaha · 1h ago</div><div style={{fontSize:'13px', color:'var(--text-2)', marginTop:'4px'}}>Predicted risk moved from Moderate to High over 14 days.</div></div>
+                  <div><div style={{fontSize:'14px', fontWeight:600}}>{t('home.alerts.alert2Title')}</div><div style={{fontSize:'12px', color:'var(--text-3)', marginTop:'2px'}} className="mono">{t('home.alerts.alert2Time')}</div><div style={{fontSize:'13px', color:'var(--text-2)', marginTop:'4px'}}>{t('home.alerts.alert2Desc')}</div></div>
                 </div>
                 <div className="alert" style={{padding:'16px 0 0', borderRadius:0}}><span className="dot-live" style={{background:'var(--risk-mod)', marginTop:'5px', flexShrink:0}}></span>
-                  <div><div style={{fontSize:'14px', fontWeight:600}}>Heavy rainfall conditions</div><div style={{fontSize:'12px', color:'var(--text-3)', marginTop:'2px'}} className="mono">Kalutara · 3h ago</div><div style={{fontSize:'13px', color:'var(--text-2)', marginTop:'4px'}}>Rainfall 40% above seasonal average, breeding risk elevated.</div></div>
+                  <div><div style={{fontSize:'14px', fontWeight:600}}>{t('home.alerts.alert3Title')}</div><div style={{fontSize:'12px', color:'var(--text-3)', marginTop:'2px'}} className="mono">{t('home.alerts.alert3Time')}</div><div style={{fontSize:'13px', color:'var(--text-2)', marginTop:'4px'}}>{t('home.alerts.alert3Desc')}</div></div>
                 </div>
               </div>
             </div>
@@ -240,26 +242,26 @@ export default function Home() {
           <div className="hero-grid" style={{ gap: '24px' }}>
             <div className="card">
               <div className="map-card-head">
-                <h3 style={{fontSize:'16px', fontWeight:700}}>What's Changing?</h3>
+                <h3 style={{fontSize:'16px', fontWeight:700}}>{t('home.changes.title')}</h3>
               </div>
               <div style={{ padding: '24px' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                  <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start', fontSize: '13.5px', color: 'var(--text-2)' }}><span style={{ width: '22px', height: '22px', borderRadius: '6px', background: 'var(--brand-soft)', color: 'var(--teal)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', flexShrink: 0 }}>▲</span> Risk increased in 2 districts over the past week.</div>
-                  <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start', fontSize: '13.5px', color: 'var(--text-2)' }}><span style={{ width: '22px', height: '22px', borderRadius: '6px', background: 'var(--brand-soft)', color: 'var(--teal)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', flexShrink: 0 }}>▲</span> Rainfall increased sharply in the Western province.</div>
-                  <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start', fontSize: '13.5px', color: 'var(--text-2)' }}><span style={{ width: '22px', height: '22px', borderRadius: '6px', background: 'var(--risk-low-bg)', color: 'var(--risk-low)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', flexShrink: 0 }}>▼</span> National dengue cases decreased slightly week-over-week.</div>
-                  <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start', fontSize: '13.5px', color: 'var(--text-2)' }}><span style={{ width: '22px', height: '22px', borderRadius: '6px', background: 'var(--brand-soft)', color: 'var(--teal)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', flexShrink: 0 }}>▲</span> Forecast indicates increasing risk over the next 14 days.</div>
+                  <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start', fontSize: '13.5px', color: 'var(--text-2)' }}><span style={{ width: '22px', height: '22px', borderRadius: '6px', background: 'var(--brand-soft)', color: 'var(--teal)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', flexShrink: 0 }}>▲</span> {t('home.changes.point1')}</div>
+                  <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start', fontSize: '13.5px', color: 'var(--text-2)' }}><span style={{ width: '22px', height: '22px', borderRadius: '6px', background: 'var(--brand-soft)', color: 'var(--teal)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', flexShrink: 0 }}>▲</span> {t('home.changes.point2')}</div>
+                  <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start', fontSize: '13.5px', color: 'var(--text-2)' }}><span style={{ width: '22px', height: '22px', borderRadius: '6px', background: 'var(--risk-low-bg)', color: 'var(--risk-low)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', flexShrink: 0 }}>▼</span> {t('home.changes.point3')}</div>
+                  <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start', fontSize: '13.5px', color: 'var(--text-2)' }}><span style={{ width: '22px', height: '22px', borderRadius: '6px', background: 'var(--brand-soft)', color: 'var(--teal)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', flexShrink: 0 }}>▲</span> {t('home.changes.point4')}</div>
                 </div>
               </div>
             </div>
             <div className="card">
               <div className="map-card-head">
-                <h3 style={{fontSize:'16px', fontWeight:700}}>Data &amp; Model Status</h3>
+                <h3 style={{fontSize:'16px', fontWeight:700}}>{t('home.status.title')}</h3>
               </div>
               <div style={{ padding: '24px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid var(--border)' }}><span style={{color:'var(--text-2)', fontSize:'13.5px'}}>Case Data Feed</span><span className="mono" style={{color:'var(--risk-low)', fontSize:'12.5px', display: 'flex', alignItems: 'center', gap: '6px'}}><span className="dot" style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--risk-low)', boxShadow: '0 0 8px var(--risk-low)' }}></span> Connected</span></div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid var(--border)' }}><span style={{color:'var(--text-2)', fontSize:'13.5px'}}>Weather API</span><span className="mono" style={{color:'var(--risk-low)', fontSize:'12.5px', display: 'flex', alignItems: 'center', gap: '6px'}}><span className="dot" style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--risk-low)', boxShadow: '0 0 8px var(--risk-low)' }}></span> Connected</span></div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid var(--border)' }}><span style={{color:'var(--text-2)', fontSize:'13.5px'}}>Prediction Model</span><span className="mono" style={{color:'var(--teal)', fontSize:'12.5px', display: 'flex', alignItems: 'center', gap: '6px'}}><span className="dot" style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--teal)', boxShadow: '0 0 8px var(--teal)' }}></span> v2.3 Active</span></div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0' }}><span style={{color:'var(--text-2)', fontSize:'13.5px'}}>Last Full Sync</span><span className="mono" style={{fontSize:'12.5px', fontWeight:700}}>08:14 AM</span></div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid var(--border)' }}><span style={{color:'var(--text-2)', fontSize:'13.5px'}}>{t('home.status.feed')}</span><span className="mono" style={{color:'var(--risk-low)', fontSize:'12.5px', display: 'flex', alignItems: 'center', gap: '6px'}}><span className="dot" style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--risk-low)', boxShadow: '0 0 8px var(--risk-low)' }}></span> {t('home.status.connected')}</span></div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid var(--border)' }}><span style={{color:'var(--text-2)', fontSize:'13.5px'}}>{t('home.status.api')}</span><span className="mono" style={{color:'var(--risk-low)', fontSize:'12.5px', display: 'flex', alignItems: 'center', gap: '6px'}}><span className="dot" style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--risk-low)', boxShadow: '0 0 8px var(--risk-low)' }}></span> Connected</span></div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid var(--border)' }}><span style={{color:'var(--text-2)', fontSize:'13.5px'}}>{t('home.status.model')}</span><span className="mono" style={{color:'var(--teal)', fontSize:'12.5px', display: 'flex', alignItems: 'center', gap: '6px'}}><span className="dot" style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--teal)', boxShadow: '0 0 8px var(--teal)' }}></span> {t('home.status.active')}</span></div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0' }}><span style={{color:'var(--text-2)', fontSize:'13.5px'}}>{t('home.status.sync')}</span><span className="mono" style={{fontSize:'12.5px', fontWeight:700}}>08:14 AM</span></div>
               </div>
             </div>
           </div>

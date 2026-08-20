@@ -54,5 +54,126 @@
     "quickLinks": "Quick Links",
     "contact": "Contact Us",
     "rights": "All rights reserved."
+  },
+  "home": {
+    "hero": {
+      "eyebrow": "AI-Powered Public Health Intelligence",
+      "titlePart1": "Predicting dengue outbreaks ",
+      "titlePart2": "before they happen.",
+      "lead": "DengueRadar combines live weather data, historical case records, and machine learning (LSTM & XGBoost) to forecast district-level dengue risk across Sri Lanka up to two weeks in advance.",
+      "viewMap": "View Live Risk Map",
+      "howItWorks": "How It Works",
+      "districtsMonitored": "Districts Monitored",
+      "forecastHorizon": "Forecast Horizon",
+      "liveWeather": "Live Weather Ingestion"
+    },
+    "topRisk": {
+      "title": "Top Risk MOH Areas",
+      "live": "LIVE",
+      "score": "Score",
+      "loading": "Loading intelligence data..."
+    },
+    "mapSection": {
+      "kicker": "Command Center",
+      "title": "Live Dengue Status Map",
+      "desc": "Real-time district-level risk levels sourced from the AI prediction engine.",
+      "updatedNow": "LIVE · UPDATED JUST NOW",
+      "cardTitle": "Sri Lanka — District Risk Overview",
+      "filters": "Filters",
+      "export": "Export",
+      "lowRisk": "Low Risk",
+      "moderateRisk": "Moderate Risk",
+      "highRisk": "High Risk"
+    },
+    "stats": {
+      "activeCases": "Active Dengue Cases (Est)",
+      "newCases": "New Cases (Last 24h)",
+      "criticalZones": "Critical MOH Zones",
+      "modelAccuracy": "Model Accuracy (Last 30d)"
+    },
+    "ticker": {
+      "label": "LATEST INTELLIGENCE",
+      "msg1": "AI prediction model updated for all 25 districts",
+      "msg2": "ALERT: Colombo district rainfall exceeded 200mm threshold, breeding risk elevated",
+      "msg3": "UPDATE: Ministry of Health reports 12% decrease in national case load this week",
+      "msg4": "Gampaha: Predicted risk moved from Moderate to High for the next 14 days"
+    },
+    "forecast": {
+      "title": "Dengue Risk Forecast",
+      "desc": "Historical cases vs. AI-forecasted risk — 7-day horizon.",
+      "export": "Export Data"
+    },
+    "weather": {
+      "title": "Weather Intelligence",
+      "updated": "UPDATED 12 MIN AGO",
+      "colombo": "Colombo",
+      "humidity": "Humidity",
+      "rainfall": "Rainfall",
+      "wind": "Wind"
+    },
+    "alerts": {
+      "title": "Alert Center",
+      "active": "Active",
+      "alert1Title": "High-risk district detected",
+      "alert1Time": "Colombo · 18 min ago",
+      "alert1Desc": "Case density crossed the high-risk threshold this week.",
+      "alert2Title": "Risk increasing",
+      "alert2Time": "Gampaha · 1h ago",
+      "alert2Desc": "Predicted risk moved from Moderate to High over 14 days.",
+      "alert3Title": "Heavy rainfall conditions",
+      "alert3Time": "Kalutara · 3h ago",
+      "alert3Desc": "Rainfall 40% above seasonal average, breeding risk elevated."
+    },
+    "changes": {
+      "title": "What's Changing?",
+      "point1": "Risk increased in 2 districts over the past week.",
+      "point2": "Rainfall increased sharply in the Western province.",
+      "point3": "National dengue cases decreased slightly week-over-week.",
+      "point4": "Forecast indicates increasing risk over the next 14 days."
+    },
+    "status": {
+      "title": "Data & Model Status",
+      "feed": "Case Data Feed",
+      "connected": "Connected",
+      "api": "Weather API",
+      "model": "Prediction Model",
+      "active": "v2.3 Active",
+      "sync": "Last Full Sync"
+    }
+  },
+  "howItWorks": {
+    "hero": {
+      "title": "How DengueRadar Works",
+      "subtitle": "We analyze thousands of data points daily to predict dengue outbreaks before they occur. Here's a look under the hood."
+    },
+    "dataInput": {
+      "title": "The Data Pipeline",
+      "desc": "Our model's intelligence stems from diverse, high-quality data sources integrated in real-time.",
+      "card1Title": "Historical Cases",
+      "card1Desc": "Cases from the last 1-5 weeks, 2-6 months ago, and exactly one year ago to capture strong seasonality.",
+      "card2Title": "Rolling Stats & Growth",
+      "card2Desc": "Mean, peak, variability, week-over-week growth, and 8-week linear trends indicating momentum.",
+      "card3Title": "Weather Interactions",
+      "card3Desc": "Temperature, humidity, rainfall lags (since mosquitoes breed 2-4 weeks after rain), and heat indices.",
+      "card4Title": "District Context",
+      "card4Desc": "Total district cases and the neighbourhood's percentile rank within the district (are you the epicenter?)."
+    },
+    "modelAuth": {
+      "title": "How does the AI decide?",
+      "desc1": "We don't use one AI. We use ",
+      "desc2": "multiple different AIs that vote together",
+      "desc3": ", plus a meta-learner that learns how to combine their votes (stacking ensemble).",
+      "chartTitle": "Test Accuracy (2025-2026 Held-out Data)",
+      "chartFooter": "Tested on 16,035 (MOH, week) pairs. The 76.8% is honest, production-grade accuracy on unseen data."
+    },
+    "faq": {
+      "title": "Frequently Asked Questions",
+      "q1": "Is this replacing traditional surveillance?",
+      "a1": "No. DengueRadar is an early-warning tool designed to augment traditional surveillance. It helps health workers allocate limited resources preemptively.",
+      "q2": "How far into the future can you predict?",
+      "a2": "Our model generates forecasts for a 14-day horizon. However, accuracy is highest for the immediate 7-day window.",
+      "q3": "How often is the model updated?",
+      "a3": "The model runs daily inferences based on the latest live weather data, while case data is synchronized weekly from the Ministry of Health."
+    }
   }
 }

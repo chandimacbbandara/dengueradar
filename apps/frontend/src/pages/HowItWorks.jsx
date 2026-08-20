@@ -22,38 +22,38 @@ export default function HowItWorks() {
     { name: 'LSTM alone', accuracy: 73.4, isMain: false },
   ];
 
-  const faqs = [
+    const faqs = [
     {
-      q: 'Why 4 classes instead of just "outbreak yes/no"?',
-      a: 'Because public health response is graduated. A Warning gets a different response than an Alert, and lumping them together would lose important information. The 4-tier system matches the official Sri Lankan dengue response protocol.'
+      q: t('howItWorks.faq.q1'),
+      a: t('howItWorks.faq.a1')
     },
     {
-      q: 'Why don\'t you predict the exact number of cases?',
-      a: 'We do! The system also produces a case count estimate (alongside the tier). The tier is more reliable because it\'s a classification problem (4 options) rather than a regression problem (any positive integer), and the class probabilities are easier to interpret for non-technical users.'
+      q: t('howItWorks.faq.q2'),
+      a: t('howItWorks.faq.a2')
     },
     {
-      q: 'How is this different from just looking at last week\'s cases?',
-      a: 'It is, partially. Last week\'s cases are by far the strongest predictor — if your neighbourhood had 50 cases last week, it\'s likely a Warning or Alert this week. The model\'s edge is in detecting transitions — knowing when a steady "Watch" pattern is about to escalate to "Warning" based on district-level signals, weather changes, and seasonality.'
+      q: t('howItWorks.faq.q3'),
+      a: t('howItWorks.faq.a3')
     },
     {
-      q: 'What happens if the data is missing or wrong?',
-      a: 'The model handles missing data by forward-filling (using the last known value) and falling back to 0 if no history is available. For deployment, the upstream data pipeline should flag data quality issues — a week with no reported cases from a busy neighbourhood is suspicious and should be investigated.'
+      q: t('howItWorks.faq.q1'),
+      a: t('howItWorks.faq.a1')
     },
     {
-      q: 'Can I trust the Alert predictions?',
-      a: 'Trust them, but verify. The model is right about 78% of the time when it predicts Alert. For high-stakes decisions, look at the confidence score (p_Alert): a 0.95 Alert is much more trustworthy than a 0.52 Alert. The production system uses a 0.5 threshold to filter to high-confidence Alerts.'
+      q: t('howItWorks.faq.q2'),
+      a: t('howItWorks.faq.a2')
     },
     {
-      q: 'How often does the model update?',
-      a: 'Quarterly, with the latest surveillance data. The training pipeline is automated and takes about 15 minutes on a standard cloud server.'
+      q: t('howItWorks.faq.q3'),
+      a: t('howItWorks.faq.a3')
     },
     {
-      q: 'What about other diseases — could you predict chikungunya or Zika too?',
-      a: 'In principle, yes. The same architecture (gradient boosting + LSTM + ensemble) works for any disease with similar surveillance data. The main constraint is having enough historical data to train on.'
+      q: t('howItWorks.faq.q1'),
+      a: t('howItWorks.faq.a1')
     },
     {
-      q: 'Is the model fair across all regions?',
-      a: 'This is a critical question we monitor. We compute per-district accuracy and flag any district where accuracy drops significantly below the average. The main risk is small-population rural MOHs where a single case swings the tier dramatically. We have per-district threshold tuning in our roadmap to address this.'
+      q: t('howItWorks.faq.q2'),
+      a: t('howItWorks.faq.a2')
     }
   ];
 
@@ -77,9 +77,9 @@ export default function HowItWorks() {
           <div className="eyebrow" style={{ justifyContent: 'center', marginBottom: '24px' }}>
             <span className="dot-live"></span> INTELLIGENCE CORE
           </div>
-          <h1 className="display" style={{ fontSize: '48px', margin: '0 auto', maxWidth: '800px' }}>How DengueRadar Works</h1>
+          <h1 className="display" style={{ fontSize: '48px', margin: '0 auto', maxWidth: '800px' }}>{t('howItWorks.hero.title')}</h1>
           <p className="lead" style={{ maxWidth: '800px', margin: '20px auto 0', fontSize: '18px' }}>
-            A complete guide to our AI-powered dengue early warning system. Every week, our multi-model ensemble predicts the risk of an outbreak in all 226 MOH areas across Sri Lanka with ~77% accuracy.
+            {t('howItWorks.hero.subtitle')}
           </p>
         </div>
       </section>
@@ -97,12 +97,12 @@ export default function HowItWorks() {
 
           {/* Section: What is this? */}
           <div style={{ marginBottom: '60px' }}>
-            <h2 style={{ fontSize: '32px', marginBottom: '24px' }}>What is DengueRadar?</h2>
+            <h2 style={{ fontSize: '32px', marginBottom: '24px' }}>{t('howItWorks.dataInput.title')}</h2>
             
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px', alignItems: 'center' }}>
               <div>
                 <p style={{ marginBottom: '16px', lineHeight: '1.7', fontSize: '16px', color: 'var(--text-2)' }}>
-                  It is an AI system that predicts, every week, how likely each neighbourhood in Sri Lanka is to experience a dengue outbreak in the <strong style={{ color: 'var(--text)' }}>coming week</strong>.
+                  {t('howItWorks.dataInput.desc')} <strong style={{ color: 'var(--text)' }}>coming week</strong>.
                 </p>
                 <p style={{ marginBottom: '16px', lineHeight: '1.7', fontSize: '16px', color: 'var(--text-2)' }}>It does this by looking at:</p>
                 <div style={{ marginLeft: '10px', display: 'flex', flexDirection: 'column', gap: '0' }}>
@@ -167,42 +167,42 @@ export default function HowItWorks() {
                 <div style={{ background: 'var(--brand-soft)', width: '48px', height: '48px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px' }}>
                   <Icon name="history" size={24} color="var(--brand)" className="icon-glow" />
                 </div>
-                <h4 style={{ fontSize: '18px', marginBottom: '12px' }}>Historical Cases</h4>
-                <p style={{ fontSize: '14px', color: 'var(--text-2)', lineHeight: '1.6' }}>Cases from the last 1-5 weeks, 2-6 months ago, and exactly one year ago to capture strong seasonality.</p>
+                <h4 style={{ fontSize: '18px', marginBottom: '12px' }}>{t('howItWorks.dataInput.card1Title')}</h4>
+                <p style={{ fontSize: '14px', color: 'var(--text-2)', lineHeight: '1.6' }}>{t('howItWorks.dataInput.card1Desc')}</p>
               </div>
               <div className="card" style={{ padding: '24px' }}>
                 <div style={{ background: 'var(--brand-soft)', width: '48px', height: '48px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px' }}>
                   <Icon name="trending-up" size={24} color="var(--brand)" />
                 </div>
                 <h4 style={{ fontSize: '18px', marginBottom: '12px' }}>Rolling Stats & Growth</h4>
-                <p style={{ fontSize: '14px', color: 'var(--text-2)', lineHeight: '1.6' }}>Mean, peak, variability, week-over-week growth, and 8-week linear trends indicating momentum.</p>
+                <p style={{ fontSize: '14px', color: 'var(--text-2)', lineHeight: '1.6' }}>{t('howItWorks.dataInput.card2Desc')}</p>
               </div>
               <div className="card" style={{ padding: '24px' }}>
                 <div style={{ background: 'var(--brand-soft)', width: '48px', height: '48px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px' }}>
                   <Icon name="cloud-lightning" size={24} color="var(--brand)" />
                 </div>
-                <h4 style={{ fontSize: '18px', marginBottom: '12px' }}>Weather Interactions</h4>
-                <p style={{ fontSize: '14px', color: 'var(--text-2)', lineHeight: '1.6' }}>Temperature, humidity, rainfall lags (since mosquitoes breed 2-4 weeks after rain), and heat indices.</p>
+                <h4 style={{ fontSize: '18px', marginBottom: '12px' }}>{t('howItWorks.dataInput.card3Title')}</h4>
+                <p style={{ fontSize: '14px', color: 'var(--text-2)', lineHeight: '1.6' }}>{t('howItWorks.dataInput.card3Desc')}</p>
               </div>
               <div className="card" style={{ padding: '24px' }}>
                 <div style={{ background: 'var(--brand-soft)', width: '48px', height: '48px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px' }}>
                   <Icon name="map-pin" size={24} color="var(--brand)" />
                 </div>
-                <h4 style={{ fontSize: '18px', marginBottom: '12px' }}>District Context</h4>
-                <p style={{ fontSize: '14px', color: 'var(--text-2)', lineHeight: '1.6' }}>Total district cases and the neighbourhood's percentile rank within the district (are you the epicenter?).</p>
+                <h4 style={{ fontSize: '18px', marginBottom: '12px' }}>{t('howItWorks.dataInput.card4Title')}</h4>
+                <p style={{ fontSize: '14px', color: 'var(--text-2)', lineHeight: '1.6' }}>{t('howItWorks.dataInput.card4Desc')}</p>
               </div>
             </div>
           </div>
 
           {/* Section: The Model Architecture */}
           <div style={{ marginBottom: '60px' }}>
-            <h2 style={{ fontSize: '32px', marginBottom: '24px' }}>How does the AI decide?</h2>
+            <h2 style={{ fontSize: '32px', marginBottom: '24px' }}>{t('howItWorks.modelAuth.title')}</h2>
             <p style={{ marginBottom: '16px', lineHeight: '1.7', fontSize: '16px', color: 'var(--text-2)' }}>
-              We don't use one AI. We use <strong style={{ color: 'var(--text)' }}>multiple different AIs that vote together</strong>, plus a meta-learner that learns how to combine their votes (stacking ensemble).
+              {t('howItWorks.modelAuth.desc1')} <strong style={{ color: 'var(--text)' }}>{t('howItWorks.modelAuth.desc2')}</strong>{t('howItWorks.modelAuth.desc3')}
             </p>
             
             <div className="card" style={{ padding: '40px', marginTop: '32px' }}>
-              <h3 style={{ fontSize: '20px', marginBottom: '30px', textAlign: 'center', letterSpacing: '0.02em' }}>Test Accuracy (2025-2026 Held-out Data)</h3>
+              <h3 style={{ fontSize: '20px', marginBottom: '30px', textAlign: 'center', letterSpacing: '0.02em' }}>{t('howItWorks.modelAuth.chartTitle')}</h3>
               <div style={{ width: '100%', height: '320px' }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={modelAccuracyData} layout="vertical" margin={{ top: 5, right: 30, left: 10, bottom: 5 }}>
@@ -223,14 +223,14 @@ export default function HowItWorks() {
                 </ResponsiveContainer>
               </div>
               <p style={{ fontSize: '13px', color: 'var(--text-3)', textAlign: 'center', marginTop: '24px' }}>
-                Tested on 16,035 (MOH, week) pairs. The 76.8% is honest, production-grade accuracy on unseen data.
+                {t('howItWorks.modelAuth.chartFooter')}
               </p>
             </div>
           </div>
 
           {/* FAQ Section */}
           <div style={{ marginBottom: '80px' }}>
-            <h2 style={{ fontSize: '32px', marginBottom: '32px', textAlign: 'center' }}>Frequently Asked Questions</h2>
+            <h2 style={{ fontSize: '32px', marginBottom: '32px', textAlign: 'center' }}>{t('howItWorks.faq.title')}</h2>
             
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', maxWidth: '800px', margin: '0 auto' }}>
               {faqs.map((faq, index) => (
