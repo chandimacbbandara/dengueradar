@@ -41,17 +41,26 @@ ZONE_PATTERN = re.compile(
 
 def _extract_location(message: str):
     """Return (moh_code_or_name, display_label) or (None, None)."""
-    # Explicit "MOH 50" / "MOH area 50"
+    # 1. Explicit "MOH 50" / "MOH area 50"
     m = re.search(r'\bmoh\s*(?:area|code|zone)?\s*[:#-]?\s*(\d{1,3})\b', message, re.IGNORECASE)
     if m:
         return m.group(1), f"MOH {m.group(1)}"
 
-    # Named zone
+    # 2. Exact match for a named zone
     m = ZONE_PATTERN.search(message)
     if m:
-        return m.group(1), m.group(1).title()
+        matched = m.group(1).lower()
+        return matched, matched.title()
 
-    # Bare number ≤ 226
+    # 3. Fuzzy match for single-word typos (e.g., "kurunagala" -> "kurunegala")
+    import difflib
+    words = re.findall(r'\b[a-zA-Z]{4,}\b', message.lower())
+    for word in words:
+        matches = difflib.get_close_matches(word, KNOWN_ZONES, n=1, cutoff=0.8)
+        if matches:
+            return matches[0], matches[0].title()
+
+    # 4. Bare number ≤ 226
     m = MOH_CODE_PATTERN.search(message)
     if m and int(m.group(1)) <= 226:
         return m.group(1), f"MOH {m.group(1)}"
