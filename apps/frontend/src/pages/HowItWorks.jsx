@@ -72,13 +72,15 @@ export default function HowItWorks() {
       <Navbar />
       
       {/* Hero Section */}
-      <section className="hero" style={{ paddingBottom: '40px' }}>
-        <div className="wrap">
-          <div className="eyebrow" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Icon name="brain" size={16} /> HOW IT WORKS
+      <div className="mesh-bg"></div>
+      <section className="hero fade-in-up" style={{ position: 'relative', padding: '60px 0', textAlign: 'center', borderBottom: 'none' }}>
+        <div className="hero-glow"></div>
+        <div className="wrap" style={{ position: 'relative', zIndex: 1 }}>
+          <div className="eyebrow" style={{ justifyContent: 'center', marginBottom: '24px' }}>
+            <Icon name="brain" size={16} /> INTELLIGENCE CORE
           </div>
-          <h1 className="display">Intelligence Core</h1>
-          <p className="sub" style={{ maxWidth: '800px', margin: '0 auto' }}>
+          <h1 className="display text-gradient" style={{ fontSize: '48px', margin: '0 auto', maxWidth: '800px' }}>How DengueRadar Works</h1>
+          <p className="sub" style={{ maxWidth: '800px', margin: '20px auto 0', fontSize: '18px' }}>
             A complete guide to our AI-powered dengue early warning system. Every week, our multi-model ensemble predicts the risk of an outbreak in all 226 MOH areas across Sri Lanka with ~77% accuracy.
           </p>
         </div>
@@ -88,147 +90,167 @@ export default function HowItWorks() {
         <div className="wrap" style={{ maxWidth: '900px' }}>
           
           {/* TLDR Card */}
-          <div className="card" style={{ padding: '30px', background: 'var(--surface-2)', marginBottom: '40px', borderLeft: '4px solid var(--brand)' }}>
+          <div className="glass-panel delay-1 fade-in-up" style={{ padding: '30px', marginBottom: '60px', borderLeft: '4px solid var(--brand)' }}>
             <h3 style={{ fontSize: '14px', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--brand)', marginBottom: '10px' }}>In 30 Seconds</h3>
-            <p style={{ fontSize: '16px', lineHeight: '1.6', margin: 0 }}>
-              Every week, for each of Sri Lanka's 226 neighbourhoods, our AI looks at the neighbourhood's recent case history, the district-wide pattern, and the weather — and predicts whether next week will be <MetricBadge type="low"/>, <MetricBadge type="watch"/>, <MetricBadge type="warning"/>, or <MetricBadge type="alert"/>. The system achieves <strong>~77% accuracy</strong> on data it has never seen, giving health authorities a one-week head start on outbreak response.
+            <p style={{ fontSize: '16px', lineHeight: '1.6', margin: 0, color: 'var(--text-2)' }}>
+              Every week, for each of Sri Lanka's 226 neighbourhoods, our AI looks at the neighbourhood's recent case history, the district-wide pattern, and the weather — and predicts whether next week will be <MetricBadge type="low"/>, <MetricBadge type="watch"/>, <MetricBadge type="warning"/>, or <MetricBadge type="alert"/>. The system achieves <strong style={{ color: 'var(--text)' }}>~77% accuracy</strong> on data it has never seen, giving health authorities a one-week head start on outbreak response.
             </p>
           </div>
 
           {/* Section: What is this? */}
-          <div style={{ marginBottom: '40px' }}>
-            <h2 style={{ fontSize: '24px', marginBottom: '20px', borderBottom: '1px solid var(--border)', paddingBottom: '10px' }}>What is this?</h2>
-            <p style={{ marginBottom: '16px', lineHeight: '1.7' }}>
-              <strong>DengueRadar</strong> is an AI system that predicts, every week, how likely each neighbourhood in Sri Lanka is to experience a dengue outbreak in the <strong>coming week</strong>.
-            </p>
-            <p style={{ marginBottom: '16px', lineHeight: '1.7' }}>It does this by looking at:</p>
-            <ul style={{ listStyleType: 'disc', paddingLeft: '24px', marginBottom: '24px', lineHeight: '1.7' }}>
-              <li>The neighbourhood's own recent case history</li>
-              <li>The pattern of cases across the whole district</li>
-              <li>The current weather (rain, temperature, humidity)</li>
-              <li>The time of year</li>
-            </ul>
-
-            <div className="card" style={{ overflow: 'hidden' }}>
-              <table style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse' }}>
-                <thead>
-                  <tr style={{ background: 'var(--surface-2)' }}>
-                    <th style={{ padding: '16px', borderBottom: '1px solid var(--border)' }}>Alert</th>
-                    <th style={{ padding: '16px', borderBottom: '1px solid var(--border)' }}>What it means</th>
-                    <th style={{ padding: '16px', borderBottom: '1px solid var(--border)' }}>What to do</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td style={{ padding: '16px', borderBottom: '1px solid var(--border)' }}><MetricBadge type="low"/></td>
-                    <td style={{ padding: '16px', borderBottom: '1px solid var(--border)' }}>Normal week, low dengue activity</td>
-                    <td style={{ padding: '16px', borderBottom: '1px solid var(--border)', color: 'var(--text-2)' }}>Routine surveillance</td>
-                  </tr>
-                  <tr>
-                    <td style={{ padding: '16px', borderBottom: '1px solid var(--border)' }}><MetricBadge type="watch"/></td>
-                    <td style={{ padding: '16px', borderBottom: '1px solid var(--border)' }}>Slightly elevated, keep an eye on it</td>
-                    <td style={{ padding: '16px', borderBottom: '1px solid var(--border)', color: 'var(--text-2)' }}>Increase monitoring</td>
-                  </tr>
-                  <tr>
-                    <td style={{ padding: '16px', borderBottom: '1px solid var(--border)' }}><MetricBadge type="warning"/></td>
-                    <td style={{ padding: '16px', borderBottom: '1px solid var(--border)' }}>Outbreak likely starting</td>
-                    <td style={{ padding: '16px', borderBottom: '1px solid var(--border)', color: 'var(--text-2)' }}>Activate response teams</td>
-                  </tr>
-                  <tr>
-                    <td style={{ padding: '16px' }}><MetricBadge type="alert"/></td>
-                    <td style={{ padding: '16px' }}>Active outbreak, full response needed</td>
-                    <td style={{ padding: '16px', color: 'var(--text-2)' }}>Emergency response</td>
-                  </tr>
-                </tbody>
-              </table>
+          <div className="delay-2 fade-in-up" style={{ marginBottom: '60px' }}>
+            <h2 className="text-gradient" style={{ fontSize: '32px', marginBottom: '24px' }}>What is DengueRadar?</h2>
+            
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px', alignItems: 'center' }}>
+              <div>
+                <p style={{ marginBottom: '16px', lineHeight: '1.7', fontSize: '16px', color: 'var(--text-2)' }}>
+                  It is an AI system that predicts, every week, how likely each neighbourhood in Sri Lanka is to experience a dengue outbreak in the <strong style={{ color: 'var(--text)' }}>coming week</strong>.
+                </p>
+                <p style={{ marginBottom: '16px', lineHeight: '1.7', fontSize: '16px', color: 'var(--text-2)' }}>It does this by looking at:</p>
+                <div style={{ marginLeft: '10px', display: 'flex', flexDirection: 'column', gap: '0' }}>
+                  <div className="timeline-step">
+                    <div className="timeline-dot"><Icon name="history" size={14} color="var(--brand)" /></div>
+                    <div style={{ fontWeight: 600 }}>Recent Case History</div>
+                    <div style={{ fontSize: '13px', color: 'var(--text-3)' }}>Local epidemiological data</div>
+                  </div>
+                  <div className="timeline-step">
+                    <div className="timeline-dot"><Icon name="map" size={14} color="var(--brand)" /></div>
+                    <div style={{ fontWeight: 600 }}>District-wide Patterns</div>
+                    <div style={{ fontSize: '13px', color: 'var(--text-3)' }}>Regional spread mechanics</div>
+                  </div>
+                  <div className="timeline-step">
+                    <div className="timeline-dot"><Icon name="cloud-rain" size={14} color="var(--brand)" /></div>
+                    <div style={{ fontWeight: 600 }}>Weather & Climate</div>
+                    <div style={{ fontSize: '13px', color: 'var(--text-3)' }}>Rain, temp, humidity</div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="glass-panel" style={{ padding: '0' }}>
+                <table style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse' }}>
+                  <thead>
+                    <tr style={{ background: 'rgba(0,0,0,0.05)' }}>
+                      <th style={{ padding: '16px', borderBottom: '1px solid rgba(255,255,255,0.05)', color: 'var(--text-3)', fontSize: '12px' }}>ALERT LEVEL</th>
+                      <th style={{ padding: '16px', borderBottom: '1px solid rgba(255,255,255,0.05)', color: 'var(--text-3)', fontSize: '12px' }}>ACTION REQUIRED</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td style={{ padding: '16px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}><MetricBadge type="low"/></td>
+                      <td style={{ padding: '16px', borderBottom: '1px solid rgba(255,255,255,0.05)', color: 'var(--text-2)', fontSize: '14px' }}>Routine surveillance</td>
+                    </tr>
+                    <tr>
+                      <td style={{ padding: '16px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}><MetricBadge type="watch"/></td>
+                      <td style={{ padding: '16px', borderBottom: '1px solid rgba(255,255,255,0.05)', color: 'var(--text-2)', fontSize: '14px' }}>Increase monitoring</td>
+                    </tr>
+                    <tr>
+                      <td style={{ padding: '16px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}><MetricBadge type="warning"/></td>
+                      <td style={{ padding: '16px', borderBottom: '1px solid rgba(255,255,255,0.05)', color: 'var(--text-2)', fontSize: '14px' }}>Activate response teams</td>
+                    </tr>
+                    <tr>
+                      <td style={{ padding: '16px' }}><MetricBadge type="alert"/></td>
+                      <td style={{ padding: '16px', color: 'var(--text-2)', fontSize: '14px' }}>Emergency response</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
 
           {/* Section: The AI Features */}
-          <div style={{ marginBottom: '40px' }}>
-            <h2 style={{ fontSize: '24px', marginBottom: '20px', borderBottom: '1px solid var(--border)', paddingBottom: '10px' }}>What does the AI actually look at?</h2>
-            <p style={{ marginBottom: '24px', lineHeight: '1.7' }}>
-              Every week, for each neighbourhood, the AI looks at <strong>63 different signals</strong> (features). They're grouped into major categories:
+          <div className="delay-3 fade-in-up" style={{ marginBottom: '60px' }}>
+            <h2 className="text-gradient" style={{ fontSize: '32px', marginBottom: '24px' }}>What does the AI actually look at?</h2>
+            <p style={{ marginBottom: '32px', lineHeight: '1.7', fontSize: '16px', color: 'var(--text-2)' }}>
+              Every week, for each neighbourhood, the AI looks at <strong style={{ color: 'var(--text)' }}>63 different signals</strong> (features). They're grouped into major categories:
             </p>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
-              <div className="card" style={{ padding: '20px' }}>
-                <Icon name="history" size={24} color="var(--brand)" style={{ marginBottom: '12px' }} />
-                <h4 style={{ fontSize: '16px', marginBottom: '8px' }}>Historical Cases</h4>
-                <p style={{ fontSize: '14px', color: 'var(--text-2)', lineHeight: '1.5' }}>Cases from the last 1-5 weeks, 2-6 months ago, and exactly one year ago to capture strong seasonality.</p>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '24px' }}>
+              <div className="glass-card">
+                <div style={{ background: 'var(--brand-soft)', width: '48px', height: '48px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px' }}>
+                  <Icon name="history" size={24} color="var(--brand)" className="icon-glow" />
+                </div>
+                <h4 style={{ fontSize: '18px', marginBottom: '12px' }}>Historical Cases</h4>
+                <p style={{ fontSize: '14px', color: 'var(--text-2)', lineHeight: '1.6' }}>Cases from the last 1-5 weeks, 2-6 months ago, and exactly one year ago to capture strong seasonality.</p>
               </div>
-              <div className="card" style={{ padding: '20px' }}>
-                <Icon name="trending-up" size={24} color="var(--brand)" style={{ marginBottom: '12px' }} />
-                <h4 style={{ fontSize: '16px', marginBottom: '8px' }}>Rolling Stats & Growth</h4>
-                <p style={{ fontSize: '14px', color: 'var(--text-2)', lineHeight: '1.5' }}>Mean, peak, variability, week-over-week growth, and 8-week linear trends indicating momentum.</p>
+              <div className="glass-card">
+                <div style={{ background: 'var(--brand-soft)', width: '48px', height: '48px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px' }}>
+                  <Icon name="trending-up" size={24} color="var(--brand)" className="icon-glow" />
+                </div>
+                <h4 style={{ fontSize: '18px', marginBottom: '12px' }}>Rolling Stats & Growth</h4>
+                <p style={{ fontSize: '14px', color: 'var(--text-2)', lineHeight: '1.6' }}>Mean, peak, variability, week-over-week growth, and 8-week linear trends indicating momentum.</p>
               </div>
-              <div className="card" style={{ padding: '20px' }}>
-                <Icon name="cloud-lightning" size={24} color="var(--brand)" style={{ marginBottom: '12px' }} />
-                <h4 style={{ fontSize: '16px', marginBottom: '8px' }}>Weather Interactions</h4>
-                <p style={{ fontSize: '14px', color: 'var(--text-2)', lineHeight: '1.5' }}>Temperature, humidity, rainfall lags (since mosquitoes breed 2-4 weeks after rain), and heat indices.</p>
+              <div className="glass-card">
+                <div style={{ background: 'var(--brand-soft)', width: '48px', height: '48px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px' }}>
+                  <Icon name="cloud-lightning" size={24} color="var(--brand)" className="icon-glow" />
+                </div>
+                <h4 style={{ fontSize: '18px', marginBottom: '12px' }}>Weather Interactions</h4>
+                <p style={{ fontSize: '14px', color: 'var(--text-2)', lineHeight: '1.6' }}>Temperature, humidity, rainfall lags (since mosquitoes breed 2-4 weeks after rain), and heat indices.</p>
               </div>
-              <div className="card" style={{ padding: '20px' }}>
-                <Icon name="map-pin" size={24} color="var(--brand)" style={{ marginBottom: '12px' }} />
-                <h4 style={{ fontSize: '16px', marginBottom: '8px' }}>District Context</h4>
-                <p style={{ fontSize: '14px', color: 'var(--text-2)', lineHeight: '1.5' }}>Total district cases and the neighbourhood's percentile rank within the district (are you the epicenter?).</p>
+              <div className="glass-card">
+                <div style={{ background: 'var(--brand-soft)', width: '48px', height: '48px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px' }}>
+                  <Icon name="map-pin" size={24} color="var(--brand)" className="icon-glow" />
+                </div>
+                <h4 style={{ fontSize: '18px', marginBottom: '12px' }}>District Context</h4>
+                <p style={{ fontSize: '14px', color: 'var(--text-2)', lineHeight: '1.6' }}>Total district cases and the neighbourhood's percentile rank within the district (are you the epicenter?).</p>
               </div>
             </div>
           </div>
 
           {/* Section: The Model Architecture */}
-          <div style={{ marginBottom: '40px' }}>
-            <h2 style={{ fontSize: '24px', marginBottom: '20px', borderBottom: '1px solid var(--border)', paddingBottom: '10px' }}>How does the AI decide?</h2>
-            <p style={{ marginBottom: '16px', lineHeight: '1.7' }}>
-              We don't use one AI. We use <strong>multiple different AIs that vote together</strong>, plus a meta-learner that learns how to combine their votes (stacking ensemble).
+          <div className="delay-4 fade-in-up" style={{ marginBottom: '60px' }}>
+            <h2 className="text-gradient" style={{ fontSize: '32px', marginBottom: '24px' }}>How does the AI decide?</h2>
+            <p style={{ marginBottom: '16px', lineHeight: '1.7', fontSize: '16px', color: 'var(--text-2)' }}>
+              We don't use one AI. We use <strong style={{ color: 'var(--text)' }}>multiple different AIs that vote together</strong>, plus a meta-learner that learns how to combine their votes (stacking ensemble).
             </p>
             
-            <div className="card" style={{ padding: '30px', background: 'var(--surface)', marginTop: '24px' }}>
-              <h3 style={{ fontSize: '18px', marginBottom: '20px', textAlign: 'center' }}>Test Accuracy (2025-2026 Held-out Data)</h3>
-              <div style={{ width: '100%', height: '300px' }}>
+            <div className="glass-panel" style={{ padding: '40px', marginTop: '32px' }}>
+              <h3 style={{ fontSize: '20px', marginBottom: '30px', textAlign: 'center', letterSpacing: '0.02em' }}>Test Accuracy (2025-2026 Held-out Data)</h3>
+              <div style={{ width: '100%', height: '320px' }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={modelAccuracyData} layout="vertical" margin={{ top: 5, right: 30, left: 10, bottom: 5 }}>
-                    <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="var(--border)" />
+                    <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="rgba(255,255,255,0.05)" />
                     <XAxis type="number" domain={[70, 80]} stroke="var(--text-3)" />
-                    <YAxis dataKey="name" type="category" width={180} stroke="var(--text-2)" tick={{fontSize: 13}} />
+                    <YAxis dataKey="name" type="category" width={180} stroke="var(--text-2)" tick={{fontSize: 13, fontWeight: 600}} />
                     <RechartsTooltip 
-                      cursor={{fill: 'var(--surface-2)'}}
-                      contentStyle={{background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '8px', color: 'var(--text)'}}
+                      cursor={{fill: 'rgba(255,255,255,0.05)'}}
+                      contentStyle={{background: 'var(--glass)', backdropFilter: 'blur(10px)', border: '1px solid var(--border)', borderRadius: '12px', color: 'var(--text)', boxShadow: '0 8px 32px rgba(0,0,0,0.2)'}}
                       formatter={(val) => [`${val}%`, 'Accuracy']}
                     />
-                    <Bar dataKey="accuracy" radius={[0, 4, 4, 0]} barSize={20}>
+                    <Bar dataKey="accuracy" radius={[0, 6, 6, 0]} barSize={24}>
                       {modelAccuracyData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.isMain ? 'var(--brand)' : 'var(--text-3)'} />
+                        <Cell key={`cell-${index}`} fill={entry.isMain ? 'var(--brand)' : 'var(--text-3)'} style={{ filter: entry.isMain ? 'drop-shadow(0 0 8px var(--brand-soft))' : 'none' }} />
                       ))}
                     </Bar>
                   </BarChart>
                 </ResponsiveContainer>
               </div>
-              <p style={{ fontSize: '13px', color: 'var(--text-2)', textAlign: 'center', marginTop: '16px' }}>
+              <p style={{ fontSize: '13px', color: 'var(--text-3)', textAlign: 'center', marginTop: '24px' }}>
                 Tested on 16,035 (MOH, week) pairs. The 76.8% is honest, production-grade accuracy on unseen data.
               </p>
             </div>
           </div>
 
           {/* FAQ Section */}
-          <div style={{ marginBottom: '60px' }}>
-            <h2 style={{ fontSize: '24px', marginBottom: '24px', borderBottom: '1px solid var(--border)', paddingBottom: '10px' }}>Frequently Asked Questions</h2>
+          <div className="delay-4 fade-in-up" style={{ marginBottom: '80px' }}>
+            <h2 className="text-gradient" style={{ fontSize: '32px', marginBottom: '32px', textAlign: 'center' }}>Frequently Asked Questions</h2>
             
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', maxWidth: '800px', margin: '0 auto' }}>
               {faqs.map((faq, index) => (
                 <div 
                   key={index} 
-                  className="card" 
+                  className="glass-panel" 
                   style={{ 
                     overflow: 'hidden',
-                    border: openFaq === index ? '1px solid var(--brand)' : '1px solid var(--border)',
-                    transition: 'border-color 0.2s'
+                    border: openFaq === index ? '1px solid var(--brand)' : '1px solid rgba(255,255,255,0.05)',
+                    boxShadow: openFaq === index ? '0 8px 32px var(--brand-soft)' : '0 8px 32px rgba(0,0,0,0.1)',
+                    transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
                   }}
                 >
                   <button 
                     onClick={() => toggleFaq(index)}
                     style={{
                       width: '100%',
-                      padding: '20px',
+                      padding: '24px',
                       display: 'flex',
                       justifyContent: 'space-between',
                       alignItems: 'center',
@@ -236,31 +258,35 @@ export default function HowItWorks() {
                       border: 'none',
                       cursor: 'pointer',
                       textAlign: 'left',
-                      color: 'var(--text)',
-                      fontWeight: '600',
-                      fontSize: '15px'
+                      color: openFaq === index ? 'var(--brand)' : 'var(--text)',
+                      fontWeight: '700',
+                      fontSize: '16px',
+                      transition: 'color 0.2s ease'
                     }}
                   >
                     {faq.q}
-                    <Icon 
-                      name="chevron-down" 
-                      size={20} 
-                      color="var(--text-3)" 
-                      style={{ 
-                        transform: openFaq === index ? 'rotate(180deg)' : 'rotate(0deg)',
-                        transition: 'transform 0.3s ease'
-                      }} 
-                    />
+                    <div style={{ 
+                      width: '32px', height: '32px', borderRadius: '50%', background: openFaq === index ? 'var(--brand-soft)' : 'var(--surface-3)', 
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.3s ease',
+                      transform: openFaq === index ? 'rotate(180deg)' : 'rotate(0deg)'
+                    }}>
+                      <Icon 
+                        name="chevron-down" 
+                        size={18} 
+                        color={openFaq === index ? 'var(--brand)' : 'var(--text-3)'} 
+                      />
+                    </div>
                   </button>
                   <div 
                     style={{ 
-                      padding: openFaq === index ? '0 20px 20px 20px' : '0 20px',
+                      padding: openFaq === index ? '0 24px 24px 24px' : '0 24px',
                       maxHeight: openFaq === index ? '500px' : '0px',
                       opacity: openFaq === index ? 1 : 0,
                       overflow: 'hidden',
-                      transition: 'all 0.3s ease',
+                      transition: 'all 0.4s ease',
                       color: 'var(--text-2)',
-                      lineHeight: '1.6'
+                      lineHeight: '1.7',
+                      fontSize: '15px'
                     }}
                   >
                     {faq.a}
