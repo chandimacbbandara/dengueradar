@@ -7,45 +7,47 @@ export default function Footer() {
 
   return (
     <footer>
-      <div className="wrap footer-inner">
-        <div>
-          <Link to="/" className="brand">
-            <svg className="brand-mark" viewBox="0 0 40 40" fill="none">
-              <circle cx="20" cy="20" r="19" stroke="var(--brand)" strokeWidth="1.4" opacity="0.35"/>
-              <circle cx="20" cy="20" r="13" stroke="var(--brand)" strokeWidth="1.4" opacity="0.55"/>
-              <circle cx="20" cy="20" r="3.4" fill="var(--brand)"/>
-              <path d="M20 20 L20 4" stroke="var(--brand)" strokeWidth="1.6" strokeLinecap="round"/>
-              <path d="M20 20 L31 11" stroke="var(--brand)" strokeWidth="1.6" strokeLinecap="round" opacity="0.6"/>
-            </svg>
-            <div>
-              <div className="brand-name">DengueRadar</div>
-              <div className="brand-sub">Sri Lanka · Live</div>
+      <div className="wrap">
+        <div className="footer-grid">
+          <div>
+            <div className="brand" style={{marginBottom: '14px'}}>
+              <div className="brand-mark" style={{width: '32px', height: '32px'}}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 2C12 2 5 10 5 15a7 7 0 0014 0c0-5-7-13-7-13z" fill="white"/></svg>
+              </div>
+              <div className="brand-name" style={{fontSize: '15px'}}>DengueRadar</div>
             </div>
-          </Link>
-          <div className="l" style={{marginTop: '14px', maxWidth: '280px'}}>
-            {t('footer.tagline')}
+            <p style={{fontSize: '13px', color: '#8b96ac', lineHeight: '1.6', maxWidth: '280px'}}>
+              AI-powered dengue early warning and public health intelligence platform for Sri Lanka.
+            </p>
           </div>
-          <div className="l" style={{marginTop: '8px', opacity: 0.7}}>
-            &copy; {new Date().getFullYear()} DengueRadar Sri Lanka. All rights reserved.
+          <div>
+            <h5>Platform</h5>
+            <ul>
+              <li><Link to="/">Overview</Link></li>
+              <li><Link to="/how-it-works">How It Works</Link></li>
+              <li><a href="#map">Live Map</a></li>
+            </ul>
+          </div>
+          <div>
+            <h5>Access</h5>
+            <ul>
+              <li><Link to="/signup/general">Citizen Sign Up</Link></li>
+              <li><Link to="/signup/moh-officer">MOH Officer Portal</Link></li>
+              <li><Link to="/login">Sign In</Link></li>
+            </ul>
+          </div>
+          <div>
+            <h5>Resources</h5>
+            <ul>
+              <li><a href="#">Documentation</a></li>
+              <li><a href="mailto:support@dengueradar.lk">Contact Support</a></li>
+              <li><a href="#">Privacy Policy</a></li>
+            </ul>
           </div>
         </div>
-        <div className="footer-links" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          <div style={{fontWeight: 600, color: 'var(--text)', marginBottom: '4px'}}>Quick Links</div>
-          <Link to="/">Overview</Link>
-          <a href="#map">Risk Map</a>
-          <Link to="/login">Login</Link>
-        </div>
-        <div className="footer-links" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          <div style={{fontWeight: 600, color: 'var(--text)', marginBottom: '4px'}}>Resources</div>
-          <a href="#">Prevention Guide</a>
-          <Link to="/signup/moh-officer">MOH Portal</Link>
-          <a href="#">API Documentation</a>
-        </div>
-        <div className="footer-links" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          <div style={{fontWeight: 600, color: 'var(--text)', marginBottom: '4px'}}>Legal</div>
-          <a href="#">Privacy Policy</a>
-          <a href="#">Terms of Service</a>
-          <a href="mailto:support@dengueradar.lk">Contact Support</a>
+        <div className="footer-bottom">
+          <span>&copy; {new Date().getFullYear()} DengueRadar Sri Lanka. All rights reserved.</span>
+          <span>Built with React · Leaflet · Recharts</span>
         </div>
       </div>
     </footer>

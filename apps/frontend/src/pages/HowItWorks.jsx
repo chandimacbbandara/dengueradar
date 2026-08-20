@@ -59,10 +59,10 @@ export default function HowItWorks() {
 
   const MetricBadge = ({ type }) => {
     switch(type) {
-      case 'low': return <span className="risk-badge low">Low</span>;
-      case 'watch': return <span className="risk-badge watch" style={{background: 'var(--risk-mod)', color: '#fff'}}>Watch</span>;
-      case 'warning': return <span className="risk-badge warning" style={{background: 'var(--risk-high)', color: '#fff'}}>Warning</span>;
-      case 'alert': return <span className="risk-badge alert" style={{background: 'var(--risk-crit)', color: '#fff'}}>Alert</span>;
+      case 'low': return <span className="badge low">Low</span>;
+      case 'watch': return <span className="badge mod">Watch</span>;
+      case 'warning': return <span className="badge high">Warning</span>;
+      case 'alert': return <span className="badge crit">Alert</span>;
       default: return null;
     }
   };
@@ -72,15 +72,13 @@ export default function HowItWorks() {
       <Navbar />
       
       {/* Hero Section */}
-      <div className="mesh-bg"></div>
-      <section className="hero fade-in-up" style={{ position: 'relative', padding: '60px 0', textAlign: 'center', borderBottom: 'none' }}>
-        <div className="hero-glow"></div>
+      <section className="hero" style={{ position: 'relative', padding: '60px 0', textAlign: 'center', borderBottom: 'none' }}>
         <div className="wrap" style={{ position: 'relative', zIndex: 1 }}>
           <div className="eyebrow" style={{ justifyContent: 'center', marginBottom: '24px' }}>
-            <Icon name="brain" size={16} /> INTELLIGENCE CORE
+            <span className="dot-live"></span> INTELLIGENCE CORE
           </div>
-          <h1 className="display text-gradient" style={{ fontSize: '48px', margin: '0 auto', maxWidth: '800px' }}>How DengueRadar Works</h1>
-          <p className="sub" style={{ maxWidth: '800px', margin: '20px auto 0', fontSize: '18px' }}>
+          <h1 className="display" style={{ fontSize: '48px', margin: '0 auto', maxWidth: '800px' }}>How DengueRadar Works</h1>
+          <p className="lead" style={{ maxWidth: '800px', margin: '20px auto 0', fontSize: '18px' }}>
             A complete guide to our AI-powered dengue early warning system. Every week, our multi-model ensemble predicts the risk of an outbreak in all 226 MOH areas across Sri Lanka with ~77% accuracy.
           </p>
         </div>
@@ -90,16 +88,16 @@ export default function HowItWorks() {
         <div className="wrap" style={{ maxWidth: '900px' }}>
           
           {/* TLDR Card */}
-          <div className="glass-panel delay-1 fade-in-up" style={{ padding: '30px', marginBottom: '60px', borderLeft: '4px solid var(--brand)' }}>
-            <h3 style={{ fontSize: '14px', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--brand)', marginBottom: '10px' }}>In 30 Seconds</h3>
+          <div className="card" style={{ padding: '32px', marginBottom: '60px', borderLeft: '4px solid var(--teal)' }}>
+            <h3 style={{ fontSize: '13px', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--teal)', marginBottom: '10px' }}>In 30 Seconds</h3>
             <p style={{ fontSize: '16px', lineHeight: '1.6', margin: 0, color: 'var(--text-2)' }}>
               Every week, for each of Sri Lanka's 226 neighbourhoods, our AI looks at the neighbourhood's recent case history, the district-wide pattern, and the weather — and predicts whether next week will be <MetricBadge type="low"/>, <MetricBadge type="watch"/>, <MetricBadge type="warning"/>, or <MetricBadge type="alert"/>. The system achieves <strong style={{ color: 'var(--text)' }}>~77% accuracy</strong> on data it has never seen, giving health authorities a one-week head start on outbreak response.
             </p>
           </div>
 
           {/* Section: What is this? */}
-          <div className="delay-2 fade-in-up" style={{ marginBottom: '60px' }}>
-            <h2 className="text-gradient" style={{ fontSize: '32px', marginBottom: '24px' }}>What is DengueRadar?</h2>
+          <div style={{ marginBottom: '60px' }}>
+            <h2 style={{ fontSize: '32px', marginBottom: '24px' }}>What is DengueRadar?</h2>
             
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px', alignItems: 'center' }}>
               <div>
@@ -108,44 +106,44 @@ export default function HowItWorks() {
                 </p>
                 <p style={{ marginBottom: '16px', lineHeight: '1.7', fontSize: '16px', color: 'var(--text-2)' }}>It does this by looking at:</p>
                 <div style={{ marginLeft: '10px', display: 'flex', flexDirection: 'column', gap: '0' }}>
-                  <div className="timeline-step">
-                    <div className="timeline-dot"><Icon name="history" size={14} color="var(--brand)" /></div>
+                  <div style={{ paddingLeft: '24px', borderLeft: '2px solid var(--border)', position: 'relative', paddingBottom: '20px' }}>
+                    <div style={{ position: 'absolute', left: '-7px', top: '2px', width: '12px', height: '12px', borderRadius: '50%', background: 'var(--teal)' }}></div>
                     <div style={{ fontWeight: 600 }}>Recent Case History</div>
                     <div style={{ fontSize: '13px', color: 'var(--text-3)' }}>Local epidemiological data</div>
                   </div>
-                  <div className="timeline-step">
-                    <div className="timeline-dot"><Icon name="map" size={14} color="var(--brand)" /></div>
+                  <div style={{ paddingLeft: '24px', borderLeft: '2px solid var(--border)', position: 'relative', paddingBottom: '20px' }}>
+                    <div style={{ position: 'absolute', left: '-7px', top: '2px', width: '12px', height: '12px', borderRadius: '50%', background: 'var(--teal)' }}></div>
                     <div style={{ fontWeight: 600 }}>District-wide Patterns</div>
                     <div style={{ fontSize: '13px', color: 'var(--text-3)' }}>Regional spread mechanics</div>
                   </div>
-                  <div className="timeline-step">
-                    <div className="timeline-dot"><Icon name="cloud-rain" size={14} color="var(--brand)" /></div>
+                  <div style={{ paddingLeft: '24px', borderLeft: '2px solid transparent', position: 'relative' }}>
+                    <div style={{ position: 'absolute', left: '-7px', top: '2px', width: '12px', height: '12px', borderRadius: '50%', background: 'var(--teal)' }}></div>
                     <div style={{ fontWeight: 600 }}>Weather & Climate</div>
                     <div style={{ fontSize: '13px', color: 'var(--text-3)' }}>Rain, temp, humidity</div>
                   </div>
                 </div>
               </div>
               
-              <div className="glass-panel" style={{ padding: '0' }}>
-                <table style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse' }}>
+              <div className="card" style={{ padding: '0' }}>
+                <table className="data-table">
                   <thead>
-                    <tr style={{ background: 'rgba(0,0,0,0.05)' }}>
-                      <th style={{ padding: '16px', borderBottom: '1px solid rgba(255,255,255,0.05)', color: 'var(--text-3)', fontSize: '12px' }}>ALERT LEVEL</th>
-                      <th style={{ padding: '16px', borderBottom: '1px solid rgba(255,255,255,0.05)', color: 'var(--text-3)', fontSize: '12px' }}>ACTION REQUIRED</th>
+                    <tr>
+                      <th>ALERT LEVEL</th>
+                      <th>ACTION REQUIRED</th>
                     </tr>
                   </thead>
                   <tbody>
                     <tr>
-                      <td style={{ padding: '16px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}><MetricBadge type="low"/></td>
-                      <td style={{ padding: '16px', borderBottom: '1px solid rgba(255,255,255,0.05)', color: 'var(--text-2)', fontSize: '14px' }}>Routine surveillance</td>
+                      <td style={{ padding: '16px', borderBottom: '1px solid var(--border)' }}><MetricBadge type="low"/></td>
+                      <td style={{ padding: '16px', borderBottom: '1px solid var(--border)', color: 'var(--text-2)', fontSize: '14px' }}>Routine surveillance</td>
                     </tr>
                     <tr>
-                      <td style={{ padding: '16px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}><MetricBadge type="watch"/></td>
-                      <td style={{ padding: '16px', borderBottom: '1px solid rgba(255,255,255,0.05)', color: 'var(--text-2)', fontSize: '14px' }}>Increase monitoring</td>
+                      <td style={{ padding: '16px', borderBottom: '1px solid var(--border)' }}><MetricBadge type="watch"/></td>
+                      <td style={{ padding: '16px', borderBottom: '1px solid var(--border)', color: 'var(--text-2)', fontSize: '14px' }}>Increase monitoring</td>
                     </tr>
                     <tr>
-                      <td style={{ padding: '16px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}><MetricBadge type="warning"/></td>
-                      <td style={{ padding: '16px', borderBottom: '1px solid rgba(255,255,255,0.05)', color: 'var(--text-2)', fontSize: '14px' }}>Activate response teams</td>
+                      <td style={{ padding: '16px', borderBottom: '1px solid var(--border)' }}><MetricBadge type="warning"/></td>
+                      <td style={{ padding: '16px', borderBottom: '1px solid var(--border)', color: 'var(--text-2)', fontSize: '14px' }}>Activate response teams</td>
                     </tr>
                     <tr>
                       <td style={{ padding: '16px' }}><MetricBadge type="alert"/></td>
@@ -158,37 +156,37 @@ export default function HowItWorks() {
           </div>
 
           {/* Section: The AI Features */}
-          <div className="delay-3 fade-in-up" style={{ marginBottom: '60px' }}>
-            <h2 className="text-gradient" style={{ fontSize: '32px', marginBottom: '24px' }}>What does the AI actually look at?</h2>
+          <div style={{ marginBottom: '60px' }}>
+            <h2 style={{ fontSize: '32px', marginBottom: '24px' }}>What does the AI actually look at?</h2>
             <p style={{ marginBottom: '32px', lineHeight: '1.7', fontSize: '16px', color: 'var(--text-2)' }}>
               Every week, for each neighbourhood, the AI looks at <strong style={{ color: 'var(--text)' }}>63 different signals</strong> (features). They're grouped into major categories:
             </p>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '24px' }}>
-              <div className="glass-card">
+              <div className="card" style={{ padding: '24px' }}>
                 <div style={{ background: 'var(--brand-soft)', width: '48px', height: '48px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px' }}>
                   <Icon name="history" size={24} color="var(--brand)" className="icon-glow" />
                 </div>
                 <h4 style={{ fontSize: '18px', marginBottom: '12px' }}>Historical Cases</h4>
                 <p style={{ fontSize: '14px', color: 'var(--text-2)', lineHeight: '1.6' }}>Cases from the last 1-5 weeks, 2-6 months ago, and exactly one year ago to capture strong seasonality.</p>
               </div>
-              <div className="glass-card">
+              <div className="card" style={{ padding: '24px' }}>
                 <div style={{ background: 'var(--brand-soft)', width: '48px', height: '48px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px' }}>
-                  <Icon name="trending-up" size={24} color="var(--brand)" className="icon-glow" />
+                  <Icon name="trending-up" size={24} color="var(--brand)" />
                 </div>
                 <h4 style={{ fontSize: '18px', marginBottom: '12px' }}>Rolling Stats & Growth</h4>
                 <p style={{ fontSize: '14px', color: 'var(--text-2)', lineHeight: '1.6' }}>Mean, peak, variability, week-over-week growth, and 8-week linear trends indicating momentum.</p>
               </div>
-              <div className="glass-card">
+              <div className="card" style={{ padding: '24px' }}>
                 <div style={{ background: 'var(--brand-soft)', width: '48px', height: '48px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px' }}>
-                  <Icon name="cloud-lightning" size={24} color="var(--brand)" className="icon-glow" />
+                  <Icon name="cloud-lightning" size={24} color="var(--brand)" />
                 </div>
                 <h4 style={{ fontSize: '18px', marginBottom: '12px' }}>Weather Interactions</h4>
                 <p style={{ fontSize: '14px', color: 'var(--text-2)', lineHeight: '1.6' }}>Temperature, humidity, rainfall lags (since mosquitoes breed 2-4 weeks after rain), and heat indices.</p>
               </div>
-              <div className="glass-card">
+              <div className="card" style={{ padding: '24px' }}>
                 <div style={{ background: 'var(--brand-soft)', width: '48px', height: '48px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px' }}>
-                  <Icon name="map-pin" size={24} color="var(--brand)" className="icon-glow" />
+                  <Icon name="map-pin" size={24} color="var(--brand)" />
                 </div>
                 <h4 style={{ fontSize: '18px', marginBottom: '12px' }}>District Context</h4>
                 <p style={{ fontSize: '14px', color: 'var(--text-2)', lineHeight: '1.6' }}>Total district cases and the neighbourhood's percentile rank within the district (are you the epicenter?).</p>
@@ -197,28 +195,28 @@ export default function HowItWorks() {
           </div>
 
           {/* Section: The Model Architecture */}
-          <div className="delay-4 fade-in-up" style={{ marginBottom: '60px' }}>
-            <h2 className="text-gradient" style={{ fontSize: '32px', marginBottom: '24px' }}>How does the AI decide?</h2>
+          <div style={{ marginBottom: '60px' }}>
+            <h2 style={{ fontSize: '32px', marginBottom: '24px' }}>How does the AI decide?</h2>
             <p style={{ marginBottom: '16px', lineHeight: '1.7', fontSize: '16px', color: 'var(--text-2)' }}>
               We don't use one AI. We use <strong style={{ color: 'var(--text)' }}>multiple different AIs that vote together</strong>, plus a meta-learner that learns how to combine their votes (stacking ensemble).
             </p>
             
-            <div className="glass-panel" style={{ padding: '40px', marginTop: '32px' }}>
+            <div className="card" style={{ padding: '40px', marginTop: '32px' }}>
               <h3 style={{ fontSize: '20px', marginBottom: '30px', textAlign: 'center', letterSpacing: '0.02em' }}>Test Accuracy (2025-2026 Held-out Data)</h3>
               <div style={{ width: '100%', height: '320px' }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={modelAccuracyData} layout="vertical" margin={{ top: 5, right: 30, left: 10, bottom: 5 }}>
-                    <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="rgba(255,255,255,0.05)" />
+                    <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="var(--border)" />
                     <XAxis type="number" domain={[70, 80]} stroke="var(--text-3)" />
                     <YAxis dataKey="name" type="category" width={180} stroke="var(--text-2)" tick={{fontSize: 13, fontWeight: 600}} />
                     <RechartsTooltip 
-                      cursor={{fill: 'rgba(255,255,255,0.05)'}}
-                      contentStyle={{background: 'var(--glass)', backdropFilter: 'blur(10px)', border: '1px solid var(--border)', borderRadius: '12px', color: 'var(--text)', boxShadow: '0 8px 32px rgba(0,0,0,0.2)'}}
+                      cursor={{fill: 'var(--surface-2)'}}
+                      contentStyle={{background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '12px', color: 'var(--text)', boxShadow: 'var(--shadow-card)'}}
                       formatter={(val) => [`${val}%`, 'Accuracy']}
                     />
                     <Bar dataKey="accuracy" radius={[0, 6, 6, 0]} barSize={24}>
                       {modelAccuracyData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.isMain ? 'var(--brand)' : 'var(--text-3)'} style={{ filter: entry.isMain ? 'drop-shadow(0 0 8px var(--brand-soft))' : 'none' }} />
+                        <Cell key={`cell-${index}`} fill={entry.isMain ? 'var(--teal)' : 'var(--text-3)'} />
                       ))}
                     </Bar>
                   </BarChart>
@@ -231,21 +229,21 @@ export default function HowItWorks() {
           </div>
 
           {/* FAQ Section */}
-          <div className="delay-4 fade-in-up" style={{ marginBottom: '80px' }}>
-            <h2 className="text-gradient" style={{ fontSize: '32px', marginBottom: '32px', textAlign: 'center' }}>Frequently Asked Questions</h2>
+          <div style={{ marginBottom: '80px' }}>
+            <h2 style={{ fontSize: '32px', marginBottom: '32px', textAlign: 'center' }}>Frequently Asked Questions</h2>
             
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', maxWidth: '800px', margin: '0 auto' }}>
               {faqs.map((faq, index) => (
-                <div 
-                  key={index} 
-                  className="glass-panel" 
-                  style={{ 
-                    overflow: 'hidden',
-                    border: openFaq === index ? '1px solid var(--brand)' : '1px solid rgba(255,255,255,0.05)',
-                    boxShadow: openFaq === index ? '0 8px 32px var(--brand-soft)' : '0 8px 32px rgba(0,0,0,0.1)',
-                    transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
-                  }}
-                >
+                  <div 
+                    key={index} 
+                    className="card" 
+                    style={{ 
+                      overflow: 'hidden',
+                      border: openFaq === index ? '1px solid var(--teal)' : '1px solid var(--border)',
+                      boxShadow: openFaq === index ? 'var(--shadow-card)' : 'none',
+                      transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
+                    }}
+                  >
                   <button 
                     onClick={() => toggleFaq(index)}
                     style={{
@@ -258,7 +256,7 @@ export default function HowItWorks() {
                       border: 'none',
                       cursor: 'pointer',
                       textAlign: 'left',
-                      color: openFaq === index ? 'var(--brand)' : 'var(--text)',
+                      color: openFaq === index ? 'var(--teal)' : 'var(--text)',
                       fontWeight: '700',
                       fontSize: '16px',
                       transition: 'color 0.2s ease'
@@ -273,7 +271,7 @@ export default function HowItWorks() {
                       <Icon 
                         name="chevron-down" 
                         size={18} 
-                        color={openFaq === index ? 'var(--brand)' : 'var(--text-3)'} 
+                        color={openFaq === index ? 'var(--teal)' : 'var(--text-3)'} 
                       />
                     </div>
                   </button>

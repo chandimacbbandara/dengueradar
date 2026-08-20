@@ -155,17 +155,17 @@ export default function SignupMohOfficer() {
     return (
       <div className="auth-layout">
         <div className="auth-panel-left">
-          <Link to="/" className="text-2xl font-extrabold mb-12 flex items-center gap-2" style={{ color: 'var(--brand)' }}>
-             <Icon name="activity" /> Dengue<span>Radar</span>
+          <Link to="/" style={{ fontSize: '24px', fontWeight: 800, marginBottom: '48px', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--teal)', textDecoration: 'none' }}>
+             <Icon name="activity" /> Dengue<span style={{ color: 'var(--text)' }}>Radar</span>
           </Link>
-          <h1 className="text-4xl font-extrabold mb-4">Check your inbox</h1>
-          <p className="text-lg mb-8 max-w-md" style={{ color: 'rgba(255,255,255,0.85)' }}>
+          <h1 style={{ fontSize: '36px', fontWeight: 800, marginBottom: '16px', lineHeight: 1.2 }}>Check your inbox</h1>
+          <p style={{ fontSize: '18px', marginBottom: '32px', maxWidth: '400px', color: 'var(--text-2)' }}>
             Your official email must be verified before your MOH officer application is submitted.
           </p>
-          <ul className="flex flex-col gap-4">
-            <li className="flex items-center gap-3"><Icon name="shield" size={20} /> Check spam/junk if you don't see it</li>
-            <li className="flex items-center gap-3"><Icon name="alert" size={20} /> Code valid for 10 minutes</li>
-            <li className="flex items-center gap-3"><Icon name="activity" size={20} /> Never share your code with anyone</li>
+          <ul style={{ display: 'flex', flexDirection: 'column', gap: '16px', listStyle: 'none', padding: 0 }}>
+            <li style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><Icon name="shield" size={20} color="var(--teal)" /> Check spam/junk if you don't see it</li>
+            <li style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><Icon name="alert-triangle" size={20} color="var(--teal)" /> Code valid for 10 minutes</li>
+            <li style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><Icon name="activity" size={20} color="var(--teal)" /> Never share your code with anyone</li>
           </ul>
         </div>
 
@@ -191,7 +191,8 @@ export default function SignupMohOfficer() {
               <button
                 id="verify-otp-officer-btn"
                 type="submit"
-                className="btn btn-primary w-full justify-center"
+                className="btn btn-primary"
+                style={{ width: '100%', justifyContent: 'center' }}
                 disabled={loading || otp.replace(/\s/g,'').length < 6}
               >
                 {loading ? 'Verifying...' : 'Verify & Submit Application'}
@@ -234,15 +235,15 @@ export default function SignupMohOfficer() {
   return (
     <div className="auth-layout">
       <div className="auth-panel-left">
-        <Link to="/" className="text-2xl font-extrabold mb-12 flex items-center gap-2" style={{ color: 'var(--brand)' }}>
-           <Icon name="activity" /> Dengue<span>Radar</span>
+        <Link to="/" style={{ fontSize: '24px', fontWeight: 800, marginBottom: '48px', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--teal)', textDecoration: 'none' }}>
+           <Icon name="activity" /> Dengue<span style={{ color: 'var(--text)' }}>Radar</span>
         </Link>
-        <h1 className="text-4xl font-extrabold mb-4">For MOH Officers</h1>
-        <p className="text-lg mb-8 max-w-md" style={{ color: 'rgba(255,255,255,0.85)' }}>Access specialized tools to monitor risks, manage resources, and coordinate public health responses.</p>
-        <ul className="flex flex-col gap-4">
-          <li className="flex items-center gap-3"><Icon name="shield" size={20} /> Detailed risk reports</li>
-          <li className="flex items-center gap-3"><Icon name="alert" size={20} /> Zone-level trend analysis</li>
-          <li className="flex items-center gap-3"><Icon name="activity" size={20} /> Community outreach tools</li>
+        <h1 style={{ fontSize: '36px', fontWeight: 800, marginBottom: '16px', lineHeight: 1.2 }}>For MOH Officers</h1>
+        <p style={{ fontSize: '18px', marginBottom: '32px', maxWidth: '400px', color: 'var(--text-2)' }}>Access specialized tools to monitor risks, manage resources, and coordinate public health responses.</p>
+        <ul style={{ display: 'flex', flexDirection: 'column', gap: '16px', listStyle: 'none', padding: 0 }}>
+          <li style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><Icon name="shield" size={20} color="var(--teal)" /> Detailed risk reports</li>
+          <li style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><Icon name="alert-triangle" size={20} color="var(--teal)" /> Zone-level trend analysis</li>
+          <li style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><Icon name="activity" size={20} color="var(--teal)" /> Community outreach tools</li>
         </ul>
       </div>
 
@@ -251,7 +252,7 @@ export default function SignupMohOfficer() {
           <h2 className="auth-form-title">MOH Registration</h2>
           <p className="auth-form-subtitle">Register for official MOH access to DengueRadar.</p>
 
-          <form onSubmit={handleSendOtp} className="flex flex-col gap-4">
+          <form onSubmit={handleSendOtp} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <div className="form-group" style={{marginBottom:0}}>
               <label className="form-label">Officer Name</label>
               <input type="text" className={`form-input ${errors.officerName?'error':''}`} value={formData.officerName} onChange={e=>setFormData({...formData,officerName:e.target.value})} />
@@ -264,7 +265,7 @@ export default function SignupMohOfficer() {
               {errors.email && <span className="form-error">{errors.email}</span>}
             </div>
 
-            <div className="grid-2 gap-4">
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
               <div className="form-group" style={{marginBottom:0}}>
                 <label className="form-label">WhatsApp Number</label>
                 <div style={{display:'flex'}}>
@@ -281,7 +282,7 @@ export default function SignupMohOfficer() {
 
             <DistrictZoneSelect district={district} setDistrict={setDistrict} mohZone={mohZone} setMohZone={setMohZone} errors={errors} />
 
-            <div className="grid-2 gap-4">
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
               <div className="form-group" style={{marginBottom:0}}>
                 <label className="form-label">Password</label>
                 <input type="password" className={`form-input ${errors.password?'error':''}`} value={formData.password} onChange={e=>setFormData({...formData,password:e.target.value})} />
@@ -295,17 +296,17 @@ export default function SignupMohOfficer() {
               </div>
             </div>
 
-            <div className="alert alert-info mt-2">
-              <Icon name="alert" size={16} /> MOH officer accounts require admin approval before you can log in.
+            <div className="alert" style={{ marginBottom: '16px', borderRadius: 'var(--r-sm)' }}>
+              <span className="dot-live" style={{background:'var(--risk-mod)'}}></span><div><div style={{fontSize:'13px'}}>MOH officer accounts require admin approval before you can log in.</div></div>
             </div>
 
-            <button id="officer-signup-btn" type="submit" className="btn btn-primary w-full justify-center mt-2" disabled={loading}>
+            <button id="officer-signup-btn" type="submit" className="btn btn-primary" style={{ width: '100%', justifyContent: 'center' }} disabled={loading}>
               {loading ? 'Sending Code...' : 'Continue — Verify Email →'}
             </button>
           </form>
 
-          <div className="mt-8 text-center text-sm text-muted">
-            Already have an account? <Link to="/login" className="text-primary font-semibold">Log in</Link>
+          <div style={{ marginTop: '32px', textAlign: 'center', fontSize: '14px', color: 'var(--text-3)' }}>
+            Already have an account? <Link to="/login" style={{ color: 'var(--teal)', fontWeight: 600, textDecoration: 'none' }}>Log in</Link>
           </div>
         </div>
       </div>

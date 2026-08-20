@@ -216,16 +216,16 @@ export default function AdminDashboard() {
     <div className="dashboard-layout">
       <Navbar />
 
-      <div className="dashboard-header">
-        <div className="container flex justify-between items-center">
+      <div className="dashboard-header" style={{ background: 'var(--surface-2)', padding: '32px 0', borderBottom: '1px solid var(--border)' }}>
+        <div className="wrap" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
-            <h1 className="text-2xl font-bold">Admin Dashboard</h1>
-            <p className="text-muted mt-1">Manage MOH officer approvals and platform users</p>
+            <h1 style={{ fontSize: '24px', fontWeight: 700, color: 'var(--text)', marginBottom: '4px' }}>Admin Dashboard</h1>
+            <p style={{ fontSize: '14px', color: 'var(--text-2)' }}>Manage MOH officer approvals and platform users</p>
           </div>
         </div>
       </div>
 
-      <div className="dashboard-content flex flex-col gap-6">
+      <div className="wrap" style={{ display: 'flex', flexDirection: 'column', gap: '24px', paddingTop: '32px', paddingBottom: '64px' }}>
 
         {/* ── Stats row ── */}
         <div className="grid-4">

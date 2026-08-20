@@ -50,17 +50,17 @@ export default function Login() {
   return (
     <div className="auth-layout">
       <div className="auth-panel-left">
-        <Link to="/" className="text-2xl font-extrabold mb-12 flex items-center gap-2" style={{ color: 'var(--brand)' }}>
-          <Icon name="activity" /> Dengue<span>Radar</span>
+        <Link to="/" style={{ fontSize: '24px', fontWeight: 800, marginBottom: '48px', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--teal)', textDecoration: 'none' }}>
+          <Icon name="activity" /> Dengue<span style={{ color: 'var(--text)' }}>Radar</span>
         </Link>
-        <h1 className="text-4xl font-extrabold mb-4">Welcome Back</h1>
-        <p className="text-lg mb-8 max-w-md" style={{ color: 'rgba(255,255,255,0.85)' }}>
+        <h1 style={{ fontSize: '36px', fontWeight: 800, marginBottom: '16px', lineHeight: 1.2 }}>Welcome Back</h1>
+        <p style={{ fontSize: '18px', marginBottom: '32px', maxWidth: '400px', color: 'var(--text-2)' }}>
           Access your personalized dashboard to monitor local dengue risks and manage your alert preferences.
         </p>
-        <ul className="flex flex-col gap-4">
-          <li className="flex items-center gap-3"><Icon name="shield" size={20} /> Real-time risk map</li>
-          <li className="flex items-center gap-3"><Icon name="alert" size={20} /> Instant WhatsApp alerts</li>
-          <li className="flex items-center gap-3"><Icon name="activity" size={20} /> Accurate AI predictions</li>
+        <ul style={{ display: 'flex', flexDirection: 'column', gap: '16px', listStyle: 'none', padding: 0 }}>
+          <li style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><Icon name="shield" size={20} color="var(--teal)" /> Real-time risk map</li>
+          <li style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><Icon name="alert-triangle" size={20} color="var(--teal)" /> Instant WhatsApp alerts</li>
+          <li style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><Icon name="activity" size={20} color="var(--teal)" /> Accurate AI predictions</li>
         </ul>
       </div>
       
@@ -69,7 +69,7 @@ export default function Login() {
           <h2 className="auth-form-title">Log in</h2>
           <p className="auth-form-subtitle">Enter your details to access your account.</p>
 
-          {error && <div className="alert alert-error mb-6">{error}</div>}
+          {error && <div className="alert" style={{ marginBottom: '24px', borderRadius: 'var(--r-sm)' }}><span className="dot-live" style={{background:'var(--risk-crit)'}}></span><div><div style={{fontSize:'14px', fontWeight:600}}>{error}</div></div></div>}
 
           <form onSubmit={handleSubmit}>
             <div className="form-group">
@@ -105,22 +105,22 @@ export default function Login() {
               </div>
             </div>
 
-            <div className="flex justify-between items-center mb-6 mt-2">
-              <label className="flex items-center gap-2 text-sm text-muted cursor-pointer">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', marginTop: '8px' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', color: 'var(--text-2)', cursor: 'pointer' }}>
                 <input type="checkbox" /> Remember me
               </label>
-              <a href="#" className="text-sm font-semibold text-primary">Forgot password?</a>
+              <a href="#" style={{ fontSize: '14px', fontWeight: 600, color: 'var(--teal)', textDecoration: 'none' }}>Forgot password?</a>
             </div>
 
-            <button type="submit" className="btn btn-primary w-full justify-center" disabled={loading}>
+            <button type="submit" className="btn btn-primary" style={{ width: '100%', justifyContent: 'center' }} disabled={loading}>
               {loading ? 'Logging in...' : 'Log In'}
             </button>
           </form>
 
-          <div className="mt-8 text-center text-sm text-muted">
+          <div style={{ marginTop: '32px', textAlign: 'center', fontSize: '14px', color: 'var(--text-3)' }}>
             Don't have an account? <br/>
-            <Link to="/signup/general" className="text-primary font-semibold mx-1">Sign up as Citizen</Link> | 
-            <Link to="/signup/moh-officer" className="text-primary font-semibold mx-1">Register as MOH</Link>
+            <Link to="/signup/general" style={{ color: 'var(--teal)', fontWeight: 600, margin: '0 4px', textDecoration: 'none' }}>Sign up as Citizen</Link> | 
+            <Link to="/signup/moh-officer" style={{ color: 'var(--teal)', fontWeight: 600, margin: '0 4px', textDecoration: 'none' }}>Register as MOH</Link>
           </div>
         </div>
       </div>

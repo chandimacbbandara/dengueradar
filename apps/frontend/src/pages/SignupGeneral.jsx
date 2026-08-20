@@ -168,18 +168,18 @@ export default function SignupGeneral() {
     return (
       <div className="auth-layout">
         <div className="auth-panel-left">
-          <Link to="/" className="text-2xl font-extrabold mb-12 flex items-center gap-2" style={{ color: 'var(--brand)' }}>
-             <Icon name="activity" /> Dengue<span>Radar</span>
+          <Link to="/" style={{ fontSize: '24px', fontWeight: 800, marginBottom: '48px', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--teal)', textDecoration: 'none' }}>
+             <Icon name="activity" /> Dengue<span style={{ color: 'var(--text)' }}>Radar</span>
           </Link>
-          <h1 className="text-4xl font-extrabold mb-4">Check your inbox</h1>
-          <p className="text-lg mb-8 max-w-md" style={{ color: 'rgba(255,255,255,0.85)' }}>
+          <h1 style={{ fontSize: '36px', fontWeight: 800, marginBottom: '16px', lineHeight: 1.2 }}>Check your inbox</h1>
+          <p style={{ fontSize: '18px', marginBottom: '32px', maxWidth: '400px', color: 'var(--text-2)' }}>
             We sent a 6-digit verification code to protect your account.
             It expires in 10 minutes.
           </p>
-          <ul className="flex flex-col gap-4">
-            <li className="flex items-center gap-3"><Icon name="shield" size={20} /> Check spam/junk if you don't see it</li>
-            <li className="flex items-center gap-3"><Icon name="alert" size={20} /> Code is valid for 10 minutes</li>
-            <li className="flex items-center gap-3"><Icon name="activity" size={20} /> Never share your code with anyone</li>
+          <ul style={{ display: 'flex', flexDirection: 'column', gap: '16px', listStyle: 'none', padding: 0 }}>
+            <li style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><Icon name="shield" size={20} color="var(--teal)" /> Check spam/junk if you don't see it</li>
+            <li style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><Icon name="alert-triangle" size={20} color="var(--teal)" /> Code is valid for 10 minutes</li>
+            <li style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><Icon name="activity" size={20} color="var(--teal)" /> Never share your code with anyone</li>
           </ul>
         </div>
 
@@ -207,7 +207,8 @@ export default function SignupGeneral() {
               <button
                 id="verify-otp-btn"
                 type="submit"
-                className="btn btn-primary w-full justify-center"
+                className="btn btn-primary"
+                style={{ width: '100%', justifyContent: 'center' }}
                 disabled={loading || otp.replace(/\s/g,'').length < 6}
               >
                 {loading ? 'Verifying...' : 'Verify & Create Account'}
@@ -249,15 +250,15 @@ export default function SignupGeneral() {
   return (
     <div className="auth-layout">
       <div className="auth-panel-left">
-        <Link to="/" className="text-2xl font-extrabold mb-12 flex items-center gap-2" style={{ color: 'var(--brand)' }}>
-           <Icon name="activity" /> Dengue<span>Radar</span>
+        <Link to="/" style={{ fontSize: '24px', fontWeight: 800, marginBottom: '48px', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--teal)', textDecoration: 'none' }}>
+           <Icon name="activity" /> Dengue<span style={{ color: 'var(--text)' }}>Radar</span>
         </Link>
-        <h1 className="text-4xl font-extrabold mb-4">Join DengueRadar</h1>
-        <p className="text-lg mb-8 max-w-md" style={{ color: 'rgba(255,255,255,0.85)' }}>Stay ahead of dengue outbreaks and protect your family with real-time risk alerts.</p>
-        <ul className="flex flex-col gap-4">
-          <li className="flex items-center gap-3"><Icon name="shield" size={20} /> Localized risk updates</li>
-          <li className="flex items-center gap-3"><Icon name="alert" size={20} /> WhatsApp push alerts</li>
-          <li className="flex items-center gap-3"><Icon name="activity" size={20} /> Community protection tools</li>
+        <h1 style={{ fontSize: '36px', fontWeight: 800, marginBottom: '16px', lineHeight: 1.2 }}>Join DengueRadar</h1>
+        <p style={{ fontSize: '18px', marginBottom: '32px', maxWidth: '400px', color: 'var(--text-2)' }}>Stay ahead of dengue outbreaks and protect your family with real-time risk alerts.</p>
+        <ul style={{ display: 'flex', flexDirection: 'column', gap: '16px', listStyle: 'none', padding: 0 }}>
+          <li style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><Icon name="shield" size={20} color="var(--teal)" /> Localized risk updates</li>
+          <li style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><Icon name="alert-triangle" size={20} color="var(--teal)" /> WhatsApp push alerts</li>
+          <li style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><Icon name="activity" size={20} color="var(--teal)" /> Community protection tools</li>
         </ul>
       </div>
 
@@ -266,8 +267,8 @@ export default function SignupGeneral() {
           <h2 className="auth-form-title">Create Account</h2>
           <p className="auth-form-subtitle">Register to receive dengue risk alerts for your area.</p>
 
-          <form onSubmit={handleSendOtp} className="flex flex-col gap-4">
-            <div className="grid-2 gap-4">
+          <form onSubmit={handleSendOtp} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
               <div className="form-group" style={{marginBottom:0}}>
                 <label className="form-label">First Name</label>
                 <input type="text" className={`form-input ${errors.firstName?'error':''}`} value={formData.firstName} onChange={e=>setFormData({...formData,firstName:e.target.value})} />
@@ -296,7 +297,7 @@ export default function SignupGeneral() {
 
             <DistrictZoneSelect district={district} setDistrict={setDistrict} mohZone={mohZone} setMohZone={setMohZone} errors={errors} />
 
-            <div className="grid-2 gap-4">
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
               <div className="form-group" style={{marginBottom:0}}>
                 <label className="form-label">Password</label>
                 <input type="password" className={`form-input ${errors.password?'error':''}`} value={formData.password} onChange={e=>setFormData({...formData,password:e.target.value})} />
@@ -310,17 +311,17 @@ export default function SignupGeneral() {
               </div>
             </div>
 
-            <label className="flex items-center gap-2 text-sm mt-2 cursor-pointer">
+            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', marginTop: '8px', cursor: 'pointer' }}>
               <input type="checkbox" required /> I agree to the Terms of Service and Privacy Policy
             </label>
 
-            <button id="signup-submit-btn" type="submit" className="btn btn-primary w-full justify-center mt-4" disabled={loading}>
+            <button id="signup-submit-btn" type="submit" className="btn btn-primary" style={{ width: '100%', justifyContent: 'center', marginTop: '16px' }} disabled={loading}>
               {loading ? 'Sending Code...' : 'Continue — Verify Email →'}
             </button>
           </form>
 
-          <div className="mt-8 text-center text-sm text-muted">
-            Already have an account? <Link to="/login" className="text-primary font-semibold">Log in</Link>
+          <div style={{ marginTop: '32px', textAlign: 'center', fontSize: '14px', color: 'var(--text-3)' }}>
+            Already have an account? <Link to="/login" style={{ color: 'var(--teal)', fontWeight: 600, textDecoration: 'none' }}>Log in</Link>
           </div>
         </div>
       </div>
