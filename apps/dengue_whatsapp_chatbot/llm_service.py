@@ -91,6 +91,29 @@ def _validate_risk_context(risk_context: Any) -> dict[str, Any] | None:
     return verified_context
 
 
+import re
+
+def _clean_response(text: str) -> str:
+    # 1. Remove XML-style <think> tags completely
+    text = re.sub(r'<think>.*?</think>', '', text, flags=re.DOTALL)
+    
+    # 2. Handle Nemotron's explicit text-based thinking process
+    if "Here's a thinking process:" in text:
+        # It usually concludes the thinking process with "Let's draft:", "Final Answer:", or "Response:"
+        boundaries = ["Let's draft:", "Final Answer:", "Response:", "drafting the response:", "Here is the response:"]
+        for b in boundaries:
+            if b in text:
+                text = text.split(b, 1)[-1]
+                break
+                
+    text = text.strip()
+    # Remove surrounding quotes if the model quoted its own final answer
+    if text.startswith('"') and text.endswith('"'):
+        text = text[1:-1]
+        
+    return text.strip()
+
+
 def _extract_openrouter_text(response_data: dict[str, Any]) -> str:
     try:
         content = response_data["choices"][0]["message"]["content"]
@@ -100,7 +123,7 @@ def _extract_openrouter_text(response_data: dict[str, Any]) -> str:
         ) from exc
 
     if isinstance(content, str) and content.strip():
-        return content.strip()
+        return _clean_response(content.strip())
 
     # Some OpenAI-compatible models can return typed text content parts.
     if isinstance(content, list):
@@ -111,7 +134,7 @@ def _extract_openrouter_text(response_data: dict[str, Any]) -> str:
         ]
         answer = "\n".join(parts).strip()
         if answer:
-            return answer
+            return _clean_response(answer)
 
     raise AssistantServiceError("The LLM provider returned no answer text.")
 
