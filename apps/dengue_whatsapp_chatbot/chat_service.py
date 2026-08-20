@@ -17,18 +17,22 @@ TIMEOUT = 8
 
 # ── Zone/area keyword extractor ────────────────────────────────────────────────
 
-# Common Colombo zones to recognize quickly
-KNOWN_ZONES = [
-    "homagama", "dehiwala", "kaduwela", "colombo", "ratmalana", "moratuwa",
-    "nugegoda", "kotte", "kesbewa", "maharagama", "avissawella", "hanwella",
-    "gampaha", "negombo", "kalutara", "kandy", "matara", "galle", "jaffna",
-    "batticaloa", "ampara", "trincomalee", "kurunegala", "anuradhapura",
-    "polonnaruwa", "badulla", "ratnapura", "kegalle", "nuwara", "eliya",
-    "hambantota", "monaragala", "vavuniya", "mannar", "kilinochchi",
-    "mullaitivu", "puttalam",
-]
+import json
+import os
+
+ZONES_PATH = os.path.join(os.path.dirname(__file__), "..", "backend", "src", "data", "mohZoneIndex.json")
+try:
+    with open(ZONES_PATH, "r") as f:
+        zones_data = json.load(f)
+    KNOWN_ZONES = [v["zoneName"].lower() for v in zones_data.values()]
+    KNOWN_ZONES.extend(["colombo", "kandy", "galle", "gampaha", "kalutara", "matara", "kurunegala"])
+except Exception as e:
+    logger.error("Failed to load MOH zones: %s", e)
+    KNOWN_ZONES = ["homagama", "colombo"] # fallback
 
 MOH_CODE_PATTERN = re.compile(r'\b(\d{1,3})\b')
+# Sort by length descending to match longest phrases first (e.g., "Kalmunai north" before "Kalmunai")
+KNOWN_ZONES = sorted(list(set(KNOWN_ZONES)), key=len, reverse=True)
 ZONE_PATTERN = re.compile(
     r'\b(' + '|'.join(re.escape(z) for z in KNOWN_ZONES) + r')\b',
     re.IGNORECASE,
@@ -154,7 +158,8 @@ def _classify(message: str) -> str:
         return "help"
     if any(w in m for w in ["hi", "hello", "hey", "start", "hola"]):
         return "greeting"
-    if any(w in m for w in ["risk", "forecast", "predict", "case", "danger", "level", "safe", "moh", "area", "zone", "district"]):
+    identifier, _ = _extract_location(message)
+    if identifier or any(w in m for w in ["risk", "forecast", "predict", "case", "danger", "level", "safe", "moh", "area", "zone", "district"]):
         return "prediction"
     
     # Everything else goes to the RAG pipeline
@@ -191,17 +196,22 @@ def chat_response(message: str) -> str:
             logger.error("[ChatService] Failed to get LLM response: %s", e)
             return "I'm sorry, I'm having trouble answering that right now. Please try again later."
 
-    # intent == "prediction" — try to find a location
     identifier, label = _extract_location(message)
 
     if identifier:
         data = _fetch_prediction(identifier)
         if data:
-            return _prediction_response(data)
+            from llm_service import ask_dengue_assistant
+            try:
+                # Pass the prediction data to the LLM to format the response naturally as an MOH expert
+                return ask_dengue_assistant(message, knowledge_context=None, risk_context=data)
+            except Exception as e:
+                logger.error("[ChatService] Failed to get LLM prediction response: %s", e)
+                # Fallback to the strict rule-based format if the LLM fails
+                return _prediction_response(data)
         return (
             f"⚠️ Could not fetch prediction for *{label}*.\n\n"
-            "The backend service may be unavailable. "
-            "Please ensure the DengueRadar backend is running on port 5000."
+            "The backend service may be unavailable or the zone was not found."
         )
 
     # No location detected — ask for clarification

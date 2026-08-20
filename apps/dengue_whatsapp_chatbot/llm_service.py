@@ -16,17 +16,18 @@ from config import (
 )
 
 
-SYSTEM_PROMPT = """You are the Dengue Information and Risk Guidance Assistant.
+SYSTEM_PROMPT = """You are a Sri Lankan Medical Officer of Health (MOH) expert and the DengueRadar AI Assistant.
 
-Your role is to answer user questions about Dengue accurately and concisely using ONLY the provided KNOWLEDGE_CONTEXT.
+Your role is to answer user questions about Dengue accurately and concisely using ONLY the provided KNOWLEDGE_CONTEXT and RISK_CONTEXT.
 
 Rules you must follow:
-1. ONLY use facts from the provided KNOWLEDGE_CONTEXT to answer the user's question. Do not invent, guess, or use outside knowledge.
-2. If the KNOWLEDGE_CONTEXT does not contain the answer, or if the context is empty, simply say: "I'm sorry, I don't have that information right now." Do NOT invent an answer.
-3. For symptom questions, state that the response is general education, not an individual diagnosis.
-4. Keep answers concise, helpful, and non-alarmist. Use bullet points where appropriate.
-5. Answer in the language of the user's question.
-6. Do not mention that you are reading from a context or a document. Just answer naturally.
+1. ONLY use facts from the provided KNOWLEDGE_CONTEXT and RISK_CONTEXT to answer the user's question. Do not invent, guess, or use outside knowledge.
+2. If the user asks about a specific area and RISK_CONTEXT is provided, format a helpful, professional MOH response explaining the risk level and predicted cases for that area.
+3. If the KNOWLEDGE_CONTEXT and RISK_CONTEXT do not contain the answer, simply say: "I'm sorry, I don't have that information right now." Do NOT invent an answer.
+4. For symptom questions, state that the response is general education, not an individual diagnosis.
+5. Keep answers concise, helpful, and non-alarmist. Use bullet points where appropriate.
+6. Answer in the language of the user's question.
+7. Do not mention that you are reading from a context or a document. Just answer naturally as an expert.
 """
 
 ALLOWED_RISK_LEVELS = {"LOW", "MODERATE", "HIGH"}
@@ -112,7 +113,7 @@ def _extract_openrouter_text(response_data: dict[str, Any]) -> str:
     raise AssistantServiceError("The LLM provider returned no answer text.")
 
 
-def _ask_openrouter(user_message: str, knowledge_context: str | None) -> str:
+def _ask_openrouter(user_message: str, knowledge_context: str | None, risk_context: dict | None = None) -> str:
     if not LLM_API_KEY or not LLM_MODEL:
         raise AssistantConfigurationError(
             "LLM_API_KEY and LLM_MODEL must be configured."
@@ -129,6 +130,7 @@ def _ask_openrouter(user_message: str, knowledge_context: str | None) -> str:
         )
 
     context_text = knowledge_context if knowledge_context else "NONE"
+    risk_text = json.dumps(risk_context) if risk_context else "NONE"
     
     payload = {
         "model": LLM_MODEL,
@@ -139,6 +141,7 @@ def _ask_openrouter(user_message: str, knowledge_context: str | None) -> str:
                 "role": "user",
                 "content": (
                     f"KNOWLEDGE_CONTEXT: {context_text}\n\n"
+                    f"RISK_CONTEXT: {risk_text}\n\n"
                     f"USER_QUESTION: {user_message}"
                 ),
             },
@@ -166,14 +169,14 @@ def _ask_openrouter(user_message: str, knowledge_context: str | None) -> str:
 
 
 def ask_dengue_assistant(
-    user_message: str, knowledge_context: str | None = None
+    user_message: str, knowledge_context: str | None = None, risk_context: dict | None = None
 ) -> str:
-    """Return an LLM generated response based purely on the provided knowledge context."""
+    """Return an LLM generated response based purely on the provided knowledge context and risk context."""
     if not isinstance(user_message, str) or not user_message.strip():
         raise ValueError("user_message must be a non-empty string.")
 
     if LLM_PROVIDER == "openrouter":
-        return _ask_openrouter(user_message.strip(), knowledge_context)
+        return _ask_openrouter(user_message.strip(), knowledge_context, risk_context)
 
     raise AssistantConfigurationError(
         f"Unsupported LLM_PROVIDER: {LLM_PROVIDER or '(empty)'}"
