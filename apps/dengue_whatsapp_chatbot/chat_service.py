@@ -73,46 +73,7 @@ def _risk_emoji(level: str) -> str:
     return {"high": "🔴", "moderate": "🟠", "low": "🟢"}.get((level or "").lower(), "⚪")
 
 
-def _prevention_tips() -> str:
-    return (
-        "🛡️ *Dengue Prevention Tips*\n\n"
-        "• Empty, scrub or cover water containers every week\n"
-        "• Check buckets, flower pots, gutters, drains & tyres\n"
-        "• Use mosquito repellent as directed\n"
-        "• Wear clothing that covers arms and legs\n"
-        "• Use window screens or mosquito nets\n\n"
-        "Aedes mosquitoes bite during the day — be alert morning and evening."
-    )
-
-
-def _symptom_info() -> str:
-    return (
-        "🤒 *Dengue Symptoms*\n\n"
-        "Common signs (appear 4–10 days after a bite):\n"
-        "• Sudden high fever (39–40°C)\n"
-        "• Severe headache & pain behind the eyes\n"
-        "• Muscle and joint pain\n"
-        "• Nausea, vomiting, skin rash\n\n"
-        "⚠️ *Seek urgent medical care if you notice:*\n"
-        "• Severe abdominal pain\n"
-        "• Persistent vomiting\n"
-        "• Unusual bleeding (gums, nose, skin)\n"
-        "• Extreme fatigue or restlessness\n\n"
-        "This is general education — not a medical diagnosis. Consult a doctor."
-    )
-
-
-def _about_system() -> str:
-    return (
-        "ℹ️ *About DengueRadar*\n\n"
-        "DengueRadar uses a 3-model ML ensemble:\n"
-        "⚡ LightGBM + XGBoost + CatBoost\n\n"
-        "It analyses historical case data, weather patterns, and\n"
-        "population statistics to predict dengue risk one week ahead\n"
-        "for each of the 226 MOH zones across Sri Lanka.\n\n"
-        "To check risk for your area, type:\n"
-        "  *risk in Homagama*  or  *MOH 50*"
-    )
+# General knowledge logic is now handled by the RAG pipeline (llm_service + rag_service)
 
 
 def _whatsapp_info() -> str:
@@ -189,25 +150,21 @@ def _classify(message: str) -> str:
     m = message.lower()
     if any(w in m for w in ["whatsapp", "link", "connect", "phone", "mobile"]):
         return "whatsapp_link"
-    if any(w in m for w in ["symptom", "fever", "sign", "headache", "rash", "pain", "sick"]):
-        return "symptoms"
-    if any(w in m for w in ["prevent", "protect", "avoid", "repellent", "mosquito", "breeding", "bite"]):
-        return "prevention"
-    if any(w in m for w in ["about", "system", "how does", "how it work", "model", "ai", "ml"]):
-        return "about"
     if any(w in m for w in ["help", "what can", "what do", "command", "option"]):
         return "help"
-    if any(w in m for w in ["risk", "forecast", "predict", "case", "danger", "level", "safe", "moh", "area", "zone", "district"]):
-        return "prediction"
     if any(w in m for w in ["hi", "hello", "hey", "start", "hola"]):
         return "greeting"
-    return "prediction"  # default: try to look up prediction
+    if any(w in m for w in ["risk", "forecast", "predict", "case", "danger", "level", "safe", "moh", "area", "zone", "district"]):
+        return "prediction"
+    
+    # Everything else goes to the RAG pipeline
+    return "general_question"
 
 
 # ── Public entry point ─────────────────────────────────────────────────────────
 
 def chat_response(message: str) -> str:
-    """Return a response string for a user message, grounded in ML predictions."""
+    """Return a response string for a user message."""
     intent = _classify(message)
 
     if intent == "greeting":
@@ -217,20 +174,22 @@ def chat_response(message: str) -> str:
             "Try: *\"What is the risk in Homagama?\"*"
         )
 
-    if intent == "symptoms":
-        return _symptom_info()
-
-    if intent == "prevention":
-        return _prevention_tips()
+    if intent == "help":
+        return _help_message()
         
     if intent == "whatsapp_link":
         return _whatsapp_info()
 
-    if intent == "about":
-        return _about_system()
-
-    if intent == "help":
-        return _help_message()
+    if intent == "general_question":
+        from rag_service import retrieve_knowledge
+        from llm_service import ask_dengue_assistant
+        
+        context = retrieve_knowledge(message)
+        try:
+            return ask_dengue_assistant(message, knowledge_context=context)
+        except Exception as e:
+            logger.error("[ChatService] Failed to get LLM response: %s", e)
+            return "I'm sorry, I'm having trouble answering that right now. Please try again later."
 
     # intent == "prediction" — try to find a location
     identifier, label = _extract_location(message)

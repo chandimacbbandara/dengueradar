@@ -1,0 +1,49 @@
+# Dengue Fever - General Knowledge Base (Sri Lanka Context)
+
+## What is Dengue?
+Dengue is a viral infection transmitted to humans through the bite of infected Aedes mosquitoes. The primary vectors that transmit the disease are Aedes aegypti and Aedes albopictus mosquitoes. In Sri Lanka, dengue is a major public health concern, especially during the monsoon seasons (South-West monsoon from May to September and North-East monsoon from November to February).
+
+## Transmission and Mosquito Behavior
+- Dengue cannot be spread directly from person to person.
+- The Aedes mosquitoes are daytime biters, with peak biting periods early in the morning and in the evening before dusk.
+- They breed in clean, stagnant water. Common breeding sites include discarded tires, coconut shells, plastic containers, flower pots, blocked gutters, and bird baths.
+- Aedes aegypti typically lives indoors and bites primarily humans, making urban and semi-urban areas highly vulnerable.
+
+## Symptoms of Dengue Fever
+Symptoms typically begin 4 to 10 days after infection and last for 2 to 7 days. Common symptoms include:
+- Sudden, high fever (often reaching 40°C/104°F)
+- Severe headache
+- Pain behind the eyes (retro-orbital pain)
+- Muscle and joint pain (often called "breakbone fever")
+- Nausea and vomiting
+- Swollen glands
+- Skin rash (typically appearing 2-5 days after the onset of fever)
+
+## The Critical Phase and Dengue Hemorrhagic Fever (DHF)
+Most people recover within a week. However, in some cases, the condition worsens into a life-threatening illness called Severe Dengue or Dengue Hemorrhagic Fever (DHF). The critical phase usually occurs 3-7 days after the onset of illness, often around the time the fever begins to drop (defervescence).
+
+Warning signs of severe dengue that require IMMEDIATE medical attention include:
+- Severe abdominal pain
+- Persistent vomiting (at least 3 times in 24 hours)
+- Bleeding from the gums or nose
+- Blood in vomit or stool
+- Fast breathing or difficulty breathing
+- Fatigue, restlessness, or severe lethargy
+- Cold, clammy skin and a weak pulse (signs of shock)
+
+## Prevention and Control
+The most effective way to prevent dengue is to avoid mosquito bites and eliminate breeding sites.
+- Eliminate Stagnant Water: Inspect homes, gardens, and workplaces weekly. Empty, cover, or scrub water storage containers. Clear blocked roof gutters.
+- Personal Protection: Use mosquito repellents containing DEET, Picaridin, or IR3535. Wear long-sleeved shirts and long trousers, especially during peak biting hours.
+- Home Protection: Use window screens, doors screens, and mosquito nets (especially for sleeping infants, elderly, and those resting during the day).
+- Sri Lanka Public Health Action: In Sri Lanka, the Ministry of Health conducts regular "Shramadana" (community cleanup) campaigns. Citizens are legally obligated to keep their premises mosquito-free.
+
+## Treatment
+- There is no specific medicine or antiviral treatment for dengue.
+- Rest and stay hydrated by drinking plenty of fluids (water, king coconut water, oral rehydration solutions).
+- Take Paracetamol to control fever and relieve pain.
+- IMPORTANT: DO NOT take NSAIDs such as Aspirin, Ibuprofen, or Diclofenac, as they can increase the risk of bleeding.
+- If symptoms worsen or warning signs appear, seek immediate care at the nearest hospital. Sri Lanka has specialized Dengue Management Units in many state hospitals.
+
+## Epidemiology in Sri Lanka
+Dengue is endemic in Sri Lanka, meaning it is present year-round. However, cases spike dramatically during the monsoon rains due to the proliferation of breeding sites. The Western Province (Colombo, Gampaha, Kalutara districts) typically reports the highest number of cases due to high population density and rapid urbanization.
