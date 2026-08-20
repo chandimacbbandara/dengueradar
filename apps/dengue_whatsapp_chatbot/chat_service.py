@@ -77,22 +77,7 @@ def _risk_emoji(level: str) -> str:
     return {"high": "🔴", "moderate": "🟠", "low": "🟢"}.get((level or "").lower(), "⚪")
 
 
-# General knowledge logic is now handled by the RAG pipeline (llm_service + rag_service)
-
-
-def _whatsapp_info() -> str:
-    import os
-    from config import BACKEND_URL # just to ensure imports are fine
-    
-    # We load it from os.getenv directly since config.py might not have it exposed yet
-    wa_link = os.getenv("WHATSAPP_LINK", "https://wa.me/14157386102")
-    return (
-        "📱 *Connect on WhatsApp*\n\n"
-        "You can chat with the DengueRadar AI directly on WhatsApp!\n\n"
-        f"Click here to connect: {wa_link}\n\n"
-        "_(Note: Since this is a Sandbox, you may need to send a specific 'Join' message first. Check your Vonage dashboard for the exact phrase.)_"
-    )
-
+# ── Fallback formatter ─────────────────────────────────────────────────────────
 
 def _prediction_response(data: dict) -> str:
     zone = data.get("moh_zone", "Unknown")
@@ -101,125 +86,42 @@ def _prediction_response(data: dict) -> str:
     risk = (data.get("risk_level") or "unknown").lower()
     emoji = _risk_emoji(risk)
     area = f"{zone} ({district})" if district and district != "Unknown" else zone
-    status = data.get("data_status", "")
-    status_note = f"\n\n📌 _{status}_" if status else ""
-
-    advice = {
-        "high": (
-            "⚠️ HIGH risk area. Take extra precautions:\n"
-            "• Eliminate all standing water immediately\n"
-            "• Use repellent and protective clothing\n"
-            "• Monitor for fever — see a doctor promptly if symptoms appear"
-        ),
-        "moderate": (
-            "⚠️ MODERATE risk. Stay vigilant:\n"
-            "• Check your home for stagnant water weekly\n"
-            "• Use mosquito repellent when outdoors"
-        ),
-        "low": (
-            "✅ LOW risk currently. Keep it that way:\n"
-            "• Maintain regular water container checks\n"
-            "• Continue basic mosquito prevention"
-        ),
-    }.get(risk, "Follow standard dengue prevention guidelines.")
 
     return (
         f"📍 *{area}*\n\n"
         f"{emoji} *Risk Level: {risk.upper()}*\n"
         f"🦟 Predicted Cases (next week): *{cases}*\n\n"
-        f"{advice}"
-        f"{status_note}\n\n"
-        f"⚡ _Powered by DengueRadar AI · LightGBM + XGBoost + CatBoost_"
+        f"⚡ _Powered by DengueRadar AI_"
     )
-
-
-def _help_message() -> str:
-    return (
-        "🦟 *DengueRadar AI Assistant*\n\n"
-        "I can help you with:\n\n"
-        "📍 *Area Risk* — ask about a specific zone:\n"
-        "  • \"What is the risk in Homagama?\"\n"
-        "  • \"MOH 50 risk\"\n"
-        "  • \"Dengue forecast Colombo\"\n\n"
-        "🤒 *Symptoms* — type: symptoms\n"
-        "🛡️ *Prevention* — type: prevention\n"
-        "📱 *WhatsApp* — type: whatsapp\n"
-        "ℹ️ *About the system* — type: about\n"
-    )
-
-
-# ── Intent classifier ──────────────────────────────────────────────────────────
-
-def _classify(message: str) -> str:
-    m = message.lower()
-    if any(w in m for w in ["whatsapp", "link", "connect", "phone", "mobile"]):
-        return "whatsapp_link"
-    if any(w in m for w in ["help", "what can", "what do", "command", "option"]):
-        return "help"
-    if any(w in m for w in ["hi", "hello", "hey", "start", "hola"]):
-        return "greeting"
-    identifier, _ = _extract_location(message)
-    if identifier or any(w in m for w in ["risk", "forecast", "predict", "case", "danger", "level", "safe", "moh", "area", "zone", "district"]):
-        return "prediction"
-    
-    # Everything else goes to the RAG pipeline
-    return "general_question"
 
 
 # ── Public entry point ─────────────────────────────────────────────────────────
 
 def chat_response(message: str) -> str:
     """Return a response string for a user message."""
-    intent = _classify(message)
-
-    if intent == "greeting":
-        return (
-            "👋 Hello! I'm the DengueRadar AI Assistant.\n\n"
-            "Ask me about dengue risk in your area, symptoms, or prevention tips.\n\n"
-            "Try: *\"What is the risk in Homagama?\"*"
-        )
-
-    if intent == "help":
-        return _help_message()
-        
-    if intent == "whatsapp_link":
-        return _whatsapp_info()
-
-    if intent == "general_question":
-        from rag_service import retrieve_knowledge
-        from llm_service import ask_dengue_assistant
-        
-        context = retrieve_knowledge(message)
-        try:
-            return ask_dengue_assistant(message, knowledge_context=context)
-        except Exception as e:
-            logger.error("[ChatService] Failed to get LLM response: %s", e)
-            return "I'm sorry, I'm having trouble answering that right now. Please try again later."
-
+    # 1. Try to extract a location to fetch risk data
     identifier, label = _extract_location(message)
-
+    
+    data = None
     if identifier:
         data = _fetch_prediction(identifier)
-        if data:
-            from llm_service import ask_dengue_assistant
-            try:
-                # Pass the prediction data to the LLM to format the response naturally as an MOH expert
-                return ask_dengue_assistant(message, knowledge_context=None, risk_context=data)
-            except Exception as e:
-                logger.error("[ChatService] Failed to get LLM prediction response: %s", e)
-                # Fallback to the strict rule-based format if the LLM fails
-                return _prediction_response(data)
-        return (
-            f"⚠️ Could not fetch prediction for *{label}*.\n\n"
-            "The backend service may be unavailable or the zone was not found."
-        )
 
-    # No location detected — ask for clarification
-    return (
-        "🦟 I can check dengue risk for any MOH zone in Sri Lanka!\n\n"
-        "Please tell me the area name or MOH code, for example:\n"
-        "  • *\"What is the risk in Homagama?\"*\n"
-        "  • *\"MOH 50\"*\n"
-        "  • *\"Dengue forecast Colombo\"*\n\n"
-        "Or ask about *symptoms*, *prevention*, or type *help*."
-    )
+    # 2. Retrieve knowledge base context for all queries
+    from rag_service import retrieve_knowledge
+    from llm_service import ask_dengue_assistant
+    
+    context = retrieve_knowledge(message)
+    
+    # 3. Ask the RAG assistant to handle the response entirely
+    try:
+        return ask_dengue_assistant(message, knowledge_context=context, risk_context=data)
+    except Exception as e:
+        logger.error("[ChatService] Failed to get LLM response: %s", e)
+        
+        # If the LLM is down but we successfully fetched prediction data, fallback to basic rule-based formatting
+        if data:
+            return _prediction_response(data)
+            
+        return "I'm sorry, I'm having trouble connecting to the AI assistant right now. Please try again later."
+
+
