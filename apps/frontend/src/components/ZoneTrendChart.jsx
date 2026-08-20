@@ -202,13 +202,13 @@ export default function ZoneTrendChart({ district, mohZone }) {
               animation: 'pulse 2s ease infinite', display: 'inline-block',
             }} />
             <span style={{ fontSize: '11px', fontWeight: 700, color: '#0EA5A5', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-              Dengue Case Trend
+              Your Area Dengue Risk Trend
             </span>
           </div>
           <h3 style={{ fontSize: '18px', fontWeight: 800, color: '#F1F5F9', margin: 0 }}>
             📍 {zone || '—'}
           </h3>
-          <p style={{ fontSize: '12px', color: '#64748B', marginTop: '2px' }}>{district} District</p>
+          <p style={{ fontSize: '12px', color: '#64748B', marginTop: '2px' }}>Monitor how dengue risk in your area has changed over time.</p>
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
@@ -341,9 +341,14 @@ export default function ZoneTrendChart({ district, mohZone }) {
       </div>
 
       {/* Footer */}
-      <p style={{ fontSize: '11px', color: '#1e3a5f', marginTop: '14px', textAlign: 'right' }}>
-        Data scoped to {zone} · Source: EPID Unit records
-      </p>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '14px' }}>
+        <p style={{ fontSize: '13px', color: 'var(--text)', fontWeight: 500 }}>
+          {delta > 2 ? '↑ Risk is increasing compared with the previous period.' : delta < -2 ? '↓ Risk is decreasing compared with the previous period.' : '→ Risk has remained relatively stable.'}
+        </p>
+        <p style={{ fontSize: '11px', color: '#1e3a5f', textAlign: 'right' }}>
+          Data scoped to {zone} · Source: EPID Unit records
+        </p>
+      </div>
     </div>
   );
 }

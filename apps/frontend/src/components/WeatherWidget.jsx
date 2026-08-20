@@ -21,11 +21,16 @@ function compassDir(deg) {
   return dirs[Math.round(deg / 45) % 8];
 }
 
-export default function WeatherWidget({ district }) {
-  const [weather, setWeather] = useState(null);
-  const [loading, setLoading] = useState(true);
+export default function WeatherWidget({ district, weatherData, loading: externalLoading }) {
+  const [weather, setWeather] = useState(weatherData || null);
+  const [loading, setLoading] = useState(externalLoading !== undefined ? externalLoading : true);
 
   useEffect(() => {
+    if (weatherData !== undefined) {
+      setWeather(weatherData);
+      setLoading(externalLoading);
+      return;
+    }
     if (!district) return;
     weatherAPI.getDistrict(district)
       .then(res => setWeather(res.data.data))
