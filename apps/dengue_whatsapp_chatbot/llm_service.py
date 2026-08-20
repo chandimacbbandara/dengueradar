@@ -93,24 +93,32 @@ def _validate_risk_context(risk_context: Any) -> dict[str, Any] | None:
 
 import re
 
+
+REASONING_HEADER = re.compile(
+    r"(?:here(?:'s| is)\s+(?:a\s+)?thinking\s+process|thinking\s+process)\s*:?",
+    re.IGNORECASE,
+)
+FINAL_ANSWER_MARKER = re.compile(
+    r"(?:let's\s+draft|final\s+answer|response|drafting\s+the\s+response|"
+    r"here\s+is\s+the\s+response)\s*:\s*",
+    re.IGNORECASE,
+)
+
+
 def _clean_response(text: str) -> str:
-    # 1. Remove XML-style <think> tags completely
-    text = re.sub(r'<think>.*?</think>', '', text, flags=re.DOTALL)
-    
-    # 2. Handle Nemotron's explicit text-based thinking process
-    if "Here's a thinking process:" in text:
-        # It usually concludes the thinking process with "Let's draft:", "Final Answer:", or "Response:"
-        boundaries = ["Let's draft:", "Final Answer:", "Response:", "drafting the response:", "Here is the response:"]
-        for b in boundaries:
-            if b in text:
-                text = text.split(b, 1)[-1]
-                break
-                
+    """Return only user-facing text, rejecting responses that contain only reasoning."""
+    text = re.sub(r"<think>.*?</think>", "", text, flags=re.DOTALL | re.IGNORECASE)
+
+    reasoning_match = REASONING_HEADER.search(text)
+    if reasoning_match:
+        final_match = FINAL_ANSWER_MARKER.search(text, reasoning_match.end())
+        text = text[final_match.end():] if final_match else ""
+
     text = text.strip()
-    # Remove surrounding quotes if the model quoted its own final answer
+    text = FINAL_ANSWER_MARKER.sub("", text, count=1).strip()
     if text.startswith('"') and text.endswith('"'):
         text = text[1:-1]
-        
+
     return text.strip()
 
 
@@ -161,6 +169,7 @@ def _ask_openrouter(user_message: str, knowledge_context: str | None, risk_conte
     payload = {
         "model": LLM_MODEL,
         "max_tokens": 250,
+        "reasoning": {"exclude": True},
         "messages": [
             {"role": "system", "content": SYSTEM_PROMPT},
             {
@@ -191,7 +200,12 @@ def _ask_openrouter(user_message: str, knowledge_context: str | None, risk_conte
 
     if not isinstance(response_data, dict):
         raise AssistantServiceError("The LLM provider returned an invalid response.")
-    return _extract_openrouter_text(response_data)
+    answer = _extract_openrouter_text(response_data)
+    if not answer:
+        raise AssistantServiceError(
+            "The LLM provider returned reasoning without a user-facing answer."
+        )
+    return answer
 
 
 def ask_dengue_assistant(

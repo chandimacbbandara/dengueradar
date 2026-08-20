@@ -44,7 +44,7 @@ HELP_MESSAGE = MESSAGES["en"]["help"]
 ERROR_MESSAGE = MESSAGES["en"]["error"]
 
 MOH_REFERENCE_PATTERN = re.compile(
-    r"\bMOH(?:\s+(?:AREA|CODE))?\s*[:#-]?\s*(\d{1,10})\b",
+    r"\bMOH(?:\s+(?:AREA|CODE))?\s*[:#-]?MOH 50 \s*(\d{1,10})\b",
     re.IGNORECASE,
 )
 
@@ -154,6 +154,7 @@ def _process_free_text(phone_number: str, message: str, language: str) -> str:
     )
 
     risk_context = None
+    prediction = None
     moh_code = _extract_moh_reference(message)
     if moh_code is not None:
         prediction = get_dengue_prediction(moh_code)
@@ -164,6 +165,8 @@ def _process_free_text(phone_number: str, message: str, language: str) -> str:
         return ask_dengue_assistant(message, risk_context=risk_context)
     except AssistantServiceError:
         logger.exception("WhatsApp dengue assistant is unavailable")
+        if prediction is not None:
+            return _format_risk(prediction, language)
         return MESSAGES[language]["assistant_unavailable"]
 
 

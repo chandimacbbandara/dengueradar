@@ -15,7 +15,7 @@ from chatbot import (
     process_message,
     user_sessions,
 )
-from llm_service import AssistantServiceError
+from llm_service import AssistantServiceError, _clean_response
 from prediction_service import get_dengue_prediction
 from vonage_service import send_whatsapp_message
 
@@ -143,6 +143,22 @@ class ChatbotTests(unittest.TestCase):
                 "risk_level": "LOW",
                 "data_status": "DEMO / MOCK DATA",
             },
+        )
+
+    def test_reasoning_only_output_is_removed(self) -> None:
+        self.assertEqual(
+            _clean_response(
+                "Here's a thinking process:\n1. Analyze the question.\n"
+                "2. Check the risk context."
+            ),
+            "",
+        )
+        self.assertEqual(
+            _clean_response(
+                "<think>Check the context.</think>\n"
+                "Final Answer: Matara has moderate risk."
+            ),
+            "Matara has moderate risk.",
         )
 
 
