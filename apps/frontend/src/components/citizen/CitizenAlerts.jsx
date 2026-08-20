@@ -1,10 +1,15 @@
+import { useState } from 'react';
 import Icon from '../Icon.jsx';
 
 export default function CitizenAlerts({ alerts }) {
+  const [expanded, setExpanded] = useState(false);
+
   if (!alerts || alerts.length === 0) {
     return (
       <div className="card" style={{ padding: '24px' }}>
-        <h3 style={{ fontSize: '14px', textTransform: 'uppercase', color: 'var(--text-3)', fontWeight: 700, letterSpacing: '0.5px', marginBottom: '16px' }}>Recent Alerts</h3>
+        <h3 style={{ fontSize: '14px', textTransform: 'uppercase', color: 'var(--text-3)', fontWeight: 700, letterSpacing: '0.5px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <Icon name="bell" size={16} /> Recent Alerts
+        </h3>
         <div style={{ textAlign: 'center', padding: '24px', color: 'var(--text-3)', fontSize: '14px' }}>
           No recent alerts for your area.
         </div>
@@ -12,11 +17,15 @@ export default function CitizenAlerts({ alerts }) {
     );
   }
 
+  const visibleAlerts = expanded ? alerts : alerts.slice(0, 2);
+
   return (
     <div className="card" style={{ padding: '24px' }}>
-      <h3 style={{ fontSize: '14px', textTransform: 'uppercase', color: 'var(--text-3)', fontWeight: 700, letterSpacing: '0.5px', marginBottom: '16px' }}>Recent Alerts</h3>
+      <h3 style={{ fontSize: '14px', textTransform: 'uppercase', color: 'var(--text-3)', fontWeight: 700, letterSpacing: '0.5px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <Icon name="bell" size={16} /> Recent Alerts
+      </h3>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-        {alerts.map(alert => {
+        {visibleAlerts.map(alert => {
           const isHigh = alert.severity === 'high' || alert.riskLevel === 'high' || alert.riskLevel === 'critical';
           const iconColor = isHigh ? 'var(--risk-high)' : 'var(--risk-mod)';
           const bgColor = isHigh ? 'var(--risk-high-bg)' : 'var(--risk-mod-bg)';
@@ -42,6 +51,18 @@ export default function CitizenAlerts({ alerts }) {
           );
         })}
       </div>
+      {alerts.length > 2 && (
+        <button 
+          onClick={() => setExpanded(!expanded)}
+          style={{ 
+            marginTop: '16px', width: '100%', padding: '12px', background: 'var(--surface-2)', 
+            border: 'none', borderRadius: '8px', color: 'var(--text-2)', fontSize: '13px', 
+            fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px'
+          }}>
+          {expanded ? 'Show Less' : `View all ${alerts.length} alerts`}
+          <Icon name={expanded ? 'chevron-up' : 'chevron-down'} size={14} />
+        </button>
+      )}
     </div>
   );
 }
